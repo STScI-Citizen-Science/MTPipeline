@@ -8,7 +8,7 @@ _This is project is still under active development. This is not a stable release
 Overview
 --------
 
-. MTPipeline is written in pure Python. The processing steps applied to each input are listed below followed by descriptions.
+MTPipeline is written in pure Python. The processing steps applied to each input are listed below followed by descriptions.
 
 - Cosmic ray rejection
 - Drizzling
@@ -16,9 +16,9 @@ Overview
 
 ### Cosmic Ray Rejection
 
-Single-image cosmic ray rejection is performed using cosmics.py, a python implementation of the Laplacian cosmic ray detection algorithm (LA Cosmics). This step produces a new FITS product named <filename>_cr_c0m.fits
+Single-image cosmic ray rejection is performed using cosmics.py, a python implementation of the Laplacian cosmic ray detection algorithm (LA Cosmics). This step produces a new FITS product named `filename_cr_c0m.fits`.  
 
-cosmics.py: http://obswww.unige.ch/~tewes/cosmics_dot_py/
+cosmics.py: http://obswww.unige.ch/~tewes/cosmics_dot_py/  
 LA Cosmic: http://www.astro.yale.edu/dokkum/lacosmic/
 
 ### Drizzling
@@ -41,15 +41,15 @@ Future Updates
 Contacts
 --------
 
-Alex C. Viana
-Space Telescope Science Institute (STScI)
-http://acviana.github.com/
-viana [at] stsci [dot] edu 
-alex [dot] costa [dot] viana [at] gmail [dot] com
-
-Space Telescope Science Institute (STScI)
-http://www.stsci.edu
-
-CosmoQuest
-http://cosmoquest.org/
+**Alex C. Viana**  
+Space Telescope Science Institute (STScI)  
+http://acviana.github.com/  
+viana [at] stsci [dot] edu  
+alex [dot] costa [dot] viana [at] gmail [dot] com  
+  
+**Space Telescope Science Institute (STScI)**  
+http://www.stsci.edu  
+  
+**CosmoQuest**  
+http://cosmoquest.org/  
 
