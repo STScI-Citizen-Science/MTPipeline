@@ -49,7 +49,7 @@ def log_scale(array):
         
 # -----------------------------------------------------------------------------
 
-def make_png(data,filename):
+def make_png(data, filename):
     '''
     Use the Python image library (PIL) to write out the png file. Note 
     that the image flux is rescaled between be between 0 and 256.
@@ -161,7 +161,7 @@ def top_bottom_clip(array):
 # The Main Controller
 # -----------------------------------------------------------------------------
             
-def run_trim(filename):
+def run_trim(filename, output_path):
     '''
     '''
     # Get Data
@@ -185,7 +185,12 @@ def run_trim(filename):
     if linear_switch == True:
         linear_png_name = os.path.basename(filename)
         linear_png_name = os.path.splitext(linear_png_name)[0] + '_linear.png'
-        linear_png_name = '/astro/3/mutchler/mt/code/median_test/' + linear_png_name
+        if output_path == None:
+        	linear_png_name = os.path.join(
+        	    os.path.dirname(filename), linear_png_name)
+        elif output_path != None:
+        	linear_png_name = os.path.join(
+        	    output_path, linear_png_name)
         make_png(bottom_clip(median_scaled_data), linear_png_name)
     
     # Log
@@ -206,7 +211,12 @@ def run_trim(filename):
         # Write the output filename
         log_png_name = os.path.basename(filename)
         log_png_name = os.path.splitext(log_png_name)[0] + '_log.png'
-        log_png_name = '/astro/3/mutchler/mt/code/median_test/' + log_png_name
+        if output_path == None:
+        	log_png_name = os.path.join(
+        	    os.path.dirname(filename), log_png_name)
+        elif output_path != None:
+        	log_png_name = os.path.join(
+        	    output_path, log_png_name)
     
         before_after(
             median_scaled_data, 
