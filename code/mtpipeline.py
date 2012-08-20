@@ -124,8 +124,11 @@ def prase_args():
 
 if __name__ == '__main__':
     args = prase_args()
-    #rootfile_list = glob.glob(args.filelist)
-    rootfile_list = [args.filelist]
+    if '*' in args.filelist:
+        rootfile_list = glob.glob(args.filelist)
+    else:
+        rootfile_list = [args.filelist]
+    assert rootfile_list != [], 'empty rootfile_list in mtpipeline.py.'
     for filename in rootfile_list:
         print filename
         error = filename + ' does not end in "c0m.fits".'

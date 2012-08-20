@@ -26,6 +26,11 @@ def run_cosmics(filename):
     '''
     The main controller.
     '''
+    # Assert the input file exists
+    error = filename + ' input for run_cosmics in '
+    error += 'run_cosmics.py does not exist.'
+    assert os.access(filename,os.F_OK), error
+    
     # Define the output name and delete if exists.
     output = os.path.splitext(filename)[0] + '_cr.fits'
     query = os.access(output,os.F_OK)

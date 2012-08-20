@@ -220,8 +220,7 @@ def run_trim(filename, output_path):
     
         before_after(
             median_scaled_data, 
-            log_median_scaled_data,
-            'test')
+            log_median_scaled_data)
         
         make_png(log_median_scaled_data, log_png_name)
 

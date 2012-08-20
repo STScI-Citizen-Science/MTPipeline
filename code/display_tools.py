@@ -9,40 +9,36 @@ import pylab as P
 
 # -----------------------------------------------------------------------------
 
-def before_after(before_array, after_array, before_array_name=None,
-        after_array_name=None, output=False, pause=True):
+def before_after(before_array, after_array, before_array_name='Before',
+        after_array_name='After', output=False, pause=False):
     '''
     Display a before, after, and delta array with a log-historgram.
     '''
     # Plot the before and after images.
     P.clf()
+    delta_array = after_array - before_array
+
+    # Step through the arrays.
     for array, image_counter, array_name in \
-            zip([before_array, after_array], [1,3], [before_array_name, after_array_name]):
+            zip([before_array, after_array, delta_array], 
+                [1,3,5], 
+                [before_array_name, after_array_name, 'Delta']):
+        
+        # Create the image.
         ax1 = P.subplot(320 + image_counter)
         ax1.imshow(array, cmap = cm.gray)
-        ax1.grid(True)       
+        ax1.grid(True)
+        
+        # Set the title
+        ax1.set_ylabel(array_name) 
+        
+        # Create the histogram.
         ax1 = P.subplot(320 + image_counter + 1)
         n, bins, patches = ax1.hist(
             array.ravel(), 100, facecolor = 'green', 
             alpha=0.75, log = True)
         ax1.grid(True)
-        ax1.set_title(320 + image_counter + 1)
-        if array_name == None:
-            ax1.set_title(320 + image_counter)
-        else:
-            ax1.set_title(array_name) 
-            
-    # Create and plot the after image
-    delta = after_array - before_array
-    ax1 = P.subplot(325)
-    ax1.imshow(delta, cmap = cm.gray)
-    ax1.grid(True)
-    ax1 = P.subplot(326)
-    n, bins, patches = ax1.hist(
-        delta.ravel(), 100, facecolor = 'green', 
-        alpha=0.75, log = True)
-    ax1.grid(True)
-    
+        
     # Draw, write to file, pause.   
     if output != False:
         assert type(output) == str, 'Output must be a string type.'

@@ -119,16 +119,18 @@ def rename_files(rootfile,mode):
 
 def run_astrodrizzle(filename):
     '''
+    Executes astrodrizzle.AstroDrizzle.
     '''
     configobj_list = [
-        '/astro/3/mutchler/mt/code/cfg_files/z3_neptune_slice.cfg',
-        '/astro/3/mutchler/mt/code/cfg_files/z3_neptune_wide.cfg',
-        '/astro/3/mutchler/mt/code/cfg_files/z3_neptune_zoom.cfg']
+        '../astrodrizzle_cfg_files/z3_neptune_slice.cfg',
+        '../astrodrizzle_cfg_files/z3_neptune_wide.cfg',
+        '../astrodrizzle_cfg_files/z3_neptune_zoom.cfg']
         
     mode_list = [
         'slice',
         'wide',
         'zoom']
+        
     for configobj, mode in zip(configobj_list, mode_list):
         print filename
         astrodrizzle.AstroDrizzle(
@@ -140,13 +142,13 @@ def run_astrodrizzle(filename):
 # The main controller. 
 # ------------------------------------------------------------------------------
 
-def main(args):
+def main(target, recopy):
     '''
     The main controller.
     '''
-    archive_file_list = get_archive_file_list(args.target)
-    move_files(args.target, archive_file_list, args.recopy)
-    file_list = get_file_list(args.target)
+    archive_file_list = get_archive_file_list(target)
+    move_files(target, archive_file_list, recopy)
+    file_list = get_file_list(target)
     run_astrodrizzle(file_list)
     
 # ------------------------------------------------------------------------------
@@ -155,5 +157,5 @@ def main(args):
 
 if __name__ == '__main__':
     args = prase_args()
-    main(args)
+    main(args.target, args.recopy)
     
