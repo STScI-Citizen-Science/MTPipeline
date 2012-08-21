@@ -1,7 +1,7 @@
 MTPipeline
 ==========
 
-MTPipeline (Moveing Target Pipeline) is an imaging pipeline for Hubble Space Telescope (HST) Wide-Field Planetary Camera 2 (WFPC2) images. It produces processed PNGs from FITS images (Flexible Image Transport System) MTPipeline  was created for use by the CosmoQuest Solar System Explorers project and the Space Telescope Science Institute (STScI).
+MTPipeline (Moveing Target Pipeline) is an imaging pipeline for Hubble Space Telescope (HST) Wide-Field Planetary Camera 2 (WFPC2) images. It produces processed PNGs from FITS images (Flexible Image Transport System) MTPipeline  was created for use by the CosmoQuest Planet Investigators project and the Space Telescope Science Institute (STScI).
 
 _This is project is still under active development. This is not a stable release. Software license TBA._
 

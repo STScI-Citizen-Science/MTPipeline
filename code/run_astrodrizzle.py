@@ -61,40 +61,19 @@ def move_files(target, file_list, recopy_switch):
         if os.access(dst, os.F_OK) != True or recopy_switch == True:
             print 'Copying: ' + filename + ' -> ' + dst
             shutil.copyfile(filename, dst)
-    
-# ------------------------------------------------------------------------------
-
-def prase_args():
-    '''
-    Prase the command line arguemnts.
-    '''
-    parser = argparse.ArgumentParser(
-        description = 'A script to run Astrodrizzle.' )
-    parser.add_argument(
-        '-target', 
-        required = True,
-        help = 'Target name, e.g. "vesta"')
-    parser.add_argument(
-        '-recopy',
-        action = 'store_true',
-        required = False,
-        help = 'Recopy the c0m.fits file to the drizzled area.')
-    args = parser.parse_args()
-        
-    return args
 
 # ------------------------------------------------------------------------------
 
-def rename_files(rootfile,mode):
+def rename_files(rootfile, mode, output_path):
     '''
     Rename all the files that match the root of the filename input 
     paramater, excluding the input filename itself.
     '''
+    print 'Renaming Files'
+    
     # Build the file list.
-    print rootfile
     rootfile = os.path.abspath(rootfile)
     basename = os.path.splitext(rootfile)[0]
-    print basename
     search = basename + '_sci*'
     file_list_1 = glob.glob(search)
     search = basename + '_single*'
@@ -104,39 +83,40 @@ def rename_files(rootfile,mode):
     # Loop over the files and rename.
     for filename in file_list:
         dst = string.split(basename,'/')[-1] + '_' + mode 
-        dst += string.split(filename,basename)[1]
-        dst = os.path.join('/astro/3/mutchler/mt/drizzled/neptune', dst)       
-        shutil.copyfile(filename,dst)
+        dst += string.split(filename, basename)[1]
+        if output_path == None:
+            dst = os.path.join(os.path.dirname(rootfile), dst)
+        elif output_path != None:
+            dst = os.path.join(output_path, dst)
+        shutil.copyfile(filename, dst)
         os.remove(filename)
 
     # Generate and return the output list.
     search = basename + '*single_sci.fits'
-    print search
     output_list = glob.glob(search)
     return output_list
 
 # ------------------------------------------------------------------------------
 
-def run_astrodrizzle(filename):
+def run_astrodrizzle(filename, output_path = None):
     '''
     Executes astrodrizzle.AstroDrizzle.
     '''
     configobj_list = [
-        '../astrodrizzle_cfg_files/z3_neptune_slice.cfg',
-        '../astrodrizzle_cfg_files/z3_neptune_wide.cfg',
-        '../astrodrizzle_cfg_files/z3_neptune_zoom.cfg']
+        '/Users/viana/Dropbox/Work/MTPipeline/Code/astrodrizzle_cfg/z3_neptune_slice.cfg']
+#        '../astrodrizzle_cfg/z3_neptune_wide.cfg',
+#        '../astrodrizzle_cfg/z3_neptune_zoom.cfg']
         
     mode_list = [
-        'slice',
-        'wide',
-        'zoom']
+        'slice']
+ #       'wide',
+  #      'zoom']
         
     for configobj, mode in zip(configobj_list, mode_list):
-        print filename
         astrodrizzle.AstroDrizzle(
             input = filename,
             configobj = configobj)
-        rename_files_output = rename_files(filename, mode)
+        rename_files_output = rename_files(filename, mode, output_path)
             
 # ------------------------------------------------------------------------------
 # The main controller. 
@@ -155,6 +135,26 @@ def main(target, recopy):
 # For command line execution.
 # ------------------------------------------------------------------------------
 
+def prase_args():
+    '''
+    Prase the command line arguemnts.
+    '''
+    parser = argparse.ArgumentParser(
+        description = 'A script to run Astrodrizzle.' )
+    parser.add_argument(
+        '-target', 
+        required = True,
+        help = 'Target name, e.g. "vesta"')
+    parser.add_argument(
+        '-recopy',
+        action = 'store_true',
+        required = False,
+        help = 'Recopy the c0m.fits file to the drizzled area.')
+    args = parser.parse_args()        
+    return args
+    
+# ------------------------------------------------------------------------------
+        
 if __name__ == '__main__':
     args = prase_args()
     main(args.target, args.recopy)

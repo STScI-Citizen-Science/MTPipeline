@@ -64,20 +64,32 @@ def run_mtpipeline(root_filename, output_path = None, cr_reject_switch=True,
     
     # Run CR reject.
     if cr_reject_switch == True:
+    	print 'Running cr_reject'
         run_cosmics(root_filename)
+        print 'Done running cr_reject'
+    else:
+    	print 'Skipping cr_reject'
     
     # Run astrodrizzle.         
     if astrodrizzle_switch == True:
+    	print 'Running Astrodrizzle'
         for filename in  output_file_dict['cr_reject_output']:
             updatewcs.updatewcs(filename)
             run_astrodrizzle(filename)
-    
+        print 'Done running astrodrizzle'
+    else:
+        print 'Skipping astrodrizzle'
+        
     # Run trim.
     if trim_switch == True:
+        print 'Running scaling'
         for filename in output_file_dict['drizzle_output']:
             print filename
             run_trim(filename, output_path)
-
+        print 'Done running scaling'
+    else:
+        print 'Skipping running scaling'
+        
 # ----------------------------------------------------------------------------
 # For command line execution.
 # ----------------------------------------------------------------------------
@@ -93,9 +105,9 @@ def prase_args():
         required = True,
         help = 'Search string for files. Wildcards accepted.')
     parser.add_argument(
-    	'-output_path',
-    	required = False,
-    	help = 'Set the path for the output. Default is the input directory.')
+        '-output_path',
+        required = False,
+        help = 'Set the path for the output. Default is the input directory.')
     parser.add_argument(
         '-no_cr_reject',
         required = False,
@@ -130,9 +142,9 @@ if __name__ == '__main__':
         rootfile_list = [args.filelist]
     assert rootfile_list != [], 'empty rootfile_list in mtpipeline.py.'
     for filename in rootfile_list:
-        print filename
         error = filename + ' does not end in "c0m.fits".'
         assert filename[-8:] == 'c0m.fits', error
+        filename = os.path.abspath(filename)
         run_mtpipeline(filename, 
             output_path =  args.output_path,
             cr_reject_switch = args.cr_reject,

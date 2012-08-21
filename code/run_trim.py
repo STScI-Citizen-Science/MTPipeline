@@ -5,6 +5,7 @@ Scales the images and produces the output images.
 '''
 
 # Standard modules
+import argparse
 import copy
 import glob
 import Image
@@ -66,11 +67,12 @@ def make_png(data, filename):
 
 # -----------------------------------------------------------------------------
 
-def median_scale(array, box):
+def median_scale(array, box, verbose=False):
     '''
     Perform a local-median subtraction (box smoothing). The box size 
     must be odd and is set by the box parameter.
     '''
+    print 'Starting the median scale.'
     assert box % 2 == 1, 'Box size must be odd.'
     output = N.zeros((array.shape[0],array.shape[1]))        
     for x in xrange(array.shape[0]):
@@ -79,9 +81,10 @@ def median_scale(array, box):
         for y in xrange(array.shape[1]):
             ymin = max(0, y - (box / 2)) 
             ymax = min(y + (box / 2) + 1, array.shape[1])
-            local_region = array[xmin:xmax,ymin:ymax]
+            local_region = array[xmin:xmax, ymin:ymax]
             local_median = N.median(local_region)
-            output[x,y] = copy.copy(array[x,y] - local_median)
+            output[x, y] = copy.copy(array[x, y] - local_median)
+    print 'Done with the median scale.'
     return output
     
 # -----------------------------------------------------------------------------
@@ -170,27 +173,25 @@ def run_trim(filename, output_path):
     h.close()
 
     # Make png folder    
-    png_path = os.path.join(os.path.split(filename)[0], 'png')
+    png_path = os.path.join(os.path.dirname(filename), 'png')
     test = os.access(png_path,os.F_OK)
     if test == False:
         os.mkdir(png_path)
 
-    #median 
+    #median
     median_scaled_data = median_scale(data, 25)
-    #before_after(data, median_scaled_data)
-    #before_after(median_scaled_data, bottom_clip(median_scaled_data))
-
+    
     # Linear
     linear_switch = False
     if linear_switch == True:
         linear_png_name = os.path.basename(filename)
         linear_png_name = os.path.splitext(linear_png_name)[0] + '_linear.png'
         if output_path == None:
-        	linear_png_name = os.path.join(
-        	    os.path.dirname(filename), linear_png_name)
+            linear_png_name = os.path.join(
+                os.path.dirname(filename), linear_png_name)
         elif output_path != None:
-        	linear_png_name = os.path.join(
-        	    output_path, linear_png_name)
+            linear_png_name = os.path.join(
+                output_path, linear_png_name)
         make_png(bottom_clip(median_scaled_data), linear_png_name)
     
     # Log
@@ -212,11 +213,11 @@ def run_trim(filename, output_path):
         log_png_name = os.path.basename(filename)
         log_png_name = os.path.splitext(log_png_name)[0] + '_log.png'
         if output_path == None:
-        	log_png_name = os.path.join(
-        	    os.path.dirname(filename), log_png_name)
+            log_png_name = os.path.join(
+                os.path.dirname(filename), log_png_name)
         elif output_path != None:
-        	log_png_name = os.path.join(
-        	    output_path, log_png_name)
+            log_png_name = os.path.join(
+                output_path, log_png_name)
     
         before_after(
             median_scaled_data, 
@@ -224,6 +225,32 @@ def run_trim(filename, output_path):
         
         make_png(log_median_scaled_data, log_png_name)
 
+# -----------------------------------------------------------------------------
+# For command line execution.
+# -----------------------------------------------------------------------------
 
-
+def prase_args():
+    '''
+    Prase the command line arguemnts.
+    '''
+    parser = argparse.ArgumentParser(
+        description = 'A script to scale and trim the images.' )
+    parser.add_argument(
+        '-filelist', 
+        required = True,
+        help = 'Search string for files to used. Wild cards accepted')
+    parser.add_argument(
+        '-output_path',
+        required = False,
+        help = 'Set the path for the output. Default is the input directory.')        
+    args = parser.parse_args()        
+    return args
     
+# -----------------------------------------------------------------------------
+    
+if __name__ == '__main__':
+    args = prase_args()
+    file_list = glob.glob(args.filelist)
+    assert file_list != [], 'run_trim found no files matching ' + args.filelist
+    for filename in file_list:
+	    run_trim(filename, args.output_path)
