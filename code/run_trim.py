@@ -24,22 +24,31 @@ from display_tools import *
 # Low-Level Functions
 # -----------------------------------------------------------------------------
 
-def bottom_clip(input, percent):
+def bottom_clip(input, pixels_to_change, inspect=False):
     '''
-    Rescale the bottom 1% of pixels.
-    '''    
-    # Clip the top and bottom 1% of pixels.
-    sorted_array = copy.copy(input)
+    Rescale the bottom X pixels.
+    '''
+    error = 'pixels_to_change in bottom_clip must be an int type.'
+    assert type(pixels_to_change) == int, error
+    sorted_array = copy.deepcopy(input)
     sorted_array = sorted_array.ravel()
     sorted_array.sort()
-    bottom = sorted_array[int(len(sorted_array) * percent)]
+    bottom = sorted_array[pixels_to_change - 1]
     bottom_index = N.where(input < bottom)
-    input[bottom_index] = bottom
-    return input
+    output = copy.deepcopy(input)
+    output[bottom_index] = bottom
+    if inspect:
+        before_after(
+            before_array = input, 
+            after_array = output, 
+            before_array_name = 'Input Data',
+            after_array_name = 'Remove Bottom ' + str(pixels_to_change) + ' Pixels',
+            pause = True)  
+    return output
 
 # -----------------------------------------------------------------------------
 
-def log_scale(array, inspect=False):
+def log_scale(array, inspect=True):
     '''
     Returns the log of the input array.
     '''
@@ -50,7 +59,8 @@ def log_scale(array, inspect=False):
         before_after(before_array = array, 
             after_array = array_log, 
             before_array_name = 'Input Data',
-            after_array_name = 'Log') 
+            after_array_name = 'Log',
+            pause = False) 
     return array_log
         
 # -----------------------------------------------------------------------------
@@ -60,12 +70,10 @@ def make_png(data, filename):
     Use the Python image library (PIL) to write out the png file. Note 
     that the image flux is rescaled between be between 0 and 256.
     '''
-    # Scale the data.
     data = data - data.min()            
     data = (data / data.max()) * 255.
     data = N.flipud(data)
     data = N.uint8(data)
-    # Write to the file.    
     image = Image.new('L',(data.shape[1],data.shape[0]))
     image.putdata(data.ravel())
     image.save(filename)
@@ -114,7 +122,6 @@ def positive(input_array, inspect=False):
     if min_val <= 0:
         output_array = input_array + ((min_val * -1.0) + 0.0001) 
     if inspect == True:
-    	#png_name = make_png_name(path, filename, ext)
         before_after(before_array = input_array, 
             after_array = output_array, 
             before_array_name = 'Input Data',
@@ -230,6 +237,7 @@ def run_trim(filename, output_path, stretch_switch):
     if stretch_switch == 'log':        
         log_output = positive(data, inspect = True)
         log_output = log_scale(log_output, inspect = True)
+        log_output = bottom_clip(log_output, 10, inspect = True)
         log_output_path = os.path.join(os.path.dirname(filename), 'png')
         log_png_name = make_png_name(log_output_path, filename, 'log')            
         make_png(log_output, log_png_name)
