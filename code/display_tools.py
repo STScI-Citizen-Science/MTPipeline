@@ -10,7 +10,7 @@ import pylab as P
 # -----------------------------------------------------------------------------
 
 def before_after(before_array, after_array, before_array_name='Before',
-        after_array_name='After', output=False, pause=False):
+        after_array_name='After', show=True, output=False, pause=False):
     '''
     Display a before, after, and delta array with a log-historgram.
     '''
@@ -42,8 +42,9 @@ def before_after(before_array, after_array, before_array_name='Before',
     # Draw, write to file, pause.   
     if output != False:
         assert type(output) == str, 'Output must be a string type.'
-        P.savefig(output + '.png')    
-    else:   
+        assert output[-4:] == '.png', 'Output must end in .png'
+        P.savefig(output)  
+    if show == True:
         P.draw()
     if pause == True:
         raw_input('Paused') 
