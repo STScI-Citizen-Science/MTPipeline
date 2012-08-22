@@ -43,7 +43,7 @@ def bottom_clip(input, pixels_to_change, inspect=False):
             after_array = output, 
             before_array_name = 'Input Data',
             after_array_name = 'Remove Bottom ' + str(pixels_to_change) + ' Pixels',
-            pause = True)  
+            pause = False)  
     return output
 
 # -----------------------------------------------------------------------------
@@ -189,7 +189,7 @@ def top_bottom_clip(array):
 # The Main Controller
 # -----------------------------------------------------------------------------
             
-def run_trim(filename, output_path, stretch_switch):
+def run_trim(filename, output_path, stretch_switch, trim=False):
     '''
     Set the stretch and create the output image.
     '''
@@ -207,41 +207,36 @@ def run_trim(filename, output_path, stretch_switch):
     test = os.access(png_path,os.F_OK)
     if test == False:
         os.mkdir(png_path)
-
-    # Median
-    #if median_switch == True:
-    #    median_scaled_data = median_scale(data, 25)
     
-    # Make a before/after plot
-    #before_after(median_scaled_data, log_median_scaled_data)
-    #output = os.path.basename(filename)
-    #log_png_name = os.path.splitext(log_png_name)[0] + '_log.png'
-    #log_png_name = '/astro/3/mutchler/mt/code/median_test/' + log_png_name
-    #before_after(
-    #    log_median_scaled_data,
-    #    bottom_clip(log_median_scaled_data, 0.1))
-        
-    # Linear
-    linear_switch = False
-    if linear_switch == True:
-        linear_png_name = os.path.basename(filename)
-        linear_png_name = os.path.splitext(linear_png_name)[0] + '_linear.png'
-        if output_path == None:
-            linear_png_name = os.path.join(
-                os.path.dirname(filename), linear_png_name)
-        elif output_path != None:
-            linear_png_name = os.path.join(
-                output_path, linear_png_name)
-        make_png(bottom_clip(median_scaled_data), linear_png_name)
+    # Trim image.
+    if trim != False:
+    	trim = trim[0]
+    	assert len(trim) == 3, 'len(trim) in run_trim must be 3.'
+    	trim[0] = int(trim[0])
+    	trim[1] = int(trim[1])
+    	trim[2] = int(trim[2])
+    	xmin = trim[0] - (trim[2] / 2)
+    	xmax = trim[0] + (trim[2] / 2)
+    	ymin = trim[1] - (trim[2] / 2)
+    	ymax = trim[1] + (trim[2] / 2)
+    	data = subarray(data, xmin, xmax, ymin, ymax)
     
-    if stretch_switch == 'log':        
-        log_output = positive(data, inspect = True)
-        log_output = log_scale(log_output, inspect = True)
-        log_output = bottom_clip(log_output, 10, inspect = True)
+    # Make the log image.
+    log_output = positive(data, inspect = True)
+    log_output = log_scale(log_output, inspect = True)
+    log_output = bottom_clip(log_output, 10, inspect = True)
+    
+    if stretch_switch == 'log':                
         log_output_path = os.path.join(os.path.dirname(filename), 'png')
         log_png_name = make_png_name(log_output_path, filename, 'log')            
         make_png(log_output, log_png_name)
 
+    if stretch_switch == 'median':
+        median_output = median_scale(log_output, 25)
+        median_output_path = os.path.join(os.path.dirname(filename), 'png')
+        median_png_name = make_png_name(median_output_path, filename, 'median')            
+        make_png(median_output, median_png_name)        
+        
 # -----------------------------------------------------------------------------
 # For command line execution.
 # -----------------------------------------------------------------------------
@@ -259,7 +254,18 @@ def prase_args():
     parser.add_argument(
         '-output_path',
         required = False,
-        help = 'Set the path for the output. Default is the input directory.')        
+        help = 'Set the path for the output. Default is the input directory.')
+    parser.add_argument(
+        '-stretch_switch',
+        required = True,
+        choices = ['log', 'median'],
+        help = 'Choose log or median.')
+    parser.add_argument(
+        '-trim',
+        required = False,
+        nargs=3, 
+        action='append',
+        help = '3 ints: x center, y center, and box size.'),
     args = parser.parse_args()        
     return args
     
@@ -270,4 +276,4 @@ if __name__ == '__main__':
     file_list = glob.glob(args.filelist)
     assert file_list != [], 'run_trim found no files matching ' + args.filelist
     for filename in file_list:
-        run_trim(filename, args.output_path, stretch_switch = 'log')
+        run_trim(filename, args.output_path, args.stretch_switch, args.trim)
