@@ -3,7 +3,6 @@
 A script to run Astrodrizzle.
 '''
 import argparse
-import drizzlepac
 from drizzlepac import astrodrizzle
 import glob
 import os
@@ -135,9 +134,9 @@ def main(target, recopy):
 # For command line execution.
 # ------------------------------------------------------------------------------
 
-def prase_args():
+def parse_args():
     '''
-    Prase the command line arguemnts.
+    parse the command line arguemnts.
     '''
     parser = argparse.ArgumentParser(
         description = 'A script to run Astrodrizzle.' )
@@ -156,6 +155,6 @@ def prase_args():
 # ------------------------------------------------------------------------------
         
 if __name__ == '__main__':
-    args = prase_args()
+    args = parse_args()
     main(args.target, args.recopy)
     

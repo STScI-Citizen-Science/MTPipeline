@@ -105,9 +105,9 @@ def run_cosmics(filename):
 # For Command Line Execution
 # -----------------------------------------------------------------------------
 
-def prase_args():
+def parse_args():
     '''
-    Prase the command line arguemnts.
+    Parse the command line arguemnts.
     '''
     parser = argparse.ArgumentParser(
         description = 'Wrapper to run cosmics.py' )
@@ -122,5 +122,5 @@ def prase_args():
 # -----------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    args = prase_args()
+    args = parse_args()
     run_cosmics(filename)

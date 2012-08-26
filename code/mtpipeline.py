@@ -11,8 +11,8 @@ viana@stsci.edu
 import argparse
 import glob
 import os
-from stwcs import updatewcs
 import sys
+from stwcs import updatewcs
 
 # Costum Packages
 from run_cosmics import run_cosmics
@@ -94,9 +94,9 @@ def run_mtpipeline(root_filename, output_path = None, cr_reject_switch=True,
 # For command line execution.
 # ----------------------------------------------------------------------------
 
-def prase_args():
+def parse_args():
     '''
-    Prase the command line arguemnts.
+    parse the command line arguemnts.
     '''
     parser = argparse.ArgumentParser(
         description = 'Run the moving target pipeline.' )
@@ -135,7 +135,7 @@ def prase_args():
 # ------------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    args = prase_args()
+    args = parse_args()
     rootfile_list = glob.glob(args.filelist)
     assert rootfile_list != [], 'empty rootfile_list in mtpipeline.py.'
     for filename in rootfile_list:

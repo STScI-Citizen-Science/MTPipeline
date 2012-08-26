@@ -17,7 +17,6 @@ import sys
 import time
 
 # Custom modules
-import display_tools
 from display_tools import *
 
 # -----------------------------------------------------------------------------
@@ -241,7 +240,7 @@ def run_trim(filename, output_path, stretch_switch, trim=False):
 # For command line execution.
 # -----------------------------------------------------------------------------
 
-def prase_args():
+def parse_args():
     '''
     Prase the command line arguemnts.
     '''
@@ -272,7 +271,7 @@ def prase_args():
 # -----------------------------------------------------------------------------
     
 if __name__ == '__main__':
-    args = prase_args()
+    args = parse_args()
     file_list = glob.glob(args.filelist)
     assert file_list != [], 'run_trim found no files matching ' + args.filelist
     for filename in file_list:
