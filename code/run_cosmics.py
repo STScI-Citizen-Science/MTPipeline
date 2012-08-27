@@ -37,7 +37,12 @@ def run_cosmics(filename):
     if query == True:
         os.remove(output)
 
-    for ext in range(0,5):
+    # Find the number of extentions.
+    header = pyfits.open(filename)
+    header_count = len(header)
+    header.close()
+
+    for ext in range(0, header_count):
         print filename + '[' + str(ext) + ']'
 
         if ext == 0:
