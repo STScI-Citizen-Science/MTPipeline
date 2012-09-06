@@ -90,11 +90,6 @@ def rename_files(rootfile, mode, output_path):
         shutil.copyfile(filename, dst)
         os.remove(filename)
 
-    # Generate and return the output list.
-    search = basename + '*single_sci.fits'
-    output_list = glob.glob(search)
-    return output_list
-
 # ------------------------------------------------------------------------------
 
 def run_astrodrizzle(filename, output_path = None):
@@ -115,7 +110,7 @@ def run_astrodrizzle(filename, output_path = None):
         astrodrizzle.AstroDrizzle(
             input = filename,
             configobj = configobj)
-        rename_files_output = rename_files(filename, mode, output_path)
+        rename_files(filename, mode, output_path)
             
 # ------------------------------------------------------------------------------
 # The main controller. 

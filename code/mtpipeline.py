@@ -11,14 +11,12 @@ viana@stsci.edu
 import argparse
 import glob
 import os
-import sys
 from stwcs import updatewcs
 
 # Costum Packages
 from run_cosmics import run_cosmics
 from run_astrodrizzle import run_astrodrizzle
 from run_trim import run_trim
-
 
 # ----------------------------------------------------------------------------
 # Functions (alphabetical)
@@ -64,15 +62,15 @@ def run_mtpipeline(root_filename, output_path = None, cr_reject_switch=True,
     
     # Run CR reject.
     if cr_reject_switch == True:
-    	print 'Running cr_reject'
+        print 'Running cr_reject'
         run_cosmics(root_filename)
         print 'Done running cr_reject'
     else:
-    	print 'Skipping cr_reject'
+        print 'Skipping cr_reject'
     
     # Run astrodrizzle.         
     if astrodrizzle_switch == True:
-    	print 'Running Astrodrizzle'
+        print 'Running Astrodrizzle'
         for filename in  output_file_dict['cr_reject_output']:
             updatewcs.updatewcs(filename)
             run_astrodrizzle(filename)

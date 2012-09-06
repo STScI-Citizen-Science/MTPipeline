@@ -16,6 +16,7 @@ import pyfits
 
 def get_file_list(search_string):
     '''
+    Generates the file list.
     '''
     file_list = glob.glob(search_string)
     return file_list
@@ -29,11 +30,11 @@ def run_cosmics(filename):
     # Assert the input file exists
     error = filename + ' input for run_cosmics in '
     error += 'run_cosmics.py does not exist.'
-    assert os.access(filename,os.F_OK), error
+    assert os.access(filename, os.F_OK), error
     
     # Define the output name and delete if exists.
     output = os.path.splitext(filename)[0] + '_cr.fits'
-    query = os.access(output,os.F_OK)
+    query = os.access(output, os.F_OK)
     if query == True:
         os.remove(output)
 
@@ -74,7 +75,7 @@ def run_cosmics(filename):
                         verbose = True)
             # Build the object
             # WFPC2 WF Chip Settings
-            elif ext in [2,3,4]:
+            elif ext in [2, 3, 4]:
                 c = cosmics.cosmicsimage(
                         array, 
                         pssl = 0.0, 
@@ -128,4 +129,6 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
-    run_cosmics(filename)
+    file_list = get_file_list(args.files)
+    for filename in file_list:
+        run_cosmics(filename)

@@ -12,8 +12,6 @@ import Image
 import numpy as N
 import os
 import pyfits
-import string
-import sys
 import time
 
 # Custom modules
@@ -23,27 +21,27 @@ from display_tools import *
 # Low-Level Functions
 # -----------------------------------------------------------------------------
 
-def bottom_clip(input, pixels_to_change, inspect=False):
+def bottom_clip(input_array, pixels_to_change, inspect=False):
     '''
-    Rescale the bottom X pixels.
+    Rescale theoutput bottom X pixels.
     '''
     error = 'pixels_to_change in bottom_clip must be an int type.'
     assert type(pixels_to_change) == int, error
-    sorted_array = copy.deepcopy(input)
+    sorted_array = copy.deepcopy(input_array)
     sorted_array = sorted_array.ravel()
     sorted_array.sort()
     bottom = sorted_array[pixels_to_change - 1]
-    bottom_index = N.where(input < bottom)
-    output = copy.deepcopy(input)
-    output[bottom_index] = bottom
+    bottom_index = N.where(input_array < bottom)
+    output_array = copy.deepcopy(input_array)
+    output_array[bottom_index] = bottom
     if inspect:
         before_after(
-            before_array = input, 
-            after_array = output, 
+            before_array = input_array, 
+            after_array = output_array, 
             before_array_name = 'Input Data',
             after_array_name = 'Remove Bottom ' + str(pixels_to_change) + ' Pixels',
             pause = False)  
-    return output
+    return output_array
 
 # -----------------------------------------------------------------------------
 
@@ -73,7 +71,7 @@ def make_png(data, filename):
     data = (data / data.max()) * 255.
     data = N.flipud(data)
     data = N.uint8(data)
-    image = Image.new('L',(data.shape[1],data.shape[0]))
+    image = Image.new('L', (data.shape[1], data.shape[0]))
     image.putdata(data.ravel())
     image.save(filename)
 
@@ -81,7 +79,7 @@ def make_png(data, filename):
 
 def make_png_name(path, filename, ext):
     '''
-    Return the name of the png output file.
+    Return the name of the png output_array file.
     '''
     png_name = os.path.basename(filename)
     png_name = os.path.splitext(png_name)[0] + '_' + ext + '.png'
@@ -90,14 +88,14 @@ def make_png_name(path, filename, ext):
     
 # -----------------------------------------------------------------------------
                     
-def median_scale(array, box, verbose=False):
+def median_scale(array, box):
     '''
     Perform a local-median subtraction (box smoothing). The box size 
     must be odd and is set by the box parameter.
     '''
     print 'Starting the median scale.'
     assert box % 2 == 1, 'Box size must be odd.'
-    output = N.zeros((array.shape[0],array.shape[1]))        
+    output_array = N.zeros((array.shape[0], array.shape[1]))        
     for x in xrange(array.shape[0]):
         xmin = max(0, x - (box / 2)) 
         xmax = min(x + (box / 2) + 1, array.shape[0])
@@ -106,9 +104,9 @@ def median_scale(array, box, verbose=False):
             ymax = min(y + (box / 2) + 1, array.shape[1])
             local_region = array[xmin:xmax, ymin:ymax]
             local_median = N.median(local_region)
-            output[x, y] = copy.copy(array[x, y] - local_median)
+            output_array[x, y] = copy.copy(array[x, y] - local_median)
     print 'Done with the median scale.'
-    return output
+    return output_array
     
 # -----------------------------------------------------------------------------
 
@@ -132,11 +130,13 @@ def positive(input_array, inspect=False):
 
 def sigma_clip(array):
     '''
+    Performs a sigma clip. Not sure if this is going to be in the final 
+    version.
     '''
     P.clf()
     ax1 = P.subplot(121)
     ax1.set_title('Original')
-    ax1.imshow(array,cmap=cm.gray)
+    ax1.imshow(array, cmap=cm.grey)
     ax1.grid(True)
         
     min_val = N.min(array)
@@ -148,7 +148,7 @@ def sigma_clip(array):
     
     ax2 = P.subplot(122)
     ax2.set_title('Rescaled')
-    ax2.imshow(array,cmap=cm.gray)
+    ax2.imshow(array, cmap=cm.grey)
     ax2.grid(True)    
     P.draw()
     
@@ -164,8 +164,8 @@ def subarray(array, xmin, xmax, ymin, ymax):
     status += '[' + str(xmin) + ',' + str(xmax) + ':' 
     status += str(ymin) + ',' + str(ymax) + ']'
     print status
-    output = array[xmin:xmax,ymin:ymax]
-    return output
+    output_array = array[xmin:xmax, ymin:ymax]
+    return output_array
 
 # -----------------------------------------------------------------------------
 
@@ -203,22 +203,22 @@ def run_trim(filename, output_path, stretch_switch, trim=False):
 
     # Make png folder    
     png_path = os.path.join(os.path.dirname(filename), 'png')
-    test = os.access(png_path,os.F_OK)
+    test = os.access(png_path, os.F_OK)
     if test == False:
         os.mkdir(png_path)
     
     # Trim image.
     if trim != False:
-    	trim = trim[0]
-    	assert len(trim) == 3, 'len(trim) in run_trim must be 3.'
-    	trim[0] = int(trim[0])
-    	trim[1] = int(trim[1])
-    	trim[2] = int(trim[2])
-    	xmin = trim[0] - (trim[2] / 2)
-    	xmax = trim[0] + (trim[2] / 2)
-    	ymin = trim[1] - (trim[2] / 2)
-    	ymax = trim[1] + (trim[2] / 2)
-    	data = subarray(data, xmin, xmax, ymin, ymax)
+        trim = trim[0]
+        assert len(trim) == 3, 'len(trim) in run_trim must be 3.'
+        trim[0] = int(trim[0])
+        trim[1] = int(trim[1])
+        trim[2] = int(trim[2])
+        xmin = trim[0] - (trim[2] / 2)
+        xmax = trim[0] + (trim[2] / 2)
+        ymin = trim[1] - (trim[2] / 2)
+        ymax = trim[1] + (trim[2] / 2)
+        data = subarray(data, xmin, xmax, ymin, ymax)
     
     # Make the log image.
     log_output = positive(data, inspect = True)
