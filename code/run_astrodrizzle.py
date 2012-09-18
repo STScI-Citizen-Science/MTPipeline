@@ -96,20 +96,20 @@ def run_astrodrizzle(filename, output_path = None):
     '''
     Executes astrodrizzle.AstroDrizzle.
     '''
+    path = '/Users/viana/Dropbox/Work/MTPipeline/Code/astrodrizzle_cfg/'
+
     configobj_list = [
-        '/Users/viana/Dropbox/Work/MTPipeline/Code/astrodrizzle_cfg/z3_neptune_slice.cfg']
-#        '../astrodrizzle_cfg/z3_neptune_wide.cfg',
-#        '../astrodrizzle_cfg/z3_neptune_zoom.cfg']
+        'z3_neptune_centerslice.cfg',
+        'z3_neptune_wideslice.cfg']
         
     mode_list = [
-        'slice']
- #       'wide',
-  #      'zoom']
-        
+        'center',
+        'wide']
+
     for configobj, mode in zip(configobj_list, mode_list):
         astrodrizzle.AstroDrizzle(
             input = filename,
-            configobj = configobj)
+            configobj = os.path.join(path, configobj))
         rename_files(filename, mode, output_path)
             
 # ------------------------------------------------------------------------------

@@ -6,6 +6,7 @@ Tools for plotting and displaying images from the MTPipeline
 
 import matplotlib.cm as cm
 import pylab as P
+import numpy as N
 
 # -----------------------------------------------------------------------------
 
@@ -58,7 +59,7 @@ def display(array, title = ''):
     P.clf()
     ax1 = P.subplot(111)
     ax1.set_title(title)
-    ax1.imshow(array,cmap=cm.gray)
+    ax1.imshow(array, cmap=cm.gray)
     ax1.grid(True)
     P.draw()
     
@@ -66,7 +67,7 @@ def display(array, title = ''):
     
 # -----------------------------------------------------------------------------
 
-def histo_plot(array,title):
+def histo_plot(array, title):
     '''
     Created: 11/12/11 (Viana)
     '''
@@ -76,7 +77,7 @@ def histo_plot(array,title):
         array.ravel(), 50, facecolor='green', alpha=0.75)
     ax1.grid(True)
     ax2 = P.subplot(122)
-    ax2.imshow(array,cmap=cm.gray)
+    ax2.imshow(array, cmap=cm.gray)
     ax2.grid(True)
     ax2.set_title(title)
     P.figtext(
@@ -87,6 +88,18 @@ def histo_plot(array,title):
         transform = ax2.transAxes)
     P.draw()
     P.savefig(title + '.png')
+
+# -----------------------------------------------------------------------------
+
+def mark_pixels(array, mask):
+    '''
+    Mark pixels in a mask with a red pixel.
+    '''
+    P.clf()
+    ax1 = P.subplot(111)
+    ax1.imshow(array, cmap = matplotlib.cm.gray)
+    ax1.plot(mask[1], mask[0], 'r.', alpha = 0.5)
+    P.draw()
 
 # -----------------------------------------------------------------------------
 
