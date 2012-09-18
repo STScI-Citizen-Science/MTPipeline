@@ -83,7 +83,7 @@ def run_mtpipeline(root_filename, output_path = None, cr_reject_switch=True,
         print 'Running scaling'
         for filename in output_file_dict['drizzle_output']:
             print filename
-            run_trim(filename, output_path)
+            run_trim(filename, output_path, 'median')
         print 'Done running scaling'
     else:
         print 'Skipping running scaling'

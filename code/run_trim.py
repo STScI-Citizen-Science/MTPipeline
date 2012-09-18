@@ -21,27 +21,56 @@ from display_tools import *
 # Low-Level Functions
 # -----------------------------------------------------------------------------
 
-def bottom_clip(input_array, pixels_to_change, inspect=False):
+def clip(input_array, clip_val, top_or_bottom,  inspect=False):
     '''
-    Rescale theoutput bottom X pixels.
+    Clip an input numpy array and set the clipped pixels to the 
+    clipping value. Bottom clip scales pixels below the clip_val.
+    Top does the same for pixels above.
     '''
-    error = 'pixels_to_change in bottom_clip must be an int type.'
-    assert type(pixels_to_change) == int, error
-    sorted_array = copy.deepcopy(input_array)
-    sorted_array = sorted_array.ravel()
-    sorted_array.sort()
-    bottom = sorted_array[pixels_to_change - 1]
-    bottom_index = N.where(input_array < bottom)
+    # Input validation
+    error = 'input_array for clip must be a numpy array instance.'
+    assert isinstance(input_array, N.ndarray), error
+    error = 'clip_val must be float'
+    assert isinstance(clip_val, float), error
+    error = 'top_or_bottom for clip must be "top" or "bottom".'
+    assert top_or_bottom in ['top', 'bottom'], error
+
+    if top_or_bottom == 'bottom':   
+        index = N.where(input_array < clip_val)
+    elif top_or_bottom == 'top':
+        index = N.where(input_array > clip_val)
     output_array = copy.deepcopy(input_array)
-    output_array[bottom_index] = bottom
+    output_array[index] = clip_val
     if inspect:
         before_after(
             before_array = input_array, 
             after_array = output_array, 
             before_array_name = 'Input Data',
-            after_array_name = 'Remove Bottom ' + str(pixels_to_change) + ' Pixels',
+            after_array_name = 'Clip ' + top_or_bottom + ' at ' + str(clip_val),
             pause = False)  
     return output_array
+
+# -----------------------------------------------------------------------------
+
+def get_value_by_pixel_count(input_array, pixel_number ,top_or_bottom):
+    '''
+    Return the value for the ith pixel from the top or bottom.
+    '''
+    error = 'input_array for get_value_by_pixel_count must be a numpy array instance.'
+    assert isinstance(input_array, N.ndarray), error
+    error = 'pixel_count for get_value_by_pixel_count must by int.'
+    assert isinstance(pixel_number, int)
+    error = 'top_or_bottom for get_value_by_pixel_count must be "top" or "bottom".'
+    assert top_or_bottom in ['top', 'bottom'], error
+    sorted_array = copy.deepcopy(input_array)
+    sorted_array = sorted_array.ravel()
+    sorted_array.sort()
+    if top_or_bottom == 'top':
+        output = sorted_array[pixel_number]
+    elif top_or_bottom == 'bottom':
+        output = sorted_array[pixel_number - 1]
+    output = float(output)
+    return output
 
 # -----------------------------------------------------------------------------
 
@@ -223,8 +252,9 @@ def run_trim(filename, output_path, stretch_switch, trim=False):
     # Make the log image.
     log_output = positive(data, inspect = True)
     log_output = log_scale(log_output, inspect = True)
-    log_output = bottom_clip(log_output, 10, inspect = True)
-    
+    bottom_value = get_value_by_pixel_count(log_output, 10, 'bottom')
+    log_output = clip(log_output, bottom_value, 'bottom', inspect = True)
+
     if stretch_switch == 'log':                
         log_output_path = os.path.join(os.path.dirname(filename), 'png')
         log_png_name = make_png_name(log_output_path, filename, 'log')            
