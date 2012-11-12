@@ -67,7 +67,7 @@ def get_header_info(filename):
     Gets the header info from the FITS file. 
     '''
     output = {}
-    output['targname'] = pyfits.getval(filename, 'targname')
+    output['targname'] = pyfits.getval(filename, 'targname').lower().split('-')[0]
     output['date_obs'] = pyfits.getval(filename, 'date-obs')
     output['time_obs'] = pyfits.getval(filename, 'time-obs')
     output['ra_targ']  = pyfits.getval(filename,  'ra_targ')
@@ -101,11 +101,17 @@ def jpl_to_pixels(file_dict):
     hst_pointing = coords.Degrees(
         (file_dict['ra_targ'], file_dict['dec_targ']))
 
+    print file_dict['jpl_ra'], file_dict['jpl_dec']
+    print file_dict['ra_targ'], file_dict['dec_targ']
+
     file_dict['jpl_ra'], file_dict['jpl_dec'] = jpl_pos._calcinternal()
     file_dict['ra_targ'], file_dict['dec_targ'] = hst_pointing.a1, hst_pointing.a2
 
-    print (file_dict['ra_targ'] - file_dict['jpl_ra']) * (20./15)
-    print (file_dict['dec_targ'] - file_dict['jpl_dec']) * (20./15)
+    print file_dict['jpl_ra'], file_dict['jpl_dec']
+    print file_dict['ra_targ'], file_dict['dec_targ']
+
+    print (file_dict['ra_targ'] - file_dict['jpl_ra']) * (3600. / 0.05)
+    print (file_dict['dec_targ'] - file_dict['jpl_dec']) * (3600. / 0.05)
 
 # ----------------------------------------------------------------------------
 
@@ -113,18 +119,37 @@ def main():
     '''
     '''
     file_dict = get_header_info(os.path.abspath(
-        '../../Data/Neptune/u40n0102m_c0m_cr_slice_single_sci.fits'))
+        '/Users/viana/Dropbox/Work/MTPipeline/Data/Neptune/u40n0102m_c0m_cr_slice_single_sci.fits'))
     file_dict = convert_datetime(file_dict)
 
-    command_list = ['899',
-        'e', 'o', 'geo',
-        file_dict['horizons_start_time'],
-        file_dict['horizons_end_time'],
-        '1m', 'y','1,2,3,4', 'n']
-    data = telnet_session(command_list, verbose=True)
-    data_dict = trim_data(data)
-    file_dict.update(data_dict)
-    jpl_to_pixels(file_dict)
+    f = open('planets_and_moons.txt')
+    full_moon_list = f.readlines()
+    f.close()
+
+    moon_id_list = []
+    moon_switch = False
+    for line in full_moon_list:
+        line = line.strip().split()
+        if line != [] and line[-1] == file_dict['targname']:
+            moon_switch = True
+            continue
+        if moon_switch:
+            print line
+            if line != []:
+                moon_id_list.append(line[0])
+            else:
+                break
+
+    for moon_id in moon_id_list:
+        command_list = [moon_id,
+            'e', 'o', 'geo',
+            file_dict['horizons_start_time'],
+            file_dict['horizons_end_time'],
+            '1m', 'y','1,2,3,4', 'n']
+        data = telnet_session(command_list, verbose=True)
+        data_dict = trim_data(data)
+        file_dict.update(data_dict)
+        jpl_to_pixels(file_dict)
 
 if __name__ == '__main__':
     main()

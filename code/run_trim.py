@@ -21,7 +21,7 @@ from display_tools import *
 # Low-Level Functions
 # -----------------------------------------------------------------------------
 
-def clip(input_array, clip_val, top_or_bottom,  inspect=False):
+def clip(input_array, clip_val, top_or_bottom, inspect=False, output=False):
     '''
     Clip an input numpy array and set the clipped pixels to the 
     clipping value. Bottom clip scales pixels below the clip_val.
@@ -47,6 +47,7 @@ def clip(input_array, clip_val, top_or_bottom,  inspect=False):
             after_array = output_array, 
             before_array_name = 'Input Data',
             after_array_name = 'Clip ' + top_or_bottom + ' at ' + str(clip_val),
+            output = output,
             pause = False)  
     return output_array
 
@@ -252,8 +253,23 @@ def run_trim(filename, output_path, stretch_switch, trim=False):
     # Make the log image.
     log_output = positive(data, inspect = True)
     log_output = log_scale(log_output, inspect = True)
+    
+    # Clip the bottom 10 pixels.
     bottom_value = get_value_by_pixel_count(log_output, 10, 'bottom')
-    log_output = clip(log_output, bottom_value, 'bottom', inspect = True)
+    log_output = clip(
+        log_output, 
+        bottom_value, 
+        'bottom', 
+        inspect = True,
+        output = os.path.join(png_path, os.path.basename(filename)[:-4] + 'bottom_clip.png'))
+    
+    # Clip any saturated pixels.
+    log_output = clip(
+        log_output, 
+        4095.0, 
+        'top', 
+        inspect = True, 
+        output = os.path.join(png_path, os.path.basename(filename)[:-4] + 'top_clip.png'))
 
     if stretch_switch == 'log':                
         log_output_path = os.path.join(os.path.dirname(filename), 'png')
