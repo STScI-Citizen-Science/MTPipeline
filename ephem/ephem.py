@@ -31,6 +31,10 @@ def get_header_info(filename):
     output['time_obs'] = pyfits.getval(filename, 'time-obs')
     output['ra_targ']  = pyfits.getval(filename,  'ra_targ')
     output['dec_targ'] = pyfits.getval(filename, 'dec_targ')
+
+    planet_list = ['mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto']
+    error = 'Header TARGNAME not in planet_list'
+    assert output['targname'] in planet_list, error
     return output
 
 # ----------------------------------------------------------------------------
