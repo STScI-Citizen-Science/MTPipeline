@@ -3,7 +3,8 @@ Nose tests for the run_trim.py module.
 '''
 
 from run_trim import get_value_by_pixel_count
-from run_trim import clip 
+from run_trim import clip
+from run_trim import positive 
 import numpy as N 
 
 class test_get_value_by_pixel_count(object):
@@ -33,7 +34,7 @@ class test_clip(object):
     '''
     Test for the clip function in run_trim.
     '''
-    def __init__(self):
+    def __init__(self): 
         self.input_array = N.resize(range(100),(10,10))
 
     def bottom_test(self):
@@ -53,3 +54,18 @@ class test_clip(object):
         top_test_result = N.sum(top_test_result == 90)
         error = 'test_clip.bottom_test got ' + str(top_test_result) + ' expected 10'
         assert top_test_result == 10, error
+
+class test_positive(object):
+    '''
+    Test for the positive function in run_trim. Because it's hard 
+    (impossible?) to exactly match two floats we look at the detla.
+    '''
+    def __init__(self):
+        #self.input_array = N.resize(range(-99,1),(10,10))
+        self.input_array = N.array([-1,0])
+
+    def positive_test(self):
+        result = positive(self.input_array)
+        expected = N.array([0,1]) + 0.0001
+        difference = round(abs(N.sum(result - expected)))
+        assert difference == 0, 'positive is not working.'

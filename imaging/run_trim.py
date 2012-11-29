@@ -79,7 +79,7 @@ def log_scale(array, inspect=True):
     '''
     Returns the log of the input array.
     '''
-    # Log Scale
+    assert isinstance(array, N.ndarray), 'array must be numpy array'
     print '\t' + time.asctime() + ' log scaling' 
     array_log = N.log(array)
     if inspect == True:
@@ -97,6 +97,7 @@ def make_png(data, filename):
     Use the Python image library (PIL) to write out the png file. Note 
     that the image flux is rescaled between be between 0 and 256.
     '''
+    assert isinstance(data, N.ndarray), 'array must be numpy array'
     data = data - data.min()            
     data = (data / data.max()) * 255.
     data = N.flipud(data)
@@ -125,6 +126,7 @@ def median_scale(array, box):
     '''
     print 'Starting the median scale.'
     assert box % 2 == 1, 'Box size must be odd.'
+    assert isinstance(array, N.ndarray), 'array must be numpy array'
     output_array = N.zeros((array.shape[0], array.shape[1]))        
     for x in xrange(array.shape[0]):
         xmin = max(0, x - (box / 2)) 
@@ -145,6 +147,7 @@ def positive(input_array, inspect=False):
     Shift all the pixels so there are no negative or 0 pixels. Needed 
     to prevent taken the log of negative values.
     '''
+    assert isinstance(input_array, N.ndarray), 'array must be numpy array'
     min_val = N.min(input_array)
     if min_val <= 0:
         output_array = input_array + ((min_val * -1.0) + 0.0001) 
@@ -163,6 +166,7 @@ def sigma_clip(array):
     Performs a sigma clip. Not sure if this is going to be in the final 
     version.
     '''
+    assert isinstance(array, N.ndarray), 'array must be numpy array'
     P.clf()
     ax1 = P.subplot(121)
     ax1.set_title('Original')
@@ -190,6 +194,11 @@ def subarray(array, xmin, xmax, ymin, ymax):
     '''
     Returns a subarray.
     '''
+    assert isinstance(array, N.ndarray), 'array must be numpy array'
+    assert isinstance(xmin, int), 'xmin in subarray must be an int.'
+    assert isinstance(xmax, int), 'xmax in subarray must be an int.'
+    assert isinstance(ymin, int), 'ymin in subarray must be an int.'
+    assert isinstance(ymax, int), 'ymax in subarray must be an int.'    
     status = '\t' + time.asctime() + ' trimming to '
     status += '[' + str(xmin) + ',' + str(xmax) + ':' 
     status += str(ymin) + ',' + str(ymax) + ']'
@@ -203,6 +212,7 @@ def top_bottom_clip(array):
     '''
     Clip the top and bottom 1% of pixels.
     '''
+    assert isinstance(array, N.ndarray), 'array must be numpy array'
     sorted_array = copy.copy(array)
     sorted_array = sorted_array.ravel()
     sorted_array.sort()
