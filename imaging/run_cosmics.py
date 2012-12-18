@@ -46,11 +46,11 @@ def run_cosmics(filename):
     for ext in range(0, header_count):
         print filename + '[' + str(ext) + ']'
 
-        if ext == 0:
+        if ext in [0, 5]:
             hdu = pyfits.open(filename)
-            array = hdu[0].data
-            header = hdu[0].header
-            pyfits.writeto(
+            array = hdu[ext].data
+            header = hdu[ext].header
+            pyfits.append(
                 output,
                 array,
                 header)
