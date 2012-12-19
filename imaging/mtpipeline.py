@@ -42,7 +42,7 @@ def make_output_file_dict(filename):
             
     # Drizzled outputs.
     for cr in ['','_cr']:
-        for drz in ['_slice']: #['_slice', '_wide', '_zoom']:
+        for drz in ['_wide', '_center']:
             drz = basename + cr + drz + '_single_sci.fits'
             output_file_dict['drizzle_output'].append(drz)
     
