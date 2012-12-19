@@ -1,8 +1,11 @@
+import argparse
 import coords
 import datetime
+import glob
 import os
 import pyfits
 import telnetlib
+import __main__
 
 # ----------------------------------------------------------------------------
 
@@ -69,7 +72,8 @@ def make_moon_dict(filename, file_dict):
     '''
     Parses the text file for id numbers of the moons.
     '''
-    f = open('planets_and_moons.txt')
+    path_to_code = os.path.dirname(__main__.__file__)
+    f = open(os.path.join(path_to_code, 'planets_and_moons.txt'))
     full_moon_list = f.readlines()
     f.close()
 
@@ -169,11 +173,26 @@ def main(filename):
 
     print moon_dict
 
+#----------------------------------------------------------------------------
+# For command line execution
+#----------------------------------------------------------------------------
+
+def parse_args():
+    '''
+    parse the command line arguemnts.
+    '''
+    parser = argparse.ArgumentParser(
+        description = 'Generate the ephemeride data.')
+    parser.add_argument(
+        '-filelist',
+        required = True,
+        help = 'Search string for files. Wildcards accepted.')
+    args = parser.parse_args()
+    return args
+
 if __name__ == '__main__':
-    import sys
-    if sys.platform == 'win32':
-        filename = '/Users/acv/Documents/My Dropbox/Work/MTPipeline/Data/Neptune/u40n0102m_c0m_cr_slice_single_sci.fits'
-    else:
-        filename = '/Users/viana/Dropbox/Work/MTPipeline/Data/Neptune/u40n0102m_c0m_cr_slice_single_sci.fits'
-    main(filename)
+    args = parse_args()
+    file_list = glob.glob(args.filelist)
+    for filename in file_list:
+        main(filename)
 
