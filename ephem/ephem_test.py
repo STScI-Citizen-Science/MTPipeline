@@ -4,22 +4,34 @@
 Tests the ephem.py module
 '''
 
+import datetime
 import ephem
 from ephem import *
 import os
 
 path_to_code = str(ephem.__file__)[:-20]
 TEST_FILE = os.path.join(path_to_code, 'test-files/u40n0102m_c0m_slice_single_sci.fits')
-
 print 'Testing with ' + TEST_FILE
 
-def test_get_header_info():
-	'''
-	Test the test_get_header_info function.
-	'''
-	header_dict = get_header_info(TEST_FILE)
-	assert header_dict['targname'] == 'neptune', 'targname should be neptune'
-	assert header_dict['date_obs'] == '1997-07-03', 'date_obs should be 1997-07-03'
-	assert header_dict['time_obs'] == '09:17:13', 'time_obs should be 09:17:13'
-	assert header_dict['ra_targ'] == 301.1233313134, 'ra_targ should be 301.1233313134'
-	assert header_dict['dec_targ'] == -19.93255391992, 'dec_targ should be -19.93255391992'
+class test_ephem(object):
+
+	def test_get_header_info(self):
+		'''
+		Test the test_get_header_info function.
+		'''
+		header_dict = get_header_info(TEST_FILE)
+		assert header_dict['targname'] == 'neptune', 'targname should be neptune'
+		assert header_dict['date_obs'] == '1997-07-03', 'date_obs should be 1997-07-03'
+		assert header_dict['time_obs'] == '09:17:13', 'time_obs should be 09:17:13'
+		assert header_dict['ra_targ'] == 301.1233313134, 'ra_targ should be 301.1233313134'
+		assert header_dict['dec_targ'] == -19.93255391992, 'dec_targ should be -19.93255391992'
+
+	def test_convert_datetime(self):
+		'''
+		Tests the test_convert_datetime function.
+		'''
+		header_dict = get_header_info(TEST_FILE)
+		header_dict = convert_datetime(header_dict)
+		assert header_dict['header_time'] == datetime.datetime(1997, 7, 3, 9, 17, 13), 'header_time should be datetime.datetime(1997, 7, 3, 9, 17, 13)'
+		assert header_dict['horizons_start_time'] == '1997-Jul-03 09:17', 'horizons_start_time should be 1997-Jul-03 09:17'
+		assert header_dict['horizons_end_time'] == '1997-Jul-03 09:18', 'horizons_end_time should be 1997-Jul-03 09:18'
