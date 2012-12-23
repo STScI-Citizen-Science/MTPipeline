@@ -5,7 +5,6 @@ import glob
 import os
 import pyfits
 import telnetlib
-import __main__
 
 # ----------------------------------------------------------------------------
 
@@ -72,7 +71,7 @@ def make_moon_dict(filename, file_dict):
     '''
     Parses the text file for id numbers of the moons.
     '''
-    path_to_code = os.path.dirname(__main__.__file__)
+    path_to_code = os.path.dirname(__file__)
     f = open(os.path.join(path_to_code, 'planets_and_moons.txt'))
     full_moon_list = f.readlines()
     f.close()
