@@ -155,9 +155,7 @@ def main(filename):
     '''
     file_dict = get_header_info(os.path.abspath(filename))
     file_dict = convert_datetime(file_dict)
-
     moon_dict = make_moon_dict('planets_and_moons.txt', file_dict)
-    print moon_dict
 
     for moon in moon_dict.keys():
         command_list = [moon_dict[moon]['id'],
@@ -167,31 +165,8 @@ def main(filename):
             '1m', 'y','1,2,3,4', 'n']
         data = telnet_session(command_list, verbose=True)
         data_dict = trim_data(data)
+        #print data_dict 
         file_dict.update(data_dict)
         moon_dict[moon]['delta_x'], moon_dict[moon]['delta_y'] = jpl_to_pixels(file_dict)
 
-    print moon_dict
-
-#----------------------------------------------------------------------------
-# For command line execution
-#----------------------------------------------------------------------------
-
-def parse_args():
-    '''
-    parse the command line arguemnts.
-    '''
-    parser = argparse.ArgumentParser(
-        description = 'Generate the ephemeride data.')
-    parser.add_argument(
-        '-filelist',
-        required = True,
-        help = 'Search string for files. Wildcards accepted.')
-    args = parser.parse_args()
-    return args
-
-if __name__ == '__main__':
-    args = parse_args()
-    file_list = glob.glob(args.filelist)
-    for filename in file_list:
-        main(filename)
-
+    return moon_dict
