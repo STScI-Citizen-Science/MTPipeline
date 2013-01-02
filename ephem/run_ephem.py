@@ -15,8 +15,6 @@ class Finders(Base):
     __tablename__ = 'finders'
     __table_args__ = {'autoload':True}
 
-
-
 #----------------------------------------------------------------------------
 # For command line execution
 #----------------------------------------------------------------------------
@@ -33,6 +31,8 @@ def parse_args():
         help = 'Search string for files. Wildcards accepted.')
     args = parser.parse_args()
     return args
+
+#----------------------------------------------------------------------------
 
 if __name__ == '__main__':
     args = parse_args()
