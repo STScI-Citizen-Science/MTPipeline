@@ -51,14 +51,8 @@ def jpl_to_pixels(file_dict):
     hst_pointing = coords.Degrees(
         (file_dict['ra_targ'], file_dict['dec_targ']))
 
-    print file_dict['jpl_ra'], file_dict['jpl_dec']
-    print file_dict['ra_targ'], file_dict['dec_targ']
-
     file_dict['jpl_ra'], file_dict['jpl_dec'] = jpl_pos._calcinternal()
     file_dict['ra_targ'], file_dict['dec_targ'] = hst_pointing.a1, hst_pointing.a2
-
-    print file_dict['jpl_ra'], file_dict['jpl_dec']
-    print file_dict['ra_targ'], file_dict['dec_targ']
 
     delta_x = (file_dict['ra_targ'] - file_dict['jpl_ra']) * (3600. / 0.05)
     delta_y = (file_dict['dec_targ'] - file_dict['jpl_dec']) * (3600. / 0.05)
