@@ -320,6 +320,7 @@ def parse_args():
         required = False,
         nargs=3, 
         action='append',
+        default = False,
         help = '3 ints: x center, y center, and box size.'),
     args = parser.parse_args()        
     return args
