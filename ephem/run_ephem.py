@@ -9,11 +9,8 @@ from ephem import *
 
 session, Base = loadConnection('mysql://root@localhost/mtpipeline')
 
-class Finders(Base):
-    '''
-    '''
-    __tablename__ = 'finders'
-    __table_args__ = {'autoload':True}
+from database_interface import Finders
+from database_interface import MasterImages
 
 #----------------------------------------------------------------------------
 # For command line execution
@@ -38,8 +35,10 @@ if __name__ == '__main__':
     args = parse_args()
     file_list = glob.glob(args.filelist)
     for filename in file_list:
-        moon_dict = main(filename)
 
+        #session.query(MasterImages).filter()
+
+        moon_dict = main(filename)
         for moon in moon_dict.keys():
             record = Finders()
             record.object_name = moon

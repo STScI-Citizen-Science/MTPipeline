@@ -27,8 +27,8 @@ class MasterImages(Base):
         = (72,000 pix / 1 deg). The pixel resolution is given in units 
         of arcsec / pix.
         '''
-        png_path, png_name = os.path.split(png_file)
-        fits_path, fits_name = os.path.split(fits_file)
+        png_path, png_name = os.path.split(os.path.abspath(png_file))
+        fits_path, fits_name = os.path.split(os.path.abspath(fits_file))
 
         self.project_id = pyfits.getval(fits_file, 'proposid')
         self.name = png_name
@@ -51,10 +51,12 @@ class MasterImages(Base):
 def get_fits_file(png_file):
     '''
     Returns the absolute path to the fits file corresponding to a png 
-    file. Assumes the at png file is one level above the fits file in 
-    directory tree.
+    file. Assumes the at png file is one level below the fits file in 
+    directory tree. Checks to ensure the input file is .png and that 
+    the output is .fits.
     '''    
     png_path, png_name = os.path.split(os.path.abspath(png_file))
+    assert os.path.splitext(png_name)[1] == '.png', 'png file required'
     fits_path = os.path.split(png_path)[0]
     fits_name = os.path.splitext(png_name)[0]
     if fits_name[-4:] == '_log':
@@ -62,6 +64,7 @@ def get_fits_file(png_file):
     elif fits_name[-7:] == '_median':
         fits_name = fits_name[:-7] + '.fits'
     fits_file = os.path.join(fits_path, fits_name)
+    assert os.path.splitext(fits_file)[1] == '.fits', 'unexpected output.'
     return fits_file
 
 #----------------------------------------------------------------------------
@@ -95,7 +98,6 @@ if __name__ == '__main__':
     file_list = glob.glob(args.filelist)
     for png_file in file_list:
         fits_file = get_fits_file(png_file)
-        print fits_file
         png_path, png_name = os.path. os.path.split(os.path.abspath(png_file))
         if args.rebuild == False:
             query = session.query(MasterImages.name).filter(MasterImages.name == png_name)
