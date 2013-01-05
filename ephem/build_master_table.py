@@ -7,7 +7,6 @@ import pyfits
 
 from database_interface import loadConnection
 
-
 session, Base = loadConnection('mysql://root@localhost/mtpipeline')
 
 class MasterImages(Base):
@@ -17,7 +16,7 @@ class MasterImages(Base):
     '''
     __tablename__ = 'master_images'
     __table_args__ = {'autoload':True}
-    def __init__(self, filename):
+    def __init__(self, png_file, fits_file):
         '''
         The values for the minimum and maximum ra and dec are given in 
         degrees to match the units of the RA_TARG and DEC_TARG 
@@ -28,21 +27,42 @@ class MasterImages(Base):
         = (72,000 pix / 1 deg). The pixel resolution is given in units 
         of arcsec / pix.
         '''
-        self.project_id = pyfits.getval(filename, 'proposid')
-        #self.name = 
-        self.fits_file = basename 
-        self.object_name = pyfits.getval(filename, 'targname')
+        png_path, png_name = os.path.split(png_file)
+        fits_path, fits_name = os.path.split(fits_file)
+
+        self.project_id = pyfits.getval(fits_file, 'proposid')
+        self.name = png_name
+        self.fits_file = fits_name
+        self.object_name = pyfits.getval(fits_file, 'targname')
         #self.set_id = 
         #self.set_index =
-        self.width = pyfits.getval(filename, 'NAXIS1')
-        self.height = pyfits.getval(filename, 'NAXIS2')
-        self.minimum_ra = pyfits.getval(filename, 'RA_TARG') - (420.0 / 72000)
-        self.minimum_dec = pyfits.getval(filename, 'DEC_TARG') - (424.5 / 72000)
-        self.maximum_ra = pyfits.getval(filename, 'RA_TARG') + ((self.width - 420.0) / 72000) 
-        self.maximum_dec = pyfits.getval(filename, 'DEC_TARG') + ((self.height - 424.5) / 72000) 
+        self.width = pyfits.getval(fits_file, 'NAXIS1')
+        self.height = pyfits.getval(fits_file, 'NAXIS2')
+        self.minimum_ra = pyfits.getval(fits_file, 'RA_TARG') - (420.0 / 72000)
+        self.minimum_dec = pyfits.getval(fits_file, 'DEC_TARG') - (424.5 / 72000)
+        self.maximum_ra = pyfits.getval(fits_file, 'RA_TARG') + ((self.width - 420.0) / 72000) 
+        self.maximum_dec = pyfits.getval(fits_file, 'DEC_TARG') + ((self.height - 424.5) / 72000) 
         self.pixel_resolution = 0.05 #arcsec / pix
-        self.description = pyfits.getval(filename, 'FILTNAM1')
-        self.file_location = path
+        self.description = pyfits.getval(fits_file, 'FILTNAM1')
+        self.file_location = png_path
+
+#----------------------------------------------------------------------------
+
+def get_fits_file(png_file):
+    '''
+    Returns the absolute path to the fits file corresponding to a png 
+    file. Assumes the at png file is one level above the fits file in 
+    directory tree.
+    '''    
+    png_path, png_name = os.path.split(os.path.abspath(png_file))
+    fits_path = os.path.split(png_path)[0]
+    fits_name = os.path.splitext(png_name)[0]
+    if fits_name[-4:] == '_log':
+        fits_name = fits_name[:-4] + '.fits'
+    elif fits_name[-6] == '_median':
+        fits_name = fits_name[:-6] + '.fits'
+    fits_file = os.path.join(fits_path, fits_name)
+    return fits_file
 
 #----------------------------------------------------------------------------
 # For command line execution
@@ -73,15 +93,16 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
     file_list = glob.glob(args.filelist)
-    for filename in file_list:
-        path, basename = os.path. os.path.split(os.path.abspath(filename))
+    for png_file in file_list:
+        fits_file = get_fits_file(png_file)
+        png_path, png_name = os.path. os.path.split(os.path.abspath(png_file))
         if args.rebuild == False:
-            query = session.query(MasterImages.name).filter(MasterImages.name == basename)
+            query = session.query(MasterImages.name).filter(MasterImages.name == png_name)
             if len(query.all()) == 0:
-                record = MasterImages(filename)
+                record = MasterImages(png_file, fits_file)
                 session.add(record)
         elif args.rebuild == True:
-            record = MasterImages(filename)
+            record = MasterImages(png_file, fits_file)
             session.add(record)           
 
     session.commit()
