@@ -59,8 +59,8 @@ def get_fits_file(png_file):
     fits_name = os.path.splitext(png_name)[0]
     if fits_name[-4:] == '_log':
         fits_name = fits_name[:-4] + '.fits'
-    elif fits_name[-6] == '_median':
-        fits_name = fits_name[:-6] + '.fits'
+    elif fits_name[-7:] == '_median':
+        fits_name = fits_name[:-7] + '.fits'
     fits_file = os.path.join(fits_path, fits_name)
     return fits_file
 
@@ -95,6 +95,7 @@ if __name__ == '__main__':
     file_list = glob.glob(args.filelist)
     for png_file in file_list:
         fits_file = get_fits_file(png_file)
+        print fits_file
         png_path, png_name = os.path. os.path.split(os.path.abspath(png_file))
         if args.rebuild == False:
             query = session.query(MasterImages.name).filter(MasterImages.name == png_name)
