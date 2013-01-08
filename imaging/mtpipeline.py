@@ -28,6 +28,10 @@ def make_output_file_dict(filename):
     step. This allows steps to be omitted if the output files already 
     exist.
     '''
+    # Check the input.
+    error = filename + ' does not end in "c0m.fits".'
+    assert filename[-8:] == 'c0m.fits', error
+
     # Build the dictionary.
     output_file_dict = {}
     output_file_dict['input_file'] = filename
@@ -56,8 +60,9 @@ def run_mtpipeline(root_filename, output_path = None, cr_reject_switch=True,
         astrodrizzle_switch=True, trim_switch=True):
     '''
     This is the main controller for all the steps in the pipeline.
-    ''' 
+    '''
     # Generate the output drizzle names 
+    filename = os.path.abspath(filename) 
     output_file_dict = make_output_file_dict(root_filename)
     
     # Run CR reject.
@@ -137,9 +142,6 @@ if __name__ == '__main__':
     rootfile_list = glob.glob(args.filelist)
     assert rootfile_list != [], 'empty rootfile_list in mtpipeline.py.'
     for filename in rootfile_list:
-        error = filename + ' does not end in "c0m.fits".'
-        assert filename[-8:] == 'c0m.fits', error
-        filename = os.path.abspath(filename)
         run_mtpipeline(filename, 
             output_path =  args.output_path,
             cr_reject_switch = args.cr_reject,
