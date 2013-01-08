@@ -37,18 +37,20 @@ def make_output_file_dict(filename):
     output_file_dict['input_file'] = filename
     output_file_dict['cr_reject_output'] = []
     output_file_dict['drizzle_output'] = []
-    basename = os.path.splitext(filename)[0]
+    path, basename = os.path.split(filename)
+    basename = basename.split('_')[0]
     
     # CR Rejection outputs.
     for cr in ['','_cr']:
-        drz = basename + cr + '.fits'
-        output_file_dict['cr_reject_output'].append(drz)
+        filename = os.path.join(path, basename + cr + '_c0m.fits')
+        output_file_dict['cr_reject_output'].append(filename)
             
     # Drizzled outputs.
     for cr in ['','_cr']:
         for drz in ['_wide', '_center']:
-            drz = basename + cr + drz + '_single_sci.fits'
-            output_file_dict['drizzle_output'].append(drz)
+            filename = os.path.join(path, basename + cr + '_c0m' + drz + '_single_sci.fits')
+            print filename
+            output_file_dict['drizzle_output'].append(filename)
     
     return output_file_dict
 
