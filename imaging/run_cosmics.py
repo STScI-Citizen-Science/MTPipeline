@@ -23,7 +23,23 @@ def get_file_list(search_string):
 
 # -----------------------------------------------------------------------------
 
-def run_cosmics(filename):
+def make_c1m_link(filename):
+    '''
+    Create a link to a c1m.fits that matches the cosmic ray rejected 
+    naming scheme.
+    '''
+    error = filename + ' does not end in "c0m.fits".'
+    assert filename[-8:] == 'c0m.fits', error
+    src = filename.replace('_c0m.fits', '_c1m.fits')
+    dst = src.replace('_c1m.fits', '_cr_c1m.fits')
+    query = os.access(dst, os.F_OK)
+    if query == True:
+        os.remove(dst)
+    os.symlink(src, dst)
+
+# -----------------------------------------------------------------------------
+
+def run_cosmics(filename, output):
     '''
     The main controller.
     '''
@@ -33,7 +49,6 @@ def run_cosmics(filename):
     assert os.access(filename, os.F_OK), error
     
     # Define the output name and delete if exists.
-    output = os.path.splitext(filename)[0] + '_cr.fits'
     query = os.access(output, os.F_OK)
     if query == True:
         os.remove(output)
@@ -104,9 +119,7 @@ def run_cosmics(filename):
             # cosmics.tofits("mask.fits", c.mask, header)
             # (c.mask is a boolean numpy array, that gets 
             # converted here to an integer array)
-            
-    #return output
-        
+                    
 # -----------------------------------------------------------------------------
 # For Command Line Execution
 # -----------------------------------------------------------------------------
@@ -125,10 +138,11 @@ def parse_args():
     args = parser.parse_args() 
     return args
 
-# -----------------------------------------------------------------------------
+# c
 
 if __name__ == '__main__':
     args = parse_args()
     file_list = get_file_list(args.files)
     for filename in file_list:
         run_cosmics(filename)
+        make_c1m_link(filename)

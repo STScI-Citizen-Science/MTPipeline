@@ -49,7 +49,6 @@ def make_output_file_dict(filename):
     for cr in ['','_cr']:
         for drz in ['_wide', '_center']:
             filename = os.path.join(path, basename + cr + '_c0m' + drz + '_single_sci.fits')
-            print filename
             output_file_dict['drizzle_output'].append(filename)
     
     return output_file_dict
@@ -64,13 +63,13 @@ def run_mtpipeline(root_filename, output_path = None, cr_reject_switch=True,
     This is the main controller for all the steps in the pipeline.
     '''
     # Generate the output drizzle names 
-    filename = os.path.abspath(filename) 
+    filename = os.path.abspath(root_filename) 
     output_file_dict = make_output_file_dict(root_filename)
     
     # Run CR reject.
     if cr_reject_switch == True:
         print 'Running cr_reject'
-        run_cosmics(root_filename)
+        run_cosmics(root_filename, output_file_dict['cr_reject_output'][1])
         print 'Done running cr_reject'
     else:
         print 'Skipping cr_reject'
