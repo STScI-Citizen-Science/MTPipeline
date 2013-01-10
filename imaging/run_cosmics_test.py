@@ -7,11 +7,15 @@ Test module for the run_cosmics.py module.
 import os
 from run_cosmics import make_c1m_link  
 
-def teardown():
-    query = os.access('u2eu0101f_cr_c1m.fits', os.F_OK)
+def setup():
+    query = os.path.islink('u2eu0101f_cr_c1m.fits')
     if query == True:
         os.remove('u2eu0101f_cr_c1m.fits')
 
+def teardown():
+    query = os.path.islink('u2eu0101f_cr_c1m.fits')
+    if query == True:
+        os.remove('u2eu0101f_cr_c1m.fits')
 
 def make_c1m_link_test():
     '''
@@ -19,4 +23,5 @@ def make_c1m_link_test():
     the link.
     '''
     make_c1m_link('u2eu0101f_c0m.fits')
+    assert os.path.islink('u2eu0101f_cr_c1m.fits'), 'Link does not exist.'
 

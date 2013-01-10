@@ -32,7 +32,7 @@ def make_c1m_link(filename):
     assert filename[-8:] == 'c0m.fits', error
     src = filename.replace('_c0m.fits', '_c1m.fits')
     dst = src.replace('_c1m.fits', '_cr_c1m.fits')
-    query = os.access(dst, os.F_OK)
+    query = os.path.islink(dst)
     if query == True:
         os.remove(dst)
     os.symlink(src, dst)
@@ -119,6 +119,12 @@ def run_cosmics(filename, output):
             # cosmics.tofits("mask.fits", c.mask, header)
             # (c.mask is a boolean numpy array, that gets 
             # converted here to an integer array)
+
+    assert os.path.isfile(output) == True, 'run_cosmics did not create: ' + output
+
+    # Create a symbolic link to the original c1m files that matches the 
+    # Output filename.
+    make_c1m_link(os.path.abspath(filename))
                     
 # -----------------------------------------------------------------------------
 # For Command Line Execution
@@ -138,11 +144,8 @@ def parse_args():
     args = parser.parse_args() 
     return args
 
-# c
-
 if __name__ == '__main__':
     args = parse_args()
     file_list = get_file_list(args.files)
     for filename in file_list:
         run_cosmics(filename)
-        make_c1m_link(filename)
