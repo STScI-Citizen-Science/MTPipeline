@@ -75,7 +75,7 @@ def get_value_by_pixel_count(input_array, pixel_number ,top_or_bottom):
 
 # -----------------------------------------------------------------------------
 
-def log_scale(array, inspect=True):
+def log_scale(array, inspect=False, output=False):
     '''
     Returns the log of the input array.
     '''
@@ -87,6 +87,7 @@ def log_scale(array, inspect=True):
             after_array = array_log, 
             before_array_name = 'Input Data',
             after_array_name = 'Log',
+            output = False,
             pause = False) 
     return array_log
         
@@ -119,7 +120,7 @@ def make_png_name(path, filename, ext):
     
 # -----------------------------------------------------------------------------
                     
-def median_scale(array, box):
+def median_scale(array, box, inspect=False, output=False):
     '''
     Perform a local-median subtraction (box smoothing). The box size 
     must be odd and is set by the box parameter.
@@ -138,11 +139,19 @@ def median_scale(array, box):
             local_median = N.median(local_region)
             output_array[x, y] = copy.copy(array[x, y] - local_median)
     print 'Done with the median scale.'
+    if inspect:
+        before_after(
+            before_array = array, 
+            after_array = output_array, 
+            before_array_name = 'Input Data',
+            after_array_name = 'Median with ' + str(box) + ' box',
+            output = output,
+            pause = False) 
     return output_array
     
 # -----------------------------------------------------------------------------
 
-def positive(input_array, inspect=False):
+def positive(input_array, inspect=False, output=False):
     '''
     Shift all the pixels so there are no negative or 0 pixels. Needed 
     to prevent taken the log of negative values.
@@ -151,42 +160,14 @@ def positive(input_array, inspect=False):
     min_val = N.min(input_array)
     if min_val <= 0:
         output_array = input_array + ((min_val * -1.0) + 0.0001) 
-    if inspect == True:
+    if inspect:
         before_after(before_array = input_array, 
             after_array = output_array, 
             before_array_name = 'Input Data',
             after_array_name = 'Positive Corrected',
-            show = False)    
+            output = output,
+            pause = False)   
     return output_array
-
-# -----------------------------------------------------------------------------
-
-def sigma_clip(array):
-    '''
-    Performs a sigma clip. Not sure if this is going to be in the final 
-    version.
-    '''
-    assert isinstance(array, N.ndarray), 'array must be numpy array'
-    P.clf()
-    ax1 = P.subplot(121)
-    ax1.set_title('Original')
-    ax1.imshow(array, cmap=cm.grey)
-    ax1.grid(True)
-        
-    min_val = N.min(array)
-    med_val = N.median(array)
-    std_val = N.std(array)
-    zero = med_val - (2. * std_val)
-    array = array - zero
-    array = array * (array >= 0)
-    
-    ax2 = P.subplot(122)
-    ax2.set_title('Rescaled')
-    ax2.imshow(array, cmap=cm.grey)
-    ax2.grid(True)    
-    P.draw()
-    
-    return array
 
 # -----------------------------------------------------------------------------
 
@@ -199,11 +180,17 @@ def subarray(array, xmin, xmax, ymin, ymax):
     assert isinstance(xmax, int), 'xmax in subarray must be an int.'
     assert isinstance(ymin, int), 'ymin in subarray must be an int.'
     assert isinstance(ymax, int), 'ymax in subarray must be an int.'    
-    status = '\t' + time.asctime() + ' trimming to '
-    status += '[' + str(xmin) + ',' + str(xmax) + ':' 
-    status += str(ymin) + ',' + str(ymax) + ']'
-    print status
+    assert xmin < xmax, 'xmin must be stictly less than xmax.'
+    assert ymin < ymax, 'ymin must be stictly less than ymax.'
+    if xmax > array.shape[0] or ymax > array.shape[1]:
+        border_array = N.zeros((max(xmax,array.shape[0]), max(ymax,array.shape[1])))
+        print xmin, xmax, ymin, ymax
+        print array.shape, border_array.shape
+        border_array[:array.shape[0], :array.shape[1]] = array
+        array = border_array
     output_array = array[xmin:xmax, ymin:ymax]
+    assert output_array.shape[0] == xmax - xmin, 'Output shape is unexpected.'
+    assert output_array.shape[1] == ymax - ymin, 'Output shape is unexpected.' 
     return output_array
 
 # -----------------------------------------------------------------------------
@@ -225,72 +212,120 @@ def top_bottom_clip(array):
     return array
 
 # -----------------------------------------------------------------------------
+# Main Class
+# -----------------------------------------------------------------------------
+
+class PNGCreator(object):
+    '''
+    The PNGCreator class incorperates all the functions in the run_trim
+    module to create a smoother interface for passing the numpy array 
+    around and for saving the result. All manipulations are done in 
+    place, with the expection of the trim method which returns a new 
+    PNGCreator instance.
+    '''
+    def __init__(self, data):
+        '''
+        Check the input type on instantiation.
+        '''
+        self.data = data
+        assert isinstance(data, N.ndarray), 'Expected N.ndarray got ' + str(type(data))
+
+    def trim(self, xmin, xmax, ymin, ymax):
+        '''
+        Trim the self.data attribute and another instance of PNGCreator
+        for the trimmed data. This allows you to apply the save_png 
+        method to the trimmed data.
+        '''
+        return PNGCreator(subarray(self.data, xmin, xmax, ymin, ymax))
+    
+    def log(self, output=False):
+        '''
+        Transform all the data in the self.data attribute to a positive
+        value and take the log of image.
+        '''
+        self.data = positive(self.data, inspect = False, output = output)
+        self.data = log_scale(self.data, inspect = False, output = output)
+    
+    def bottom_clip(self, output=False):
+        '''
+        Clip the bottom 10 pixels from the self.data attribute.
+        '''
+        bottom_value = get_value_by_pixel_count(self.data, 10, 'bottom')
+        self.data = clip(self.data, bottom_value, 'bottom', inspect = False, 
+            output = output)
+    
+    def saturated_clip(self, output=False):
+        '''
+        Clip any saturated pixels.
+        '''
+        self.data = clip(self.data, 4095.0, 'top', inspect = False, 
+            output = output)
+
+    def save_png(self, png_name):
+        '''
+        Save the self.data attribute to a png.
+        '''                          
+        make_png(self.data, png_name)
+
+    def median(self, output=False):
+        '''
+        Take a 25x25 median box smoothing of the self.data attribute.
+        '''
+        self.data = median_scale(self.data, 25, output = output)
+
+# -----------------------------------------------------------------------------
 # The Main Controller
 # -----------------------------------------------------------------------------
             
-def run_trim(filename, output_path, stretch_switch, trim=False):
+def run_trim(filename, output_path):
     '''
-    Set the stretch and create the output image.
+    The main controller for the png creation. Checks for and creates an
+    output folder. Opens the data header extention. Uses a PNGCreator 
+    instance to create trimmed and scaled pngs.
     '''
-    # Check the inputs
-    error = 'strech_switch must me "log" or "median".'
-    assert stretch_switch in ['log', 'median'], error
-    
-    # Get Data
-    h = pyfits.open(filename) 
-    data = h[0].data
-    h.close()
-
-    # Make png folder    
+    # Make png folder if it doesn't exist.
     png_path = os.path.join(os.path.dirname(filename), 'png')
     test = os.access(png_path, os.F_OK)
     if test == False:
         os.mkdir(png_path)
-    
-    # Trim image.
-    if trim != False:
-        trim = trim[0]
-        assert len(trim) == 3, 'len(trim) in run_trim must be 3.'
-        trim[0] = int(trim[0])
-        trim[1] = int(trim[1])
-        trim[2] = int(trim[2])
-        xmin = trim[0] - (trim[2] / 2)
-        xmax = trim[0] + (trim[2] / 2)
-        ymin = trim[1] - (trim[2] / 2)
-        ymax = trim[1] + (trim[2] / 2)
-        data = subarray(data, xmin, xmax, ymin, ymax)
-    
-    # Make the log image.
-    log_output = positive(data, inspect = True)
-    log_output = log_scale(log_output, inspect = True)
-    
-    # Clip the bottom 10 pixels.
-    bottom_value = get_value_by_pixel_count(log_output, 10, 'bottom')
-    log_output = clip(
-        log_output, 
-        bottom_value, 
-        'bottom', 
-        inspect = True,
-        output = os.path.join(png_path, os.path.basename(filename)[:-4] + 'bottom_clip.png'))
-    
-    # Clip any saturated pixels.
-    log_output = clip(
-        log_output, 
-        4095.0, 
-        'top', 
-        inspect = True, 
-        output = os.path.join(png_path, os.path.basename(filename)[:-4] + 'top_clip.png'))
 
-    if stretch_switch == 'log':                
-        log_output_path = os.path.join(os.path.dirname(filename), 'png')
-        log_png_name = make_png_name(log_output_path, filename, 'log')            
-        make_png(log_output, log_png_name)
+    # Get the data.
+    h = pyfits.open(filename) 
+    data = h[0].data
+    h.close()
+    
+    # Itinital scaling.
+    pngc = PNGCreator(data)
+    pngc.bottom_clip(make_png_name(output_path, filename, 'bottom_clip_stat'))
+    pngc.saturated_clip(make_png_name(output_path, filename, 'saturated_clip_stat'))
 
-    if stretch_switch == 'median':
-        median_output = median_scale(log_output, 25)
-        median_output_path = os.path.join(os.path.dirname(filename), 'png')
-        median_png_name = make_png_name(median_output_path, filename, 'median')            
-        make_png(median_output, median_png_name)        
+    # Create and save a full log image.
+    pngc.log(make_png_name(output_path, filename, 'log_stat'))
+    log_png_name = make_png_name(output_path, filename, 'log') 
+    pngc.save_png(log_png_name)
+
+    # Create and save the trimmed log images.
+    counter = 0
+    for xmin in range(0, 1351, 450):
+        for ymin in range(0, 901, 450):
+            counter += 1
+            pngc_trimmed = pngc.trim(xmin, xmin + 450, ymin, ymin + 450)
+            log_png_name = make_png_name(output_path, filename, 'log_' + str(counter))
+            pngc_trimmed.save_png(log_png_name)
+
+    # Create and save a full median image.
+    pngc.median(make_png_name(output_path, filename, 'median_stat'))
+    median_png_name = make_png_name(output_path, filename, 'median')   
+    pngc.save_png(median_png_name)
+
+    # Create and save the trimmed median images.
+    counter = 0
+    for xmin in range(0, 1351, 450):
+        for ymin in range(0, 901, 450):
+            counter += 1
+            pngc_trimmed = pngc.trim(xmin, xmin + 450, ymin, ymin + 450)
+            median_png_name = make_png_name(output_path, filename, 'median_' + str(counter))   
+            pngc_trimmed.save_png(median_png_name)
         
 # -----------------------------------------------------------------------------
 # For command line execution.
@@ -310,18 +345,6 @@ def parse_args():
         '-output_path',
         required = False,
         help = 'Set the path for the output. Default is the input directory.')
-    parser.add_argument(
-        '-stretch_switch',
-        required = True,
-        choices = ['log', 'median'],
-        help = 'Choose log or median.')
-    parser.add_argument(
-        '-trim',
-        required = False,
-        nargs=3, 
-        action='append',
-        default = False,
-        help = '3 ints: x center, y center, and box size.'),
     args = parser.parse_args()        
     return args
     
@@ -332,4 +355,4 @@ if __name__ == '__main__':
     file_list = glob.glob(args.filelist)
     assert file_list != [], 'run_trim found no files matching ' + args.filelist
     for filename in file_list:
-        run_trim(filename, args.output_path, args.stretch_switch, args.trim)
+        run_trim(filename, args.output_path)

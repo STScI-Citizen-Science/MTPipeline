@@ -123,7 +123,8 @@ def run_mtpipeline(root_filename, output_path = None, cr_reject_switch=True,
         else:
             print 'Running png'
             for filename in output_file_dict['drizzle_output']:
-                run_trim(filename, output_path, 'median')
+                output_path = os.path.join(os.path.dirname(filename), 'png')
+                run_trim(filename, output_path)
             print 'Done running png'
     else:
         print 'Skipping running png'
