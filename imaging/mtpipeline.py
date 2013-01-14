@@ -183,6 +183,7 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
     rootfile_list = glob.glob(args.filelist)
+    rootfile_list = [x for x in rootfile_list if len(os.path.basename(x)) == 18]
     assert rootfile_list != [], 'empty rootfile_list in mtpipeline.py.'
     for filename in rootfile_list:
         run_mtpipeline(filename, 

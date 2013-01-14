@@ -15,7 +15,7 @@ import pyfits
 import time
 
 # Custom modules
-from display_tools import *
+from display_tools import before_after
 
 # -----------------------------------------------------------------------------
 # Low-Level Functions: Image Manipulation, etc.
@@ -307,10 +307,10 @@ def run_trim(filename, output_path):
     # Itinital scaling.
     print 'Creating log PNGs'
     pngc_log = PNGCreator(data)
+    pngc_log.saturated_clip(output = make_png_name(output_path, filename, 'saturated_clip_stat'))
     pngc_log.positive(output = make_png_name(output_path, filename, 'positive_stat'))
     pngc_log.log(output = make_png_name(output_path, filename, 'log_stat'))
     pngc_log.bottom_clip(output = make_png_name(output_path, filename, 'bottom_clip_stat'))
-    pngc_log.saturated_clip(output = make_png_name(output_path, filename, 'saturated_clip_stat'))
     pngc_median = PNGCreator(pngc_log.data)
     pngc_log.compress() 
     pngc_log.save_png(make_png_name(output_path, filename, 'log'))
