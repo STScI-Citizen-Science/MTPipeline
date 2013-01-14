@@ -18,10 +18,10 @@ import time
 from display_tools import *
 
 # -----------------------------------------------------------------------------
-# Low-Level Functions
+# Low-Level Functions: Image Manipulation, etc.
 # -----------------------------------------------------------------------------
 
-def clip(input_array, clip_val, top_or_bottom, inspect=False, output=False):
+def clip(input_array, clip_val, top_or_bottom, output=False):
     '''
     Clip an input numpy array and set the clipped pixels to the 
     clipping value. Bottom clip scales pixels below the clip_val.
@@ -41,14 +41,13 @@ def clip(input_array, clip_val, top_or_bottom, inspect=False, output=False):
         index = N.where(input_array > clip_val)
     output_array = copy.deepcopy(input_array)
     output_array[index] = clip_val
-    if inspect:
+    if output != False:
         before_after(
             before_array = input_array, 
             after_array = output_array, 
             before_array_name = 'Input Data',
             after_array_name = 'Clip ' + top_or_bottom + ' at ' + str(clip_val),
-            output = output,
-            pause = False)  
+            output = output)
     return output_array
 
 # -----------------------------------------------------------------------------
@@ -75,32 +74,29 @@ def get_value_by_pixel_count(input_array, pixel_number ,top_or_bottom):
 
 # -----------------------------------------------------------------------------
 
-def log_scale(array, inspect=False, output=False):
+def log_scale(array, output=False):
     '''
     Returns the log of the input array.
     '''
     assert isinstance(array, N.ndarray), 'array must be numpy array'
-    print '\t' + time.asctime() + ' log scaling' 
     array_log = N.log(array)
-    if inspect == True:
+    if output != False:
         before_after(before_array = array, 
             after_array = array_log, 
             before_array_name = 'Input Data',
             after_array_name = 'Log',
-            output = False,
-            pause = False) 
+            output = output) 
     return array_log
         
 # -----------------------------------------------------------------------------
 
 def make_png(data, filename):
     '''
-    Use the Python image library (PIL) to write out the png file. Note 
-    that the image flux is rescaled between be between 0 and 256.
+    Use the Python image library (PIL) to write out the png file. The 
+    data is flipped in the "up-down" direction and converted to 8bit
+    encoding before writing.
     '''
     assert isinstance(data, N.ndarray), 'array must be numpy array'
-    data = data - data.min()            
-    data = (data / data.max()) * 255.
     data = N.flipud(data)
     data = N.uint8(data)
     image = Image.new('L', (data.shape[1], data.shape[0]))
@@ -120,12 +116,11 @@ def make_png_name(path, filename, ext):
     
 # -----------------------------------------------------------------------------
                     
-def median_scale(array, box, inspect=False, output=False):
+def median_scale(array, box, output=False):
     '''
     Perform a local-median subtraction (box smoothing). The box size 
     must be odd and is set by the box parameter.
     '''
-    print 'Starting the median scale.'
     assert box % 2 == 1, 'Box size must be odd.'
     assert isinstance(array, N.ndarray), 'array must be numpy array'
     output_array = N.zeros((array.shape[0], array.shape[1]))        
@@ -139,7 +134,7 @@ def median_scale(array, box, inspect=False, output=False):
             local_median = N.median(local_region)
             output_array[x, y] = copy.copy(array[x, y] - local_median)
     print 'Done with the median scale.'
-    if inspect:
+    if output != False:
         before_after(
             before_array = array, 
             after_array = output_array, 
@@ -151,7 +146,7 @@ def median_scale(array, box, inspect=False, output=False):
     
 # -----------------------------------------------------------------------------
 
-def positive(input_array, inspect=False, output=False):
+def positive(input_array, output=False):
     '''
     Shift all the pixels so there are no negative or 0 pixels. Needed 
     to prevent taken the log of negative values.
@@ -160,7 +155,7 @@ def positive(input_array, inspect=False, output=False):
     min_val = N.min(input_array)
     if min_val <= 0:
         output_array = input_array + ((min_val * -1.0) + 0.0001) 
-    if inspect:
+    if output != False:
         before_after(before_array = input_array, 
             after_array = output_array, 
             before_array_name = 'Input Data',
@@ -182,15 +177,11 @@ def subarray(array, xmin, xmax, ymin, ymax):
     assert isinstance(ymax, int), 'ymax in subarray must be an int.'    
     assert xmin < xmax, 'xmin must be stictly less than xmax.'
     assert ymin < ymax, 'ymin must be stictly less than ymax.'
-    if xmax > array.shape[0] or ymax > array.shape[1]:
-        border_array = N.zeros((max(xmax,array.shape[0]), max(ymax,array.shape[1])))
-        print xmin, xmax, ymin, ymax
-        print array.shape, border_array.shape
-        border_array[:array.shape[0], :array.shape[1]] = array
-        array = border_array
-    output_array = array[xmin:xmax, ymin:ymax]
-    assert output_array.shape[0] == xmax - xmin, 'Output shape is unexpected.'
-    assert output_array.shape[1] == ymax - ymin, 'Output shape is unexpected.' 
+    output_array = array[xmin:min(xmax,array.shape[0]), ymin:min(ymax,array.shape[1])]
+    assert output_array.shape[0] == min(xmax,array.shape[0]) - xmin, \
+        'Output shape is unexpected: ' + str(min(xmax,array.shape[0]) - xmin)
+    assert output_array.shape[1] == min(ymax,array.shape[1]) - ymin, \
+        'Output shape is unexpected: ' + str(min(ymax,array.shape[1]) - ymin)
     return output_array
 
 # -----------------------------------------------------------------------------
@@ -220,46 +211,61 @@ class PNGCreator(object):
     The PNGCreator class incorperates all the functions in the run_trim
     module to create a smoother interface for passing the numpy array 
     around and for saving the result. All manipulations are done in 
-    place, with the expection of the trim method which returns a new 
-    PNGCreator instance.
+    place. The __init__ method creates a new copy of the array, not a 
+    pointer, by using the deepcopy fucntion. In this way you can create
+    a new instance of the PNGCreator class on the self.data attribute 
+    of another class to make changes that will not affect the other 
+    class instance.
     '''
     def __init__(self, data):
         '''
         Check the input type on instantiation.
         '''
-        self.data = data
+        self.data = copy.deepcopy(data)
         assert isinstance(data, N.ndarray), 'Expected N.ndarray got ' + str(type(data))
 
-    def trim(self, xmin, xmax, ymin, ymax):
-        '''
-        Trim the self.data attribute and another instance of PNGCreator
-        for the trimmed data. This allows you to apply the save_png 
-        method to the trimmed data.
-        '''
-        return PNGCreator(subarray(self.data, xmin, xmax, ymin, ymax))
-    
-    def log(self, output=False):
-        '''
-        Transform all the data in the self.data attribute to a positive
-        value and take the log of image.
-        '''
-        self.data = positive(self.data, inspect = False, output = output)
-        self.data = log_scale(self.data, inspect = False, output = output)
-    
     def bottom_clip(self, output=False):
         '''
         Clip the bottom 10 pixels from the self.data attribute.
         '''
         bottom_value = get_value_by_pixel_count(self.data, 10, 'bottom')
-        self.data = clip(self.data, bottom_value, 'bottom', inspect = False, 
-            output = output)
+        self.data = clip(self.data, bottom_value, 'bottom', output = output)
+
+    def compress(self):
+        '''
+        Compress the range of the array to be between 0 and 256. This
+        is the range expected for the PIL call in the save_png method.
+        This method should be called on the whole image before the 
+        trimming to ensure that the trimmed images all have the same
+        stretch. 
+        '''
+        self.data = self.data - self.data.min()            
+        self.data = (self.data / self.data.max()) * 255.
+    
+    def log(self, output=False):
+        '''
+        Take the log of self.data.
+        '''
+        self.data = log_scale(self.data, output = output)
+    
+    def median(self, output=False):
+        '''
+        Take a 25x25 median box smoothing of the self.data attribute.
+        '''
+        self.data = median_scale(self.data, 25, output = output)
+
+    def positive(self, output=False):
+        '''
+        Transform all the data in the self.data attribute to a positive
+        value.
+        '''
+        self.data = positive(self.data, output = output)
     
     def saturated_clip(self, output=False):
         '''
         Clip any saturated pixels.
         '''
-        self.data = clip(self.data, 4095.0, 'top', inspect = False, 
-            output = output)
+        self.data = clip(self.data, 4095.0, 'top', output = output)
 
     def save_png(self, png_name):
         '''
@@ -267,22 +273,26 @@ class PNGCreator(object):
         '''                          
         make_png(self.data, png_name)
 
-    def median(self, output=False):
+    def trim(self, xmin, xmax, ymin, ymax):
         '''
-        Take a 25x25 median box smoothing of the self.data attribute.
+        Trim the self.data attribute.
         '''
-        self.data = median_scale(self.data, 25, output = output)
+        self.data = subarray(self.data, xmin, xmax, ymin, ymax)
 
 # -----------------------------------------------------------------------------
-# The Main Controller
+# Control Functions
 # -----------------------------------------------------------------------------
-            
+
 def run_trim(filename, output_path):
     '''
     The main controller for the png creation. Checks for and creates an
     output folder. Opens the data header extention. Uses a PNGCreator 
     instance to create trimmed and scaled pngs.
     '''
+    
+    astrodrizzle_mode = filename.split('_')[-3]
+    print astrodrizzle_mode
+
     # Make png folder if it doesn't exist.
     png_path = os.path.join(os.path.dirname(filename), 'png')
     test = os.access(png_path, os.F_OK)
@@ -295,37 +305,41 @@ def run_trim(filename, output_path):
     h.close()
     
     # Itinital scaling.
-    pngc = PNGCreator(data)
-    pngc.bottom_clip(make_png_name(output_path, filename, 'bottom_clip_stat'))
-    pngc.saturated_clip(make_png_name(output_path, filename, 'saturated_clip_stat'))
-
-    # Create and save a full log image.
-    pngc.log(make_png_name(output_path, filename, 'log_stat'))
-    log_png_name = make_png_name(output_path, filename, 'log') 
-    pngc.save_png(log_png_name)
+    print 'Creating log PNGs'
+    pngc_log = PNGCreator(data)
+    pngc_log.positive(output = make_png_name(output_path, filename, 'positive_stat'))
+    pngc_log.log(output = make_png_name(output_path, filename, 'log_stat'))
+    pngc_log.bottom_clip(output = make_png_name(output_path, filename, 'bottom_clip_stat'))
+    pngc_log.saturated_clip(output = make_png_name(output_path, filename, 'saturated_clip_stat'))
+    pngc_median = PNGCreator(pngc_log.data)
+    pngc_log.compress() 
+    pngc_log.save_png(make_png_name(output_path, filename, 'log'))
 
     # Create and save the trimmed log images.
-    counter = 0
-    for xmin in range(0, 1351, 450):
-        for ymin in range(0, 901, 450):
-            counter += 1
-            pngc_trimmed = pngc.trim(xmin, xmin + 450, ymin, ymin + 450)
-            log_png_name = make_png_name(output_path, filename, 'log_' + str(counter))
-            pngc_trimmed.save_png(log_png_name)
+    if astrodrizzle_mode == 'wide':
+        counter = 0
+        for ymin in range(0, 1351, 450):
+            for xmin in range(0, 901, 450):
+                counter += 1
+                pngc_trimmed = PNGCreator(pngc_log.data)
+                pngc_trimmed.trim(xmin, xmin + 450, ymin, ymin + 450)
+                pngc_trimmed.save_png(make_png_name(output_path, filename, 'log_' + str(counter)))
 
     # Create and save a full median image.
-    pngc.median(make_png_name(output_path, filename, 'median_stat'))
-    median_png_name = make_png_name(output_path, filename, 'median')   
-    pngc.save_png(median_png_name)
+    print 'Creating median PNGs'
+    pngc_median.median(output = make_png_name(output_path, filename, 'median_stat'))
+    pngc_median.compress()
+    pngc_median.save_png(make_png_name(output_path, filename, 'median'))
 
-    # Create and save the trimmed median images.
-    counter = 0
-    for xmin in range(0, 1351, 450):
-        for ymin in range(0, 901, 450):
-            counter += 1
-            pngc_trimmed = pngc.trim(xmin, xmin + 450, ymin, ymin + 450)
-            median_png_name = make_png_name(output_path, filename, 'median_' + str(counter))   
-            pngc_trimmed.save_png(median_png_name)
+    # Create and save the trimmed median images. Remeber to switch x and y.
+    if astrodrizzle_mode == 'wide':
+        counter = 0
+        for ymin in range(0, 1351, 450):
+            for xmin in range(0, 901, 450):
+                counter += 1
+                pngc_trimmed = PNGCreator(pngc_median.data)
+                pngc_trimmed.trim(xmin, xmin + 450, ymin, ymin + 450)
+                pngc_trimmed.save_png(make_png_name(output_path, filename, 'median_' + str(counter)))
         
 # -----------------------------------------------------------------------------
 # For command line execution.
