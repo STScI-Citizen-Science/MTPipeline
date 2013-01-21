@@ -52,6 +52,16 @@ def clip(input_array, clip_val, top_or_bottom, output=False):
 
 # -----------------------------------------------------------------------------
 
+def get_fits_data(filename, ext=0):
+    '''
+    Return the data from the extention as a numpy array.
+    '''
+    assert os.path.splitext(filename)[1] == '.fits', 'Inputs must be FITS file.'
+    data = pyfits.getdata(filename) 
+    return data
+
+# -----------------------------------------------------------------------------
+
 def get_value_by_pixel_count(input_array, pixel_number ,top_or_bottom):
     '''
     Return the value for the ith pixel from the top or bottom.
@@ -166,6 +176,32 @@ def positive(input_array, output=False):
 
 # -----------------------------------------------------------------------------
 
+def replace_by_weight(input_array, weight_array, output=False):
+    '''
+    Replace all the pixels that have a weight value of 0 with the local
+    3x3 median. A copy of the image is created so that the values of
+    the replaced pixels don't affect the medians of other pixels as 
+    they are replaced. The subarray function is used to generate the 
+    subarrays to prevent error at the array edge.
+    '''
+    assert isinstance(input_array, N.ndarray), 'array must be numpy array'
+    assert isinstance(weight_array, N.ndarray), 'array must be numpy array'
+    output_array = copy.copy(input_array)
+    saturated_indices = N.where(weight_array == 0)
+    for index in zip(saturated_indices[0], saturated_indices[1]):
+         output_array[index] = N.median(subarray(input_array, index[0] - 1, \
+            index[0] + 1, index[1] - 1, index[1] + 1))
+    if output != False:
+        before_after(before_array = input_array, 
+            after_array = output_array, 
+            before_array_name = 'Input Data',
+            after_array_name = '0-Weight Corrected',
+            output = output,
+            pause = False)  
+    return output_array
+
+# -----------------------------------------------------------------------------
+
 def subarray(array, xmin, xmax, ymin, ymax):
     '''
     Returns a subarray.
@@ -177,11 +213,12 @@ def subarray(array, xmin, xmax, ymin, ymax):
     assert isinstance(ymax, int), 'ymax in subarray must be an int.'    
     assert xmin < xmax, 'xmin must be stictly less than xmax.'
     assert ymin < ymax, 'ymin must be stictly less than ymax.'
-    output_array = array[xmin:min(xmax,array.shape[0]), ymin:min(ymax,array.shape[1])]
-    assert output_array.shape[0] == min(xmax,array.shape[0]) - xmin, \
-        'Output shape is unexpected: ' + str(min(xmax,array.shape[0]) - xmin)
-    assert output_array.shape[1] == min(ymax,array.shape[1]) - ymin, \
-        'Output shape is unexpected: ' + str(min(ymax,array.shape[1]) - ymin)
+    output_array = array[max(xmin,0):min(xmax,array.shape[0]), \
+        max(ymin,0):min(ymax,array.shape[1])]
+    assert output_array.shape[0] == min(xmax,array.shape[0]) - max(xmin,0), \
+        'Output shape is unexpected: ' + str(min(xmax,array.shape[0]) - max(xmin,0))
+    assert output_array.shape[1] == min(ymax,array.shape[1]) - max(ymin,0), \
+        'Output shape is unexpected: ' + str(min(ymax,array.shape[1]) - max(ymin,0))
     return output_array
 
 # -----------------------------------------------------------------------------
@@ -261,11 +298,13 @@ class PNGCreator(object):
         '''
         self.data = positive(self.data, output = output)
     
-    def saturated_clip(self, output=False):
+    def saturated_clip(self, weight_data, output=False):
         '''
-        Clip any saturated pixels.
+        Replace any pixels with a weight of 0 with the local 3x3 
+        median.
         '''
-        self.data = clip(self.data, 4095.0, 'top', output = output)
+        self.data = replace_by_weight(self.data, weight_data, 
+            output = output)
 
     def save_png(self, png_name):
         '''
@@ -283,7 +322,7 @@ class PNGCreator(object):
 # Control Functions
 # -----------------------------------------------------------------------------
 
-def run_trim(filename, output_path):
+def run_trim(filename, weight_file, output_path):
     '''
     The main controller for the png creation. Checks for and creates an
     output folder. Opens the data header extention. Uses a PNGCreator 
@@ -300,14 +339,14 @@ def run_trim(filename, output_path):
         os.mkdir(png_path)
 
     # Get the data.
-    h = pyfits.open(filename) 
-    data = h[0].data
-    h.close()
+    data = get_fits_data(filename)
+    weight_data = get_fits_data(weight_file) 
     
     # Itinital scaling.
     print 'Creating log PNGs'
     pngc_log = PNGCreator(data)
-    pngc_log.saturated_clip(output = make_png_name(output_path, filename, 'saturated_clip_stat'))
+    pngc_log.saturated_clip(weight_data, \
+        output = make_png_name(output_path, filename, 'saturated_clip_stat'))
     pngc_log.positive(output = make_png_name(output_path, filename, 'positive_stat'))
     pngc_log.log(output = make_png_name(output_path, filename, 'log_stat'))
     pngc_log.bottom_clip(output = make_png_name(output_path, filename, 'bottom_clip_stat'))

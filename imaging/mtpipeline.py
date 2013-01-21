@@ -53,6 +53,7 @@ def make_output_file_dict(filename):
     output_file_dict['cr_reject_output'] = []
     output_file_dict['drizzle_output'] = []
     output_file_dict['png_output'] = []
+    output_file_dict['drizzle_weight'] = []
     path, basename = os.path.split(filename)
     basename = basename.split('_')[0]
     
@@ -66,6 +67,9 @@ def make_output_file_dict(filename):
         for drz in ['_wide_single_sci.fits', '_center_single_sci.fits']:
             filename = os.path.join(path, basename + cr + drz)
             output_file_dict['drizzle_output'].append(filename)
+        for drz in ['_wide_single_wht.fits', '_center_single_wht.fits']:
+            filename = os.path.join(path, basename + cr + drz)
+            output_file_dict['drizzle_weight'].append(filename)
 
     # PNG outputs.
     for cr in ['_c0m','_cr_c0m']:
@@ -122,9 +126,10 @@ def run_mtpipeline(root_filename, output_path = None, cr_reject_switch=True,
             print 'Not reprocessing png files.'
         else:
             print 'Running png'
-            for filename in output_file_dict['drizzle_output']:
+            for filename, weight_file in zip(output_file_dict['drizzle_output'], \
+                    output_file_dict['drizzle_weight']):
                 output_path = os.path.join(os.path.dirname(filename), 'png')
-                run_trim(filename, output_path)
+                run_trim(filename, weight_file, output_path)
             print 'Done running png'
     else:
         print 'Skipping running png'

@@ -13,7 +13,30 @@ def make_desired_result():
     '''
     Generated the dictionary of expected results.
     '''
-    desired_result = make_output_file_dict('test_path/u2eu0101f_c0m.fits')
+    desired_result = {}
+    desired_result['input_file'] = 'test_path/u2eu0101f_c0m.fits'
+    cr_reject_list = ['test_path/u2eu0101f_c0m.fits', 
+        'test_path/u2eu0101f_cr_c0m.fits']
+    desired_result['cr_reject_output'] = cr_reject_list
+    drizzle_list = ['test_path/u2eu0101f_c0m_wide_single_sci.fits', 
+        'test_path/u2eu0101f_c0m_center_single_sci.fits',
+        'test_path/u2eu0101f_cr_c0m_wide_single_sci.fits', 
+        'test_path/u2eu0101f_cr_c0m_center_single_sci.fits']
+    desired_result['drizzle_output'] = drizzle_list
+    drizzle_weight_list = ['test_path/u2eu0101f_c0m_wide_single_wht.fits', 
+        'test_path/u2eu0101f_c0m_center_single_wht.fits',
+        'test_path/u2eu0101f_cr_c0m_wide_single_wht.fits', 
+        'test_path/u2eu0101f_cr_c0m_center_single_wht.fits']
+    desired_result['drizzle_weight'] = drizzle_weight_list
+    png_output_list = ['test_path/u2eu0101f_c0m_wide_single_sci_log.png', 
+        'test_path/u2eu0101f_c0m_center_single_sci_log.png',
+        'test_path/u2eu0101f_cr_c0m_wide_single_sci_log.png', 
+        'test_path/u2eu0101f_cr_c0m_center_single_sci_log.png',
+        'test_path/u2eu0101f_c0m_wide_single_sci_median.png', 
+        'test_path/u2eu0101f_c0m_center_single_sci_median.png',
+        'test_path/u2eu0101f_cr_c0m_wide_single_sci_median.png', 
+        'test_path/u2eu0101f_cr_c0m_center_single_sci_median.png']
+    desired_result['png_output'] = png_output_list
     return desired_result
 
 
@@ -22,26 +45,23 @@ def make_output_file_dict_test():
     Test the make_output_file_dict function. First generate the test 
     dictionary, then a dictionary of expected results, and finally
     compare them.
+
+    Comparing is done by first checking that both dicts have the same
+    keys. To avoid the issue of the lists in each value being in 
+    a different order they are first compared in length and then a set
+    object constructed from each dict value is compared. 
     '''
     # Generate the dictionaries.
     test_result = make_output_file_dict('test_path/u2eu0101f_c0m.fits')
     desired_result = make_desired_result()
-
-    # Compare the input_file keys.
-    assert desired_result['input_file'] == test_result['input_file'], \
-        '\nExpected: ' + desired_result['input_file'] + '\nGot:' + test_result['input_file']
-    
-    # Compare the cr_rejected keys.
-    for desired_item, test_item in \
-            zip(desired_result['cr_reject_output'], test_result['cr_reject_output']): 
-        assert desired_item == test_item, \
-            '\nExpected: ' + str(desired_item) + '\nGot: ' + str(test_item)
-    
-    # Compare for drizzled_outputs.
-    for desired_item, test_item in \
-            zip(desired_result['drizzle_output'], test_result['drizzle_output']):
-        assert desired_item == test_item, \
-            '\nExpected: ' + str(desired_item) + '\nGot: ' + str(test_item)
+    assert test_result.keys() == desired_result.keys(), \
+        'Dict keys are not the same: ' + str(test_result.keys()) + ' ' + \
+            str(desired_result.keys())
+    for key in desired_result.keys():
+        assert len(desired_result) == len(test_result), \
+            'Dict values are not the same lenght'
+        assert set(desired_result[key]) == set(test_result[key]), \
+            'Sets of the dict values are not the same.'
 
 
 class TestCheckForOutputs(object):
