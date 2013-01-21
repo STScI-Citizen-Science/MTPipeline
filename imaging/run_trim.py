@@ -164,7 +164,9 @@ def positive(input_array, output=False):
     assert isinstance(input_array, N.ndarray), 'array must be numpy array'
     min_val = N.min(input_array)
     if min_val <= 0:
-        output_array = input_array + ((min_val * -1.0) + 0.0001) 
+        output_array = input_array + ((min_val * -1.0) + 0.0001)
+    else:
+        output_array = input_array 
     if output != False:
         before_after(before_array = input_array, 
             after_array = output_array, 
