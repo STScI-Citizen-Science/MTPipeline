@@ -183,6 +183,10 @@ def replace_by_weight(input_array, weight_array, output=False):
     the replaced pixels don't affect the medians of other pixels as 
     they are replaced. The subarray function is used to generate the 
     subarrays to prevent error at the array edge.
+
+    The indices are set keeping in mind that a[0:2,0:2] returns a 2x2 
+    array while a[0:3,0:3] returns a 3x3 array. Both arrays are 
+    centered on (1,1).
     '''
     assert isinstance(input_array, N.ndarray), 'array must be numpy array'
     assert isinstance(weight_array, N.ndarray), 'array must be numpy array'
@@ -190,7 +194,7 @@ def replace_by_weight(input_array, weight_array, output=False):
     saturated_indices = N.where(weight_array == 0)
     for index in zip(saturated_indices[0], saturated_indices[1]):
          output_array[index] = N.median(subarray(input_array, index[0] - 1, \
-            index[0] + 1, index[1] - 1, index[1] + 1))
+            index[0] + 2, index[1] - 1, index[1] + 2))
     if output != False:
         before_after(before_array = input_array, 
             after_array = output_array, 
@@ -322,13 +326,32 @@ class PNGCreator(object):
 # Control Functions
 # -----------------------------------------------------------------------------
 
+def make_subimage_pngs(input_pngc_instance, output_path, filename, suffix):
+    '''
+    Wrapper function to make trimmed png outputs for the astrodrizzle 
+    'wide' outputs.
+    '''
+    assert isinstance(output_path, str), 'Expected str got ' + str(type(output_path))
+    assert isinstance(filename, str), 'Expected str got ' + str(type(filename))
+    assert isinstance(suffix, str), 'Expected str got ' + str(type(suffix))
+    assert isinstance(input_pngc_instance, PNGCreator), \
+        'Expected instnace of PNGCreator, got ' + str(type(input_pngc_instance))
+    counter = 0
+    for ymin in range(0, 1351, 450):
+        for xmin in range(0, 901, 450):
+            counter += 1
+            pngc_trimmed = PNGCreator(input_pngc_instance.data)
+            pngc_trimmed.trim(xmin, xmin + 450, ymin, ymin + 450)
+            pngc_trimmed.save_png(make_png_name(output_path, filename, suffix + str(counter)))
+
+# -----------------------------------------------------------------------------
+
 def run_trim(filename, weight_file, output_path):
     '''
     The main controller for the png creation. Checks for and creates an
     output folder. Opens the data header extention. Uses a PNGCreator 
     instance to create trimmed and scaled pngs.
     '''
-    
     astrodrizzle_mode = filename.split('_')[-3]
     print astrodrizzle_mode
 
@@ -342,11 +365,21 @@ def run_trim(filename, weight_file, output_path):
     data = get_fits_data(filename)
     weight_data = get_fits_data(weight_file) 
     
-    # Itinital scaling.
-    print 'Creating log PNGs'
-    pngc_log = PNGCreator(data)
-    pngc_log.saturated_clip(weight_data, \
+    # Create Linear full image
+    print 'Creating linear PNGs'
+    pngc_linear = PNGCreator(data)
+    pngc_linear.saturated_clip(weight_data, \
         output = make_png_name(output_path, filename, 'saturated_clip_stat'))
+    pngc_log = PNGCreator(pngc_linear.data)
+    pngc_linear.compress()
+    pngc_linear.save_png(make_png_name(output_path, filename, 'linear'))
+
+    # Create and save the trimmed linear images.
+    if astrodrizzle_mode == 'wide':
+        make_subimage_pngs(pngc_linear, output_path, filename, 'linear_')
+
+    # Create Log full Image
+    print 'Creating log PNGs'
     pngc_log.positive(output = make_png_name(output_path, filename, 'positive_stat'))
     pngc_log.log(output = make_png_name(output_path, filename, 'log_stat'))
     pngc_log.bottom_clip(output = make_png_name(output_path, filename, 'bottom_clip_stat'))
@@ -356,29 +389,19 @@ def run_trim(filename, weight_file, output_path):
 
     # Create and save the trimmed log images.
     if astrodrizzle_mode == 'wide':
-        counter = 0
-        for ymin in range(0, 1351, 450):
-            for xmin in range(0, 901, 450):
-                counter += 1
-                pngc_trimmed = PNGCreator(pngc_log.data)
-                pngc_trimmed.trim(xmin, xmin + 450, ymin, ymin + 450)
-                pngc_trimmed.save_png(make_png_name(output_path, filename, 'log_' + str(counter)))
+        make_subimage_pngs(pngc_log, output_path, filename, 'log_')
 
     # Create and save a full median image.
-    print 'Creating median PNGs'
-    pngc_median.median(output = make_png_name(output_path, filename, 'median_stat'))
-    pngc_median.compress()
-    pngc_median.save_png(make_png_name(output_path, filename, 'median'))
+    median_switch = False
+    if median_switch:
+        print 'Creating median PNGs'
+        pngc_median.median(output = make_png_name(output_path, filename, 'median_stat'))
+        pngc_median.compress()
+        pngc_median.save_png(make_png_name(output_path, filename, 'median'))
 
-    # Create and save the trimmed median images. Remeber to switch x and y.
-    if astrodrizzle_mode == 'wide':
-        counter = 0
-        for ymin in range(0, 1351, 450):
-            for xmin in range(0, 901, 450):
-                counter += 1
-                pngc_trimmed = PNGCreator(pngc_median.data)
-                pngc_trimmed.trim(xmin, xmin + 450, ymin, ymin + 450)
-                pngc_trimmed.save_png(make_png_name(output_path, filename, 'median_' + str(counter)))
+        # Create and save the trimmed median images. Remeber to switch x and y.
+        if astrodrizzle_mode == 'wide':
+            make_subimage_pngs(pngc_log, output_path, filename, 'median_')
         
 # -----------------------------------------------------------------------------
 # For command line execution.
