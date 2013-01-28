@@ -27,8 +27,26 @@ def loadConnection(connection_string):
 
 # Breifly open a database connection to get the arguments needed for 
 # autoloading.
-session, Base = loadConnection('mysql://root@localhost/mtpipeline')
+session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
 session.close()
+
+
+class Finders(Base):
+    '''
+    Class for interacting with the master_images MySQL table. 
+    Subclasses the Base class for the SQLAlchemy declarative base.
+    '''
+    __tablename__ = 'finders'
+    __table_args__ = {'autoload':True}
+
+
+class MasterFinders(Base):
+    '''
+    Class for interacting with the master_finders MySQL table.
+    '''
+    __tablename__ = 'master_finders'
+    __table_args__ = {'autoload':True}
+    
 
 class MasterImages(Base):
     '''
@@ -67,11 +85,5 @@ class MasterImages(Base):
         self.pixel_resolution = 0.05 #arcsec / pix
         self.description = pyfits.getval(fits_file, 'FILTNAM1')
         self.file_location = png_path
- 
-class Finders(Base):
-    '''
-    Class for interacting with the master_images MySQL table. 
-    Subclasses the Base class for the SQLAlchemy declarative base.
-    '''
-    __tablename__ = 'finders'
-    __table_args__ = {'autoload':True}
+
+

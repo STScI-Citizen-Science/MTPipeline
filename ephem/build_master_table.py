@@ -8,7 +8,7 @@ import pyfits
 from database_interface import loadConnection
 from database_interface import MasterImages
 
-session, Base = loadConnection('mysql://root@localhost/mtpipeline')
+session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
 
 #----------------------------------------------------------------------------
 
@@ -25,7 +25,7 @@ def get_fits_file(png_file):
     fits_name = os.path.splitext(png_name)[0]
     if fits_name[-4:] == '_log':
         fits_name = fits_name[:-4] + '.fits'
-    elif fits_name[-7:] == '_median':
+    elif fits_name[-7:] in ['_median', '_linear']:
         fits_name = fits_name[:-7] + '.fits'
     fits_file = os.path.join(fits_path, fits_name)
     assert os.path.splitext(fits_file)[1] == '.fits', 'unexpected output.'

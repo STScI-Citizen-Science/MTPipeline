@@ -7,10 +7,13 @@ import pickle
 from database_interface import loadConnection
 from ephem import *
 
+from build_master_table import get_fits_file
+
 session, Base = loadConnection('mysql://root@localhost/mtpipeline')
 
 from database_interface import Finders
 from database_interface import MasterImages
+from database_interface import MasterFinders
 
 #----------------------------------------------------------------------------
 # For command line execution
@@ -40,13 +43,14 @@ if __name__ == '__main__':
 
         moon_dict = main(filename)
         for moon in moon_dict.keys():
-            record = Finders()
+            record = MasterFinders()
             record.object_name = moon
             record.x = moon_dict[moon]['delta_x']
             record.y = moon_dict[moon]['delta_y']
             session.add(record)
 
-        for record in session.query(Finders):
+        for record in session.query(MasterFinders):
             print record.object_name, record.x, record.y
 
     session.commit()
+    session.close()
