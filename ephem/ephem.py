@@ -27,6 +27,7 @@ def get_header_info(filename):
     '''
     Gets the header info from the FITS file. 
     '''
+    assert os.path.splitext(filename)[1] == '.fits', 'Expected .fits got ' + filename
     output = {}
     output['targname'] = pyfits.getval(filename, 'targname').lower().split('-')[0]
     output['date_obs'] = pyfits.getval(filename, 'date-obs')
@@ -144,7 +145,7 @@ def trim_data(data):
 # The main controller.
 #----------------------------------------------------------------------------
 
-def main(filename):
+def ephem_main(filename):
     '''
     '''
     file_dict = get_header_info(os.path.abspath(filename))

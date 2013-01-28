@@ -2,14 +2,15 @@
 
 import argparse
 import glob
+import os
 import pickle
 
 from database_interface import loadConnection
-from ephem import *
+from ephem import ephem_main
 
 from build_master_table import get_fits_file
 
-session, Base = loadConnection('mysql://root@localhost/mtpipeline')
+session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
 
 from database_interface import Finders
 from database_interface import MasterImages
@@ -39,18 +40,20 @@ if __name__ == '__main__':
     file_list = glob.glob(args.filelist)
     for filename in file_list:
 
-        #session.query(MasterImages).filter()
+        query = session.query(MasterImages).filter(MasterImages.fits_file == os.path.basename(filename)).one()
 
-        moon_dict = main(filename)
+        moon_dict = ephem_main(filename)
         for moon in moon_dict.keys():
+
+            print moon_dict[moon]
+
             record = MasterFinders()
             record.object_name = moon
-            record.x = moon_dict[moon]['delta_x']
-            record.y = moon_dict[moon]['delta_y']
+            record.delta_x = float(moon_dict[moon]['delta_x'])
+            record.delta_y = float(moon_dict[moon]['delta_y'])
+            record.master_images_id = query.id
             session.add(record)
 
-        for record in session.query(MasterFinders):
-            print record.object_name, record.x, record.y
+            session.commit()
 
-    session.commit()
     session.close()
