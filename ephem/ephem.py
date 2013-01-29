@@ -98,7 +98,7 @@ def telnet_session(command_list, verbose=False):
         print output
     for command in command_list:
         tn.write(command + '\r\n')
-        output = tn.read_until('] :', timeout = 2)
+        output = tn.read_until('] :', timeout = 5)
         if command == '1,2,3,4':     
             data = output
         if verbose:
@@ -160,7 +160,6 @@ def ephem_main(filename):
             '1m', 'y','1,2,3,4', 'n']
         data = telnet_session(command_list, verbose=True)
         data_dict = trim_data(data)
-        #print data_dict 
         file_dict.update(data_dict)
         moon_dict[moon]['delta_x'], moon_dict[moon]['delta_y'] = jpl_to_pixels(file_dict)
 
