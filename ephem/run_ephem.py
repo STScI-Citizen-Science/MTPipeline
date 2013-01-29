@@ -40,20 +40,25 @@ if __name__ == '__main__':
     file_list = glob.glob(args.filelist)
     for filename in file_list:
 
-        query = session.query(MasterImages).filter(MasterImages.fits_file == os.path.basename(filename)).one()
+        master_images_query = session.query(MasterImages).filter(\
+            MasterImages.fits_file == os.path.basename(filename)).one()
 
-        moon_dict = ephem_main(filename)
-        for moon in moon_dict.keys():
+        master_finder_query = session.query(MasterFinders).filter(\
+            MasterFinders.master_images_id == master_images_query.id).count()
 
-            print moon_dict[moon]
+        if master_finder_query == 0:
+            moon_dict = ephem_main(filename)
+            for moon in moon_dict.keys():
 
-            record = MasterFinders()
-            record.object_name = moon
-            record.delta_x = float(moon_dict[moon]['delta_x'])
-            record.delta_y = float(moon_dict[moon]['delta_y'])
-            record.master_images_id = query.id
-            session.add(record)
+                print moon_dict[moon]
 
-            session.commit()
+                record = MasterFinders()
+                record.object_name = moon
+                record.delta_x = float(moon_dict[moon]['delta_x'])
+                record.delta_y = float(moon_dict[moon]['delta_y'])
+                record.master_images_id = master_images_query.id
+                session.add(record)
+
+                session.commit()
 
     session.close()
