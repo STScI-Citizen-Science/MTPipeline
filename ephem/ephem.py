@@ -158,7 +158,9 @@ def ephem_main(filename):
             file_dict['horizons_start_time'],
             file_dict['horizons_end_time'],
             '1m', 'y','1,2,3,4', 'n']
-        data = telnet_session(command_list, verbose=True)
+        data = None
+        while data == None:
+            data = telnet_session(command_list, verbose=True)
         data_dict = trim_data(data)
         file_dict.update(data_dict)
         moon_dict[moon]['delta_x'], moon_dict[moon]['delta_y'] = jpl_to_pixels(file_dict)
