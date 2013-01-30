@@ -65,7 +65,7 @@ if __name__ == '__main__':
         png_path, png_name = os.path. os.path.split(os.path.abspath(png_file))
         if args.rebuild == False:
             query = session.query(MasterImages.name).filter(MasterImages.name == png_name)
-            if len(query.all()) == 0:
+            if query.count() == 0:
                 record = MasterImages()
                 record.load(png_file, fits_file)
                 session.add(record)
@@ -73,5 +73,5 @@ if __name__ == '__main__':
             record = MasterImages()
             records.load(png_file, fits_file)
             session.add(record)           
-
-    session.commit()
+        session.commit()
+    session.close()

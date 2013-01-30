@@ -56,6 +56,8 @@ if __name__ == '__main__':
                 record.object_name = moon
                 record.delta_x = float(moon_dict[moon]['delta_x'])
                 record.delta_y = float(moon_dict[moon]['delta_y'])
+                record.ephem_x = int(moon_dict[moon]['ephem_x'])
+                record.ephem_y = int(moon_dict[moon]['ephem_y'])
                 record.master_images_id = master_images_query.id
                 session.add(record)
 

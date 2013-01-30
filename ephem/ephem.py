@@ -8,6 +8,35 @@ import telnetlib
 
 # ----------------------------------------------------------------------------
 
+def calc_ephem(file_dict):
+    '''
+    Calculate the x and y position of the ephemeris in detector
+    coordinates.
+    '''
+    assert type(file_dict) == dict, 'Expected dict type got ' + str(type(file_dict))
+    ephem_x = file_dict['targ_x'] + file_dict['delta_x']
+    ephem_y= file_dict['targ_y'] + file_dict['delta_y']    
+    return ephem_x, ephem_y
+
+# ----------------------------------------------------------------------------
+
+def calc_targ(file_dict):
+    '''
+    Calculate the x and y positions of the target in detector 
+    coordinates.
+    '''
+    assert type(file_dict) == dict, 'Expected dict type got ' + str(type(file_dict))
+    refpic_pointing = coords.Degrees(
+        (file_dict['CRVAL1'], file_dict['CRVAL2']))
+    file_dict['CRVAL1'], file_dict['CRVAL2'] = refpic_pointing.a1, refpic_pointing.a2
+    delta_x = (file_dict['ra_targ'] - file_dict['CRVAL1']) * (3600. / 0.05)
+    delta_y = (file_dict['dec_targ'] - file_dict['CRVAL2']) * (3600. / 0.05)
+    targ_x = file_dict['CRPIX1'] + delta_x
+    targ_y = file_dict['CRPIX2'] + delta_y
+    return targ_x, targ_y
+
+# ----------------------------------------------------------------------------
+
 def convert_datetime(header_dict):
     '''
     Builds a datetime object from header keywords and returns a 
@@ -25,16 +54,20 @@ def convert_datetime(header_dict):
 
 def get_header_info(filename):
     '''
-    Gets the header info from the FITS file. 
+    Gets the header info from the FITS file. Checks to ensure that the 
+    target name, after string parsing, matches a known planet name.
     '''
     assert os.path.splitext(filename)[1] == '.fits', 'Expected .fits got ' + filename
     output = {}
     output['targname'] = pyfits.getval(filename, 'targname').lower().split('-')[0]
     output['date_obs'] = pyfits.getval(filename, 'date-obs')
     output['time_obs'] = pyfits.getval(filename, 'time-obs')
-    output['ra_targ']  = pyfits.getval(filename,  'ra_targ')
+    output['ra_targ']  = pyfits.getval(filename, 'ra_targ')
     output['dec_targ'] = pyfits.getval(filename, 'dec_targ')
-
+    output['CRVAL1']   = pyfits.getval(filename, 'CRVAL1')
+    output['CRVAL2']   = pyfits.getval(filename, 'CRVAL2')
+    output['CRPIX1']   = pyfits.getval(filename, 'CRPIX1')
+    output['CRPIX2']   = pyfits.getval(filename, 'CRPIX2')
     planet_list = ['mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto']
     error = 'Header TARGNAME not in planet_list'
     assert output['targname'] in planet_list, error
@@ -49,15 +82,14 @@ def jpl_to_pixels(file_dict):
     '''
     jpl_pos = coords.Hmsdms(
         file_dict['jpl_ra'] + ' ' + file_dict['jpl_dec'])
+    file_dict['jpl_ra'], file_dict['jpl_dec'] = jpl_pos._calcinternal()
+    
     hst_pointing = coords.Degrees(
         (file_dict['ra_targ'], file_dict['dec_targ']))
-
-    file_dict['jpl_ra'], file_dict['jpl_dec'] = jpl_pos._calcinternal()
     file_dict['ra_targ'], file_dict['dec_targ'] = hst_pointing.a1, hst_pointing.a2
 
     delta_x = (file_dict['ra_targ'] - file_dict['jpl_ra']) * (3600. / 0.05)
     delta_y = (file_dict['dec_targ'] - file_dict['jpl_dec']) * (3600. / 0.05)
-
     return delta_x, delta_y
 
 # ----------------------------------------------------------------------------
@@ -147,11 +179,11 @@ def trim_data(data):
 
 def ephem_main(filename):
     '''
+    The main controller for the ephem.py module. 
     '''
     file_dict = get_header_info(os.path.abspath(filename))
     file_dict = convert_datetime(file_dict)
     moon_dict = make_moon_dict('planets_and_moons.txt', file_dict)
-
     for moon in moon_dict.keys():
         command_list = [moon_dict[moon]['id'],
             'e', 'o', 'geo',
@@ -164,5 +196,6 @@ def ephem_main(filename):
         data_dict = trim_data(data)
         file_dict.update(data_dict)
         moon_dict[moon]['delta_x'], moon_dict[moon]['delta_y'] = jpl_to_pixels(file_dict)
-
+        moon_dict[moon]['targ_x'], moon_dict[moon]['targ_y'] = calc_targ(file_dict)
+        moon_dict[moon]['ephem_x'], moon_dict[moon]['ephem_y'] = calc_ephem(moon_dict[moon])
     return moon_dict
