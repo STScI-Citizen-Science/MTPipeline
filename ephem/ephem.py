@@ -80,6 +80,7 @@ def jpl_to_pixels(file_dict):
     Take the RA and Dec returned by JPL Horizons and return pixel 
     coordinates on the image.
     '''
+    assert isinstance(file_dict, dict), 'Expected dict got ' + str(type(file_dict))
     jpl_pos = coords.Hmsdms(
         file_dict['jpl_ra'] + ' ' + file_dict['jpl_dec'])
     file_dict['jpl_ra'], file_dict['jpl_dec'] = jpl_pos._calcinternal()
@@ -90,13 +91,16 @@ def jpl_to_pixels(file_dict):
 
     delta_x = (file_dict['ra_targ'] - file_dict['jpl_ra']) * (3600. / 0.05)
     delta_y = (file_dict['dec_targ'] - file_dict['jpl_dec']) * (3600. / 0.05)
+    assert isinstance(delta_x, float), 'Expected dict got ' + str(type(delta_x))
+    assert isinstance(delta_y, float), 'Expected dict got ' + str(type(delta_y))
     return delta_x, delta_y
 
 # ----------------------------------------------------------------------------
 
 def make_moon_dict(filename, file_dict):
     '''
-    Parses the text file for id numbers of the moons.
+    Parses the text file for id numbers of the moons and the planet. 
+    Returns a dict.
     '''
     path_to_code = os.path.dirname(__file__)
     f = open(os.path.join(path_to_code, 'planets_and_moons.txt'))
@@ -109,7 +113,6 @@ def make_moon_dict(filename, file_dict):
         line = line.strip().split()
         if line != [] and line[-1] == file_dict['targname']:
             moon_switch = True
-            continue
         if moon_switch:
             if line != []:
                 moon_dict[line[1]] = {'id': line[0]}
@@ -142,7 +145,7 @@ def telnet_session(command_list, verbose=False):
 
 def trim_data(data):
     '''
-    Grab the relevent information from the telnet output.
+    Grab the relevant information from the telnet output.
     '''
     section = 0
     output = {}

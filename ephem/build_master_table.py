@@ -51,7 +51,7 @@ def parse_args():
         action='store_true',        
         default = False,
         dest = 'rebuild',
-        help = 'Toggle off the scaling step.')
+        help = 'Overwrite existing entries.')
     args = parser.parse_args()
     return args
 

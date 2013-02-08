@@ -163,7 +163,7 @@
 726 mab                         
 727 cupid   
   
-899 neptune                 
+899 neptune         
 801 triton               
 802 nereid                  
 803 naiad                   
