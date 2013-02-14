@@ -57,7 +57,8 @@ class EphemPlot(object):
             MasterImages.name == os.path.basename(self.filename)).one()
         master_finders_query = session.query(MasterFinders).filter(\
             MasterFinders.master_images_id == master_images_query.id).count()
-        assert master_finders_query != 0, 'No record found in master_finders_query'
+        assert master_finders_query != 0, \
+            'No record found in master_finders_query'
         master_finders_query = session.query(MasterFinders).filter(\
             MasterFinders.master_images_id == master_images_query.id).all()
         self.master_finders_query = master_finders_query
@@ -73,10 +74,15 @@ class EphemPlot(object):
         ax1.set_xlim(ax1.get_xlim())
         ax1.set_ylim(ax1.get_ylim())
         for moon in self.master_finders_query:
-            ax1.plot(moon.ephem_x, moon.ephem_y, 'ro', markersize=10, markerfacecolor='none')
-            ax1.text(moon.ephem_x, moon.ephem_y, moon.object_name)
-        ax1.plot(self.crpix2, self.crpix1, 'ro', markersize=10, markerfacecolor='none')
-        ax1.text(self.crpix2, self.crpix1, 'CRPIX: (' + str(self.crpix2) + ',' + str(self.crpix1) + ')')
+            ax1.plot(moon.ephem_x, moon.ephem_y, 'o', markersize = 10, 
+                markerfacecolor = 'none', markeredgecolor = 'white')
+            ax1.text(moon.ephem_x, moon.ephem_y, moon.object_name, 
+                color = 'white')
+        ax1.plot(self.crpix2, self.crpix1, 'o', markersize = 10, 
+            markerfacecolor = 'none', markeredgecolor = 'white')
+        ax1.text(self.crpix2, self.crpix1, 
+            'CRPIX: (' + str(self.crpix2) + ',' + str(self.crpix1) + ')', 
+            color = 'white')
         ax1.set_title(os.path.basename(self.filename))
         plt.draw()
         plt.grid(True)

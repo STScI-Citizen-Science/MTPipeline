@@ -8,59 +8,47 @@ import telnetlib
 
 # ----------------------------------------------------------------------------
 
-def calc_delta(file_dict):
+def calc_delta(file_dict, data_dict):
     '''
     Find the difference between the JPL coordinates at the HST 
     reference pixel coordinates. Perform the difference in degrees and 
     return the result in pixels.
     '''
-    assert isinstance(file_dict, dict), 'Expected dict got ' + str(type(file_dict))
+    assert isinstance(file_dict, dict), 'Expected dict got ' + \
+        str(type(file_dict))
     
-    # Get the JPL coordinates in degrees
+    # Convert the JPL coordinates to coords instances in degrees.
     jpl_pos = coords.Hmsdms(
-        file_dict['jpl_ra'] + ' ' + file_dict['jpl_dec'])
-    file_dict['jpl_ra'], file_dict['jpl_dec'] = jpl_pos._calcinternal()
+        data_dict['jpl_ra'] + ' ' + data_dict['jpl_dec'])
+    data_dict['jpl_ra'], data_dict['jpl_dec'] = jpl_pos._calcinternal()
     
-    # Get the HST coordinates in degrees
-    hst_pointing = coords.Degrees(
-        (file_dict['ra_targ'], file_dict['dec_targ']))
-    file_dict['ra_targ'], file_dict['dec_targ'] = hst_pointing.a1, hst_pointing.a2
+    # Convert the HST reference pixel coordinates to coords instances 
+    # in degrees.
+    refpic_pointing = coords.Degrees(
+        (file_dict['CRVAL1'], file_dict['CRVAL2']))
+    file_dict['CRVAL1'], file_dict['CRVAL2'] = refpic_pointing.a1, \
+        refpic_pointing.a2
 
     # Take the difference and convert to pixels.
-    delta_x = (file_dict['ra_targ'] - file_dict['jpl_ra']) * (3600. / 0.05)
-    delta_y = (file_dict['dec_targ'] - file_dict['jpl_dec']) * (3600. / 0.05)
-    assert isinstance(delta_x, float), 'Expected dict got ' + str(type(delta_x))
-    assert isinstance(delta_y, float), 'Expected dict got ' + str(type(delta_y))
+    delta_x = (data_dict['jpl_ra'] - file_dict['CRVAL1']) * (3600. / 0.05)
+    delta_y = (data_dict['jpl_dec']- file_dict['CRVAL2']) * (3600. / 0.05)
+    assert isinstance(delta_x, float), \
+        'Expected dict got ' + str(type(delta_x))
+    assert isinstance(delta_y, float), \
+        'Expected dict got ' + str(type(delta_y))
     return delta_x, delta_y
 
 # ----------------------------------------------------------------------------
 
-def calc_ephem(file_dict):
+def calc_pixel_position(file_dict, moon_dict):
     '''
     Calculate the x and y position of the ephemeris in detector
     coordinates.
     '''
     assert type(file_dict) == dict, 'Expected dict type got ' + str(type(file_dict))
-    ephem_x = file_dict['targ_x'] + file_dict['delta_x']
-    ephem_y= file_dict['targ_y'] + file_dict['delta_y']    
+    ephem_x = file_dict['CRPIX1'] + moon_dict['delta_x']
+    ephem_y= file_dict['CRPIX2'] + moon_dict['delta_y']    
     return ephem_x, ephem_y
-
-# ----------------------------------------------------------------------------
-
-def calc_targ(file_dict):
-    '''
-    Calculate the x and y positions of the target in detector 
-    coordinates.
-    '''
-    assert type(file_dict) == dict, 'Expected dict type got ' + str(type(file_dict))
-    refpic_pointing = coords.Degrees(
-        (file_dict['CRVAL1'], file_dict['CRVAL2']))
-    file_dict['CRVAL1'], file_dict['CRVAL2'] = refpic_pointing.a1, refpic_pointing.a2
-    delta_x = (file_dict['ra_targ'] - file_dict['CRVAL1']) * (3600. / 0.05)
-    delta_y = (file_dict['dec_targ'] - file_dict['CRVAL2']) * (3600. / 0.05)
-    targ_x = file_dict['CRPIX1'] + delta_x
-    targ_y = file_dict['CRPIX2'] + delta_y
-    return targ_x, targ_y
 
 # ----------------------------------------------------------------------------
 
@@ -84,7 +72,8 @@ def get_header_info(filename):
     Gets the header info from the FITS file. Checks to ensure that the 
     target name, after string parsing, matches a known planet name.
     '''
-    assert os.path.splitext(filename)[1] == '.fits', 'Expected .fits got ' + filename
+    assert os.path.splitext(filename)[1] == '.fits', \
+        'Expected .fits got ' + filename
     output = {}
     output['targname'] = pyfits.getval(filename, 'targname').lower().split('-')[0]
     output['date_obs'] = pyfits.getval(filename, 'date-obs')
@@ -96,8 +85,8 @@ def get_header_info(filename):
     output['CRPIX1']   = pyfits.getval(filename, 'CRPIX1')
     output['CRPIX2']   = pyfits.getval(filename, 'CRPIX2')
     planet_list = ['mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto']
-    error = 'Header TARGNAME not in planet_list'
-    assert output['targname'] in planet_list, error
+    assert output['targname'] in planet_list, \
+        'Header TARGNAME not in planet_list'
     return output
 
 # ----------------------------------------------------------------------------
@@ -148,7 +137,7 @@ def telnet_session(command_list, verbose=False):
 
 # ----------------------------------------------------------------------------
 
-def trim_data(data):
+def parse_data(data):
     '''
     Grab the relevant information from the telnet output.
     '''
@@ -201,9 +190,9 @@ def ephem_main(filename):
         data = None
         while data == None:
             data = telnet_session(command_list, verbose=True)
-        data_dict = trim_data(data)
-        file_dict.update(data_dict)
-        moon_dict[moon]['delta_x'], moon_dict[moon]['delta_y'] = calc_delta(file_dict)
-        moon_dict[moon]['targ_x'], moon_dict[moon]['targ_y'] = calc_targ(file_dict)
-        moon_dict[moon]['ephem_x'], moon_dict[moon]['ephem_y'] = calc_ephem(moon_dict[moon])
+        data_dict = parse_data(data)
+        moon_dict[moon]['delta_x'], moon_dict[moon]['delta_y'] = \
+            calc_delta(file_dict, data_dict)
+        moon_dict[moon]['ephem_x'], moon_dict[moon]['ephem_y'] = \
+            calc_pixel_position(file_dict, moon_dict[moon])
     return moon_dict
