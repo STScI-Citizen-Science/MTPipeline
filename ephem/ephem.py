@@ -8,6 +8,33 @@ import telnetlib
 
 # ----------------------------------------------------------------------------
 
+def calc_delta(file_dict):
+    '''
+    Find the difference between the JPL coordinates at the HST 
+    reference pixel coordinates. Perform the difference in degrees and 
+    return the result in pixels.
+    '''
+    assert isinstance(file_dict, dict), 'Expected dict got ' + str(type(file_dict))
+    
+    # Get the JPL coordinates in degrees
+    jpl_pos = coords.Hmsdms(
+        file_dict['jpl_ra'] + ' ' + file_dict['jpl_dec'])
+    file_dict['jpl_ra'], file_dict['jpl_dec'] = jpl_pos._calcinternal()
+    
+    # Get the HST coordinates in degrees
+    hst_pointing = coords.Degrees(
+        (file_dict['ra_targ'], file_dict['dec_targ']))
+    file_dict['ra_targ'], file_dict['dec_targ'] = hst_pointing.a1, hst_pointing.a2
+
+    # Take the difference and convert to pixels.
+    delta_x = (file_dict['ra_targ'] - file_dict['jpl_ra']) * (3600. / 0.05)
+    delta_y = (file_dict['dec_targ'] - file_dict['jpl_dec']) * (3600. / 0.05)
+    assert isinstance(delta_x, float), 'Expected dict got ' + str(type(delta_x))
+    assert isinstance(delta_y, float), 'Expected dict got ' + str(type(delta_y))
+    return delta_x, delta_y
+
+# ----------------------------------------------------------------------------
+
 def calc_ephem(file_dict):
     '''
     Calculate the x and y position of the ephemeris in detector
@@ -72,28 +99,6 @@ def get_header_info(filename):
     error = 'Header TARGNAME not in planet_list'
     assert output['targname'] in planet_list, error
     return output
-
-# ----------------------------------------------------------------------------
-
-def jpl_to_pixels(file_dict):
-    '''
-    Take the RA and Dec returned by JPL Horizons and return pixel 
-    coordinates on the image.
-    '''
-    assert isinstance(file_dict, dict), 'Expected dict got ' + str(type(file_dict))
-    jpl_pos = coords.Hmsdms(
-        file_dict['jpl_ra'] + ' ' + file_dict['jpl_dec'])
-    file_dict['jpl_ra'], file_dict['jpl_dec'] = jpl_pos._calcinternal()
-    
-    hst_pointing = coords.Degrees(
-        (file_dict['ra_targ'], file_dict['dec_targ']))
-    file_dict['ra_targ'], file_dict['dec_targ'] = hst_pointing.a1, hst_pointing.a2
-
-    delta_x = (file_dict['ra_targ'] - file_dict['jpl_ra']) * (3600. / 0.05)
-    delta_y = (file_dict['dec_targ'] - file_dict['jpl_dec']) * (3600. / 0.05)
-    assert isinstance(delta_x, float), 'Expected dict got ' + str(type(delta_x))
-    assert isinstance(delta_y, float), 'Expected dict got ' + str(type(delta_y))
-    return delta_x, delta_y
 
 # ----------------------------------------------------------------------------
 
@@ -198,7 +203,7 @@ def ephem_main(filename):
             data = telnet_session(command_list, verbose=True)
         data_dict = trim_data(data)
         file_dict.update(data_dict)
-        moon_dict[moon]['delta_x'], moon_dict[moon]['delta_y'] = jpl_to_pixels(file_dict)
+        moon_dict[moon]['delta_x'], moon_dict[moon]['delta_y'] = calc_delta(file_dict)
         moon_dict[moon]['targ_x'], moon_dict[moon]['targ_y'] = calc_targ(file_dict)
         moon_dict[moon]['ephem_x'], moon_dict[moon]['ephem_y'] = calc_ephem(moon_dict[moon])
     return moon_dict

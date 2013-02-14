@@ -75,8 +75,8 @@ class EphemPlot(object):
         for moon in self.master_finders_query:
             ax1.plot(moon.ephem_x, moon.ephem_y, 'ro', markersize=10, markerfacecolor='none')
             ax1.text(moon.ephem_x, moon.ephem_y, moon.object_name)
-        ax1.plot(self.crpix1, self.crpix2, 'ro', markersize=10, markerfacecolor='none')
-        ax1.text(self.crpix1, self.crpix2, 'CRPIX: (' + str(self.crpix1) + ',' + str(self.crpix2) + ')')
+        ax1.plot(self.crpix2, self.crpix1, 'ro', markersize=10, markerfacecolor='none')
+        ax1.text(self.crpix2, self.crpix1, 'CRPIX: (' + str(self.crpix2) + ',' + str(self.crpix1) + ')')
         ax1.set_title(os.path.basename(self.filename))
         plt.draw()
         plt.grid(True)
