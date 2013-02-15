@@ -8,30 +8,31 @@ import telnetlib
 
 # ----------------------------------------------------------------------------
 
-def calc_delta(file_dict, data_dict):
+def calc_delta(moon_dict):
     '''
     Find the difference between the JPL coordinates at the HST 
     reference pixel coordinates. Perform the difference in degrees and 
     return the result in pixels.
     '''
-    assert isinstance(file_dict, dict), 'Expected dict got ' + \
-        str(type(file_dict))
+    assert isinstance(moon_dict, dict), 'Expected dict got ' + \
+        str(type(moon_dict))
     
     # Convert the JPL coordinates to coords instances in degrees.
     jpl_pos = coords.Hmsdms(
-        data_dict['jpl_ra'] + ' ' + data_dict['jpl_dec'])
-    data_dict['jpl_ra'], data_dict['jpl_dec'] = jpl_pos._calcinternal()
+        moon_dict['jpl_ra'] + ' ' + moon_dict['jpl_dec'])
+    moon_dict['jpl_ra'], moon_dict['jpl_dec'] = jpl_pos._calcinternal()
     
     # Convert the HST reference pixel coordinates to coords instances 
     # in degrees.
     refpic_pointing = coords.Degrees(
-        (file_dict['CRVAL1'], file_dict['CRVAL2']))
-    file_dict['CRVAL1'], file_dict['CRVAL2'] = refpic_pointing.a1, \
+        (moon_dict['CRVAL1'], moon_dict['CRVAL2']))
+    moon_dict['CRVAL1'], moon_dict['CRVAL2'] = refpic_pointing.a1, \
         refpic_pointing.a2
 
     # Take the difference and convert to pixels.
-    delta_x = (data_dict['jpl_ra'] - file_dict['CRVAL1']) * (3600. / 0.05)
-    delta_y = (data_dict['jpl_dec']- file_dict['CRVAL2']) * (3600. / 0.05)
+    # RA increases to the East (left) so we switch the sign on the delta.
+    delta_x = -1 * (moon_dict['jpl_ra'] - moon_dict['CRVAL1']) * (3600. / 0.05)
+    delta_y = (moon_dict['jpl_dec']- moon_dict['CRVAL2']) * (3600. / 0.05)
     assert isinstance(delta_x, float), \
         'Expected dict got ' + str(type(delta_x))
     assert isinstance(delta_y, float), \
@@ -40,14 +41,15 @@ def calc_delta(file_dict, data_dict):
 
 # ----------------------------------------------------------------------------
 
-def calc_pixel_position(file_dict, moon_dict):
+def calc_pixel_position(moon_dict):
     '''
     Calculate the x and y position of the ephemeris in detector
     coordinates.
     '''
-    assert type(file_dict) == dict, 'Expected dict type got ' + str(type(file_dict))
-    ephem_x = file_dict['CRPIX1'] + moon_dict['delta_x']
-    ephem_y= file_dict['CRPIX2'] + moon_dict['delta_y']    
+    assert type(moon_dict) == dict, \
+        'Expected dict type got ' + str(type(moon_dict))
+    ephem_x = moon_dict['CRPIX1'] + moon_dict['delta_x']
+    ephem_y = moon_dict['CRPIX2'] + moon_dict['delta_y']    
     return ephem_x, ephem_y
 
 # ----------------------------------------------------------------------------
@@ -137,7 +139,7 @@ def telnet_session(command_list, verbose=False):
 
 # ----------------------------------------------------------------------------
 
-def parse_data(data):
+def parse_jpl(data):
     '''
     Grab the relevant information from the telnet output.
     '''
@@ -164,7 +166,7 @@ def parse_data(data):
                     output['date'] = line[0] + ' ' + line[1]
                     output['jpl_ra'] = line[2] + ':' + line[3] + ':' + line[4]
                     output['jpl_dec'] = line[5] + ':' + line[6] + ':' + line[7]
-                    output['jpl_re_apparent'] = line[8] + ':' + line[9] + ':' + line[10]
+                    output['jpl_ra_apparent'] = line[8] + ':' + line[9] + ':' + line[10]
                     output['jpl_dec_apparent'] = line[11] + ':' + line[12] + ':' + line[13]
                     output['jpl_ra_delta'] = line[14]
                     output['jpl_dec_delta'] = line[15]
@@ -187,12 +189,15 @@ def ephem_main(filename):
             file_dict['horizons_start_time'],
             file_dict['horizons_end_time'],
             '1m', 'y','1,2,3,4', 'n']
-        data = None
-        while data == None:
-            data = telnet_session(command_list, verbose=True)
-        data_dict = parse_data(data)
+        jpl_data = None
+        while jpl_data == None:
+            jpl_data = telnet_session(command_list, verbose=True)
+        jpl_dict = parse_jpl(jpl_data)
+        moon_dict[moon].update(jpl_dict)
+        moon_dict[moon].update(file_dict)
         moon_dict[moon]['delta_x'], moon_dict[moon]['delta_y'] = \
-            calc_delta(file_dict, data_dict)
+            calc_delta(moon_dict[moon])
         moon_dict[moon]['ephem_x'], moon_dict[moon]['ephem_y'] = \
-            calc_pixel_position(file_dict, moon_dict[moon])
+            calc_pixel_position(moon_dict[moon])
+    print moon_dict
     return moon_dict

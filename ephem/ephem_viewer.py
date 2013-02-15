@@ -78,10 +78,10 @@ class EphemPlot(object):
                 markerfacecolor = 'none', markeredgecolor = 'white')
             ax1.text(moon.ephem_x, moon.ephem_y, moon.object_name, 
                 color = 'white')
-        ax1.plot(self.crpix2, self.crpix1, 'o', markersize = 10, 
+        ax1.plot(self.crpix1, self.crpix2, 'o', markersize = 10, 
             markerfacecolor = 'none', markeredgecolor = 'white')
-        ax1.text(self.crpix2, self.crpix1, 
-            'CRPIX: (' + str(self.crpix2) + ',' + str(self.crpix1) + ')', 
+        ax1.text(self.crpix1, self.crpix2, 
+            'CRPIX: (' + str(self.crpix1) + ',' + str(self.crpix2) + ')', 
             color = 'white')
         ax1.set_title(os.path.basename(self.filename))
         plt.draw()
