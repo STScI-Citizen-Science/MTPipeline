@@ -86,4 +86,10 @@ class MasterImages(Base):
         self.description = pyfits.getval(fits_file, 'FILTNAM1')
         self.file_location = png_path
 
+class SubImages(Base):
+    '''
+    Class for interacting with the sub_images MySQL table.
+    '''
+    __tablename__ = 'sub_images'
+    __table_args__ = {'autoload':True}
 
