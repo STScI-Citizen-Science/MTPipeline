@@ -106,7 +106,7 @@ def make_all_moon_dict(filename, file_dict):
 
 # ----------------------------------------------------------------------------
 
-def insert_record(moon_dict):
+def insert_record(moon_dict,  master_images_id):
     '''
     Make a new record to be in the master_finders table.
     '''
@@ -127,12 +127,12 @@ def telnet_session(command_list, verbose=False):
     '''
     tn = telnetlib.Telnet()
     tn.open('ssd.jpl.nasa.gov', '6775')
-    output = tn.read_until('Horizons>', timeout = 5)
+    output = tn.read_until('Horizons>', timeout = 10)
     if verbose:
         print output
     for command in command_list:
         tn.write(command + '\r\n')
-        output = tn.read_until('] :', timeout = 5)
+        output = tn.read_until('] :', timeout = 10)
         if command == '1,2,3,4':     
             data = output
         if verbose:
@@ -187,7 +187,6 @@ def update_record(moon_dict, master_images_id):
     update_dict['jpl_dec'] = moon_dict['jpl_dec']
     update_dict['master_images_id'] = master_images_id
     update_dict['version'] = __version__
-    print update_dict
     session.query(MasterFinders).filter(\
         MasterFinders.master_images_id == master_images_id, 
         MasterFinders.object_name == moon_dict['object']).update(update_dict)

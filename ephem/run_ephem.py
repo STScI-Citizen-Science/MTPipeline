@@ -130,7 +130,8 @@ def run_ephem_main(filelist, reproc=False):
 
         # Perform the calculation
         master_finder_query = session.query(MasterFinders).filter(\
-        MasterFinders.master_images_id == master_images_query.id)
+            MasterFinders.master_images_id == master_images_query.id).filter(\
+            MasterFinders.jpl_ra != None)
         for record in master_finder_query:
             if record.ephem_x == None or record.ephem_y == None or reproc == True:    
                 delta_x, delta_y = calc_delta(file_dict, record)
