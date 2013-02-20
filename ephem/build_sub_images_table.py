@@ -9,6 +9,8 @@ import argparse
 import glob
 import os
 
+from PIL import Image
+
 #----------------------------------------------------------------------------
 # Load all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
@@ -18,6 +20,43 @@ from database_interface import MasterImages
 from database_interface import SubImages
 
 session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
+
+#----------------------------------------------------------------------------
+# Low-Level Functions
+#----------------------------------------------------------------------------
+
+def get_image_size(filename):
+    '''
+    Use the PIL to get the images size.
+    '''
+    assert isinstance(filename, str), \
+        'Expected str for filename, got ' + str(type(filename))
+    im = Image.open(filename)
+    return im.size[0], im.size[1] 
+
+def get_master_filename(basename):
+    '''
+    Builds the master_filename.
+    '''
+    assert isinstance(basename, str), \
+        'Expected str for basename, got ' + str(type(basename))
+    if basename.split('_')[1] == 'cr':
+        drizzle_type = basename.split('_')[3]
+    else:
+        drizzle_type = basename.split('_')[2]
+    assert drizzle_type in ['wide', 'center'], \
+        'Unexpected image type ' + drizzle_type + ' for ' + filename
+    if drizzle_type == 'wide':
+        if len(basename) in [42, 45]:
+            master_filename = basename[:-6] + '.png'
+        elif len(basename) in [43, 46]:
+            master_filename = basename[:-7] + '.png'
+    elif drizzle_type == 'center':
+        if len(basename) in [44, 47]:
+            master_filename = basename[:-6] + '.png'
+        elif len(basename) in [45, 48]:
+            master_filename = basename[:-7] + '.png'()
+    return master_filename
 
 #----------------------------------------------------------------------------
 # The main controller.
@@ -31,34 +70,12 @@ def build_sub_images_table_main(filename, reproc):
         'Expected .png got ' + filename
     path = os.path.split(filename)[0] 
     basename = os.path.basename(filename)
-    if basename.split('_')[1] == 'cr':
-        drizzle_type = basename.split('_')[3]
-    else:
-        drizzle_type = basename.split('_')[2]
-    assert drizzle_type in ['wide', 'center'], \
-        'Unexpected image type ' + drizzle_type + ' for ' + filename
-    if drizzle_type == 'wide':
-        if len(basename) in [42, 45]:
-            master_filename = basename[:-6] + '.png'
-        elif len(basename) in [43, 46]:
-            master_filename = basename[:-7] + '.png'
-        else:
-            print basename
-            print len(basename)
-    elif drizzle_type == 'center':
-        if len(basename) in [44, 47]:
-            master_filename = basename[:-6] + '.png'
-        elif len(basename) in [45, 48]:
-            master_filename = basename[:-7] + '.png'
-        else:
-            print basename
-            print len(basename)
-    
+    master_filename = get_master_filename(basename)
     master_images_query = session.query(MasterImages).filter(\
         MasterImages.name == master_filename).one()
-
     sub_images_query = session.query(SubImages).filter(\
         SubImages.name == basename).count()
+    image_width, image_height = get_image_size(filename)
 
     if sub_images_query == 0:
         record = SubImages()
@@ -66,6 +83,8 @@ def build_sub_images_table_main(filename, reproc):
         record.master_image_name = master_images_query.name
         record.name = basename
         record.file_location = path
+        record.image_width = image_width 
+        record.image_height = image_height
         session.add(record)
         session.commit()
 
@@ -75,6 +94,8 @@ def build_sub_images_table_main(filename, reproc):
         update_dict['master_image_name'] = master_images_query.name
         update_dict['name'] = basename
         update_dict['file_location'] = path
+        update_dict['image_width'] = image_width 
+        update_dict['image_height'] = image_height
         sub_images_query = session.query(SubImages).filter(\
             SubImages.name == basename).update(update_dict)
         session.commit()
