@@ -73,4 +73,29 @@ class SetsMasterImages(Base):
     __table_args__ = {'autoload':True}
 
 
+import datetime
+
+def counter(count, update=100):
+    '''
+    Advance the count and print a status message every 100th item.
+    '''
+    check_type(count, int)
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    if count == 0:
+        print now + ': Starting processing'
+    count += 1
+    if count % update == 0:
+        print now + ': Completed ' + str(count)
+    check_type(count, int)
+    return count
+
+
+def check_type(instance, expected_type):
+    '''
+    A wrapper around my standard assert isinstance pattern.
+    '''
+    assert isinstance(instance, expected_type), \
+        'Expected ' + str(expected_type) + ' got ' +  \
+        str(type(record_dict)) + ' instead.'
+
 

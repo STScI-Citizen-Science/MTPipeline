@@ -6,6 +6,9 @@ import glob
 import os
 import pyfits
 
+from database_interface import counter
+from database_interface import check_type
+
 from sqlalchemy.sql import func
 from sqlalchemy import desc
 from sqlalchemy import distinct
@@ -20,22 +23,7 @@ from database_interface import MasterImages
 session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
 
 #----------------------------------------------------------------------------
-
-
-def counter(count):
-    '''
-    Advance the count and print a status message every 100th item.
-    '''
-    check_type(count, int)
-    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-    if count == 0:
-        print now + ': Starting processing'
-    count += 1
-    if count % 100 == 0:
-        print now + ': Completed ' + str(count)
-    check_type(count, int)
-    return count
-
+#
 
 def get_fits_file(png_file):
     '''
@@ -108,14 +96,6 @@ def make_record_dict(png_file, fits_file):
     return record_dict
 
 
-def check_type(instance, expected_type):
-    '''
-    A wrapper around my standard assert isinstance pattern.
-    '''
-    assert isinstance(instance, expected_type), \
-        'Expected ' + str(expected_type) + ' got ' +  \
-        str(type(record_dict)) + ' instead.'
-
 def make_set_info(record_dict):
     '''
     Use the existing dictionary information and the database to 
@@ -167,6 +147,7 @@ def make_set_info(record_dict):
             desc(MasterImages.set_index)).first()
         record_dict['set_index'] = max_set_index.set_index + 1
     return record_dict
+
 
 def update_record(record_dict, query):
     '''
