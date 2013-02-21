@@ -24,71 +24,82 @@ session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
 #----------------------------------------------------------------------------
 
 ARCHIVE = '/Users/viana/mtpipeline/archive'
-OUTPUT_STRING = '| {:35} | {:8} |'
-BORDER_STRING = '+ {:35} + {:8} +'
+OUTPUT_FILE = '/Users/viana/Dropbox/Work/MTPipeline/Other/project_status.txt'
+OUTPUT_STRING = '| {:35} | {:8} |\n'
+BORDER_STRING = '+ {:35} + {:8} +\n'
+PLANET_LIST = ['mars', 'neptune']
 
 #----------------------------------------------------------------------------
 # Functions
 #----------------------------------------------------------------------------
 
-def count_files(search_string):
+def count_files(search_string, file_object):
     file_count = len(glob.glob(search_string))
-    search_name = search_string.split('/')[-1]
-    print OUTPUT_STRING.format(search_name, file_count)
+    search_name = search_string.replace(ARCHIVE,'')
+    file_object.write(OUTPUT_STRING.format(search_name, file_count))
+
+def table_generator(search_list, catagory_name, count_name, file_object):
+    '''
+    Generate a Table.
+    '''
+    file_object.write(BORDER_STRING.format(35 * '-', 8 * '-'))
+    file_object.write(OUTPUT_STRING.format(catagory_name, count_name))
+    file_object.write(BORDER_STRING.format(35 * '-', 8 * '-'))
+    for search_string in search_list:
+        count_files(os.path.join(ARCHIVE, search_string), file_object)
+    file_object.write(BORDER_STRING.format(35 * '-', 8 * '-'))
+    file_object.write('\n')    
 
 def count_records():
     pass
 
+#----------------------------------------------------------------------------
+# Comand Line Execution
+#----------------------------------------------------------------------------
+
 if __name__ == '__main__':
-    print BORDER_STRING.format(35 * '-', 8 * '-')
-    print OUTPUT_STRING.format('FITS Files', 'Count')
-    print BORDER_STRING.format(35 * '-', 8 * '-')
-    proposal_count = len(glob.glob(os.path.join(ARCHIVE, '*/')))
-    print OUTPUT_STRING.format('Proposals', proposal_count)
-    c0m_list = glob.glob(os.path.join(ARCHIVE, '*/*c0m.fits'))
-    c0m_cr_list = [x for x in c0m_list if x.split('_')[2] == 'cr']
-    print OUTPUT_STRING.format('CR Rejected c0m.fits ', len(c0m_cr_list))
-    c0m_count = len(c0m_list)
-    print OUTPUT_STRING.format('c0m.fits', c0m_count)
-    search_list = ['*/*c1m.fits',
+    f = open(OUTPUT_FILE, 'w')
+    search_list = ['*/']
+    for planet in PLANET_LIST:
+        search_list.append('*' + planet + '/')
+    table_generator(search_list, 'Proposals', 'Count', f)
+
+    search_list = ['*/*c0m.fits']
+    for planet in PLANET_LIST:
+        search_list.append('*' + planet + '/*c0m.fits')
+    table_generator(search_list, 'c0m.fits Files by Target', 'Count', f)
+
+    search_list = ['*/*c0m.fits',
+        '*/*c1m.fits',
+        '*/*cr*c0m.fits',
         '*/*wide_single_sci.fits',
         '*/*center_single_sci.fits',
         '*/*single_sci.fits']
-    for search_string in search_list:
-        count_files(os.path.join(ARCHIVE, search_string))
-    print BORDER_STRING.format(35 * '-', 8 * '-')
-    print '\n'
+    table_generator(search_list, 'Total Fits Files', 'Count', f)
 
-    print BORDER_STRING.format(35 * '-', 8 * '-')
-    print OUTPUT_STRING.format('Master PNG Files', 'Count')
-    print BORDER_STRING.format(35 * '-', 8 * '-')
+    search_list = ['*/*single_sci.fits']
+    for planet in PLANET_LIST:
+        search_list.append('*' + planet + '/*single_sci.fits')
+    table_generator(search_list, '*single_sci.fits Files by Target', 'Count', f)   
+
     search_list = ['*/png/*linear.png',
         '*/png/*wide*linear.png',
         '*/png/*center*linear.png']
-    for search_string in search_list:
-        count_files(os.path.join(ARCHIVE, search_string))
-    print BORDER_STRING.format(35 * '-', 8 * '-')
-    print '\n'
+    table_generator(search_list, 'Master PNG Files', 'Count', f)
 
-    print BORDER_STRING.format(35 * '-', 8 * '-')
-    print OUTPUT_STRING.format('Subimage PNG Files', 'Count')
-    print BORDER_STRING.format(35 * '-', 8 * '-')
     search_list = ['*/png/*linear_*.png',
-        '*/png/*wide*linear_*.png',
-        '*/png/*center*linear_*.png']
-    for search_string in search_list:
-        count_files(os.path.join(ARCHIVE, search_string))
-    print BORDER_STRING.format(35 * '-', 8 * '-')
-    print '\n'
+        '*/png/*wide*linear_*.png']
+    table_generator(search_list, 'Subimage PNG Files', 'Count', f)
 
     table_class_list = [Finders, MasterFinders, MasterImages, SubImages, SetsMasterImages]
     for table_class in table_class_list:
-        print BORDER_STRING.format(35 * '-', 8 * '-')
-        print OUTPUT_STRING.format(table_class.__tablename__, 'Records')
-        print BORDER_STRING.format(35 * '-', 8 * '-')
+        f.write(BORDER_STRING.format(35 * '-', 8 * '-'))
+        f.write(OUTPUT_STRING.format(table_class.__tablename__, 'Records'))
+        f.write(BORDER_STRING.format(35 * '-', 8 * '-'))
         field_list = table_class.__table__.columns
         for field in field_list:
-            print OUTPUT_STRING.format(field, session.query(table_class).filter(field != None).count())
-        print BORDER_STRING.format(35 * '-', 8 * '-')
-        print '\n'
+            f.write(OUTPUT_STRING.format(field, session.query(table_class).filter(field != None).count()))
+        f.write(BORDER_STRING.format(35 * '-', 8 * '-'))
+        f.write('\n')
+    f.close()
 
