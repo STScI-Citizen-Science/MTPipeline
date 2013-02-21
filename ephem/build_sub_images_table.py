@@ -25,6 +25,7 @@ session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
 # Low-Level Functions
 #----------------------------------------------------------------------------
 
+
 def get_image_size(filename):
     '''
     Use the PIL to get the images size.
@@ -33,6 +34,7 @@ def get_image_size(filename):
         'Expected str for filename, got ' + str(type(filename))
     im = Image.open(filename)
     return im.size[0], im.size[1] 
+
 
 def get_master_filename(basename):
     '''
