@@ -18,7 +18,7 @@ def loadConnection(connection_string):
     Create and engine using an engine string. Declare a base and 
     metadata. Load the session and return a session object.
     '''
-    engine = create_engine(connection_string, echo=False)
+    engine = create_engine(connection_string, echo=True)
     Base = declarative_base(engine)
     metadata = Base.metadata
     Session = sessionmaker(bind=engine)
@@ -57,19 +57,26 @@ class MasterImages(Base):
     __table_args__ = {'autoload':True}
 
 
-class SubImages(Base):
+class Sets(Base):
     '''
-    Class for interacting with the sub_images MySQL table.
+    Class for interacting with the sets MySQL table.
     '''
-    __tablename__ = 'sub_images'
+    __tablename__ = 'sets'
     __table_args__ = {'autoload':True}
-
 
 class SetsMasterImages(Base):
     '''
     Class for interacting with the sets_master_images MySQL table.
     '''
     __tablename__ = 'sets_master_images'
+    __table_args__ = {'autoload':True}
+
+
+class SubImages(Base):
+    '''
+    Class for interacting with the sub_images MySQL table.
+    '''
+    __tablename__ = 'sub_images'
     __table_args__ = {'autoload':True}
 
 
