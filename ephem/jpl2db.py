@@ -17,6 +17,9 @@ import os
 import pyfits
 import telnetlib
 
+from database_interface import counter
+from database_interface import check_type
+
 #----------------------------------------------------------------------------
 # Load all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
@@ -127,12 +130,12 @@ def telnet_session(command_list, verbose=False):
     '''
     tn = telnetlib.Telnet()
     tn.open('ssd.jpl.nasa.gov', '6775')
-    output = tn.read_until('Horizons>', timeout = 10)
+    output = tn.read_until('Horizons>', timeout = 30)
     if verbose:
         print output
     for command in command_list:
         tn.write(command + '\r\n')
-        output = tn.read_until('] :', timeout = 10)
+        output = tn.read_until('] :', timeout = 30)
         if command == '1,2,3,4':     
             data = output
         if verbose:
@@ -268,5 +271,7 @@ if __name__ == '__main__':
     filelist = glob.glob(args.filelist)
     assert isinstance(filelist, list), \
         'Expected list for filelist, got ' + str(type(filelist))
+    count = 0
     for filename in filelist:
         jpl2db_main(filename, args.reproc)
+        count = counter(count, update = 10)
