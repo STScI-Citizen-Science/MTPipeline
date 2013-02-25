@@ -9,27 +9,33 @@ import os
 import pyfits
 
 from sqlalchemy import create_engine
+from sqlalchemy import Column
+from sqlalchemy import ForeignKey
+from sqlalchemy import Integer
 from sqlalchemy import MetaData
+from sqlalchemy import String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import relationship
 
 def loadConnection(connection_string):
     '''
     Create and engine using an engine string. Declare a base and 
     metadata. Load the session and return a session object.
     '''
-    engine = create_engine(connection_string, echo=True)
+    engine = create_engine(connection_string, echo=False)
     Base = declarative_base(engine)
     metadata = Base.metadata
     Session = sessionmaker(bind=engine)
     session = Session()
     return session, Base
 
-# Breifly open a database connection to get the arguments needed for 
-# autoloading.
+#----------------------------------------------------------------------------
+# Define all the SQLAlchemy ORM bindings
+#----------------------------------------------------------------------------
+
 session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
 session.close()
-
 
 class Finders(Base):
     '''
@@ -64,6 +70,7 @@ class Sets(Base):
     __tablename__ = 'sets'
     __table_args__ = {'autoload':True}
 
+
 class SetsMasterImages(Base):
     '''
     Class for interacting with the sets_master_images MySQL table.
@@ -79,8 +86,12 @@ class SubImages(Base):
     __tablename__ = 'sub_images'
     __table_args__ = {'autoload':True}
 
+#----------------------------------------------------------------------------
+# General Utility Functions
+#----------------------------------------------------------------------------
 
 import datetime
+
 
 def counter(count, update=100):
     '''
@@ -106,3 +117,22 @@ def check_type(instance, expected_type):
         str(type(record_dict)) + ' instead.'
 
 
+def insert_record(record_dict, tableclass_instance):
+    '''
+    Insert the value into the database using SQLAlchemy.
+    '''
+    record = tableclass_instance
+    for column in record.__table__.columns:
+        setattr(record, column, record_dict[column])
+    session.add(record)
+    session.commit()
+
+
+def update_record(record_dict, query):
+    '''
+    Update a record in the database using SQLAlchemy. See 
+    insert_record for details.
+    '''
+    check_type(record_dict, dict)
+    query.update(record_dict)
+    session.commit()

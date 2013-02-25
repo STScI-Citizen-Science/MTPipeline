@@ -1,5 +1,10 @@
 #! /usr/bin/env python
 
+'''
+Populates the master_images table in the MySQL database using SQLAlchemy 
+ORM.
+'''
+
 import argparse
 import datetime
 import glob
@@ -8,6 +13,8 @@ import pyfits
 
 from database_interface import counter
 from database_interface import check_type
+from database_interface import insert_record
+from database_interface import update_record
 
 from sqlalchemy.sql import func
 from sqlalchemy import desc
@@ -22,8 +29,9 @@ from database_interface import MasterImages
 
 session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
 
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 #
+# ----------------------------------------------------------------------------
 
 def get_fits_file(png_file):
     '''
@@ -43,17 +51,6 @@ def get_fits_file(png_file):
     fits_file = os.path.join(fits_path, fits_name)
     assert os.path.splitext(fits_file)[1] == '.fits', 'unexpected output.'
     return fits_file
-
-
-def insert_record(record_dict):
-    '''
-    Insert the value into the database using SQLAlchemy.
-    '''
-    record = MasterImages()
-    for column in record.__table__.columns:
-        setattr(record, column, record_dict[column])
-    session.add(record)
-    session.commit()
 
 
 def make_record_dict(png_file, fits_file):
@@ -149,14 +146,7 @@ def make_set_info(record_dict):
     return record_dict
 
 
-def update_record(record_dict, query):
-    '''
-    Update a record in the database using SQLAlchemy. See 
-    insert_record for details.
-    '''
-    check_type(record_dict, dict)
-    query.update(record_dict)
-    session.commit()
+
 
 #----------------------------------------------------------------------------
 # The main controller.
@@ -185,7 +175,7 @@ def build_master_table_main(filelist, reproc, reproc_sets):
             'Multiple matches for ' + png_name
         if master_images_query.count() == 0:
             record_dict = make_record_dict(png_file, fits_file)
-            insert_record(record_dict)
+            insert_record(record_dict, MasterImages())
         elif master_images_query.count() == 1 and reproc == True:
             record_dict = make_record_dict(png_file, fits_file)
             update_record(record_dict, master_images_query)
