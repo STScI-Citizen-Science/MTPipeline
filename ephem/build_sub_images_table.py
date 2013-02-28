@@ -8,6 +8,12 @@ ORM.
 import argparse
 import glob
 import os
+import string
+
+from database_interface import counter
+from database_interface import check_type
+from database_interface import insert_record
+from database_interface import update_record
 
 from PIL import Image
 
@@ -60,6 +66,17 @@ def get_master_filename(basename):
             master_filename = basename[:-7] + '.png'()
     return master_filename
 
+def get_region(filename):
+    '''
+    Figures out the subimage region from the filename.
+    '''
+    check_type(filename, str)
+    filename = os.path.splitext(filename)[0]
+    region = filename.split('/')[-1].split('_')[-1]
+    for digit in region:
+        assert digit in string.digits, 'Region ' + region + ' is not a number.'
+    return region
+
 #----------------------------------------------------------------------------
 # The main controller.
 #----------------------------------------------------------------------------
@@ -79,27 +96,22 @@ def build_sub_images_table_main(filename, reproc):
         SubImages.name == basename).count()
     image_width, image_height = get_image_size(filename)
 
+    # Make the input dict
+    record_dict = {}
+    record_dict['master_image_id'] = master_images_query.id
+    record_dict['master_image_name'] = master_images_query.name
+    record_dict['name'] = basename
+    record_dict['file_location'] = path
+    record_dict['image_width'] = image_width 
+    record_dict['image_height'] = image_height
+    record_dict['region'] = get_region(filename)
+
     if sub_images_query == 0:
         record = SubImages()
-        record.master_image_id = master_images_query.id
-        record.master_image_name = master_images_query.name
-        record.name = basename
-        record.file_location = path
-        record.image_width = image_width 
-        record.image_height = image_height
-        session.add(record)
-        session.commit()
-
+        insert_record(record_dict, record)
     elif sub_images_query == 1:
-        update_dict = {}
-        update_dict['master_image_id'] = master_images_query.id
-        update_dict['master_image_name'] = master_images_query.name
-        update_dict['name'] = basename
-        update_dict['file_location'] = path
-        update_dict['image_width'] = image_width 
-        update_dict['image_height'] = image_height
         sub_images_query = session.query(SubImages).filter(\
-            SubImages.name == basename).update(update_dict)
+            SubImages.name == basename).update(record_dict)
         session.commit()
     else:
         pass
@@ -115,7 +127,7 @@ def parse_args():
     parse the command line arguments.
     '''
     parser = argparse.ArgumentParser(
-        description = 'Populates the sub_images table.')
+        description = 'Populates the sub_images table from a PNG file list.')
     parser.add_argument(
         '-filelist',
         required = True,
@@ -137,5 +149,7 @@ if __name__ == '__main__':
     filelist = glob.glob(args.filelist)
     assert isinstance(filelist, list), \
         'Expected list for filelist, got ' + str(type(filelist))
+    count = 0
     for filename in filelist:
+        count = counter(count)
         build_sub_images_table_main(filename, args.reproc)
