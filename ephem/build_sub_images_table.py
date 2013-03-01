@@ -41,29 +41,18 @@ def get_image_size(filename):
     im = Image.open(filename)
     return im.size[0], im.size[1] 
 
-
 def get_master_filename(basename):
     '''
     Builds the master_filename.
     '''
-    assert isinstance(basename, str), \
-        'Expected str for basename, got ' + str(type(basename))
+    check_type(basename, str)
     if basename.split('_')[1] == 'cr':
         drizzle_type = basename.split('_')[3]
     else:
         drizzle_type = basename.split('_')[2]
     assert drizzle_type in ['wide', 'center'], \
         'Unexpected image type ' + drizzle_type + ' for ' + filename
-    if drizzle_type == 'wide':
-        if len(basename) in [42, 45]:
-            master_filename = basename[:-6] + '.png'
-        elif len(basename) in [43, 46]:
-            master_filename = basename[:-7] + '.png'
-    elif drizzle_type == 'center':
-        if len(basename) in [44, 47]:
-            master_filename = basename[:-6] + '.png'
-        elif len(basename) in [45, 48]:
-            master_filename = basename[:-7] + '.png'()
+    master_filename = basename.split('linear')[0] + 'linear.png'
     return master_filename
 
 def get_region(filename):
@@ -71,8 +60,18 @@ def get_region(filename):
     Figures out the subimage region from the filename.
     '''
     check_type(filename, str)
-    filename = os.path.splitext(filename)[0]
-    region = filename.split('/')[-1].split('_')[-1]
+    basename = os.path.basename(filename)
+    if basename.split('_')[1] == 'cr':
+        drizzle_type = basename.split('_')[3]
+    else:
+        drizzle_type = basename.split('_')[2]
+    assert drizzle_type in ['wide', 'center'], \
+        'Unexpected image type ' + drizzle_type + ' for ' + filename
+    if drizzle_type == 'wide':
+        filename = os.path.splitext(filename)[0]
+        region = filename.split('/')[-1].split('_')[-1]
+    elif drizzle_type == 'center':
+        region = '1'
     for digit in region:
         assert digit in string.digits, 'Region ' + region + ' is not a number.'
     return region
