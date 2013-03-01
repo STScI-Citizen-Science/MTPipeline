@@ -35,7 +35,6 @@ def loadConnection(connection_string):
 #----------------------------------------------------------------------------
 
 session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
-session.close()
 
 class Finders(Base):
     '''
@@ -61,23 +60,6 @@ class MasterImages(Base):
     '''
     __tablename__ = 'master_images'
     __table_args__ = {'autoload':True}
-
-
-class Sets(Base):
-    '''
-    Class for interacting with the sets MySQL table.
-    '''
-    __tablename__ = 'sets'
-    __table_args__ = {'autoload':True}
-
-
-class SetsMasterImages(Base):
-    '''
-    Class for interacting with the sets_master_images MySQL table.
-    '''
-    __tablename__ = 'sets_master_images'
-    __table_args__ = {'autoload':True}
-
 
 class SubImages(Base):
     '''
@@ -122,8 +104,9 @@ def insert_record(record_dict, tableclass_instance):
     Insert the value into the database using SQLAlchemy.
     '''
     record = tableclass_instance
-    for column in record.__table__.columns:
-        setattr(record, column, record_dict[column])
+    check_type(record_dict, dict)
+    for key in record_dict.keys():
+        setattr(record, key, record_dict[key])
     session.add(record)
     session.commit()
 
