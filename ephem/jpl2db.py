@@ -310,7 +310,7 @@ def parse_args():
     parser.add_argument(
         '-filelist',
         required = True,
-        help = 'Search string for files. Wildcards accepted.')
+        help = 'Search string for FITS files. Wildcards accepted.')
     parser.add_argument(
         '-reproc',
         required = False,
@@ -328,6 +328,7 @@ if __name__ == '__main__':
     filelist = glob.glob(args.filelist)
     assert isinstance(filelist, list), \
         'Expected list for filelist, got ' + str(type(filelist))
+    assert filelist != [], 'No files found.'
     count = 0
     for filename in filelist:
         jpl2db_main(filename, args.reproc)
