@@ -15,7 +15,6 @@ from database_interface import Finders
 from database_interface import MasterFinders
 from database_interface import MasterImages
 from database_interface import SubImages
-from database_interface import SetsMasterImages
 
 session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
 
@@ -38,6 +37,7 @@ def count_files(search_string, file_object):
     search_name = search_string.replace(ARCHIVE,'')
     file_object.write(OUTPUT_STRING.format(search_name, file_count))
 
+
 def table_generator(search_list, catagory_name, count_name, file_object):
     '''
     Generate a Table.
@@ -50,8 +50,31 @@ def table_generator(search_list, catagory_name, count_name, file_object):
     file_object.write(BORDER_STRING.format(35 * '-', 8 * '-'))
     file_object.write('\n')    
 
+
 def count_records():
     pass
+
+
+def count_moons():
+    '''
+    Given the number of moons per planet based on the contents of the 
+    planets_and_moons.txt text file.
+    '''
+    with open('/Users/viana/Dropbox/Work/MTPipeline/Code/ephem/planets_and_moons.txt', 'r') as f:
+        data = f.readlines()
+    data = [item.strip().split() for item in data]
+    moon_count_dict = {}
+    new_planet = True
+    for item in data:
+        if new_planet:
+            planet = item[1]
+            moon_count_dict[planet] = 1
+            new_planet = False
+        elif item == []:
+            new_planet = True
+        else:
+            moon_count_dict[planet] += 1
+    return moon_count_dict
 
 #----------------------------------------------------------------------------
 # Comand Line Execution
@@ -91,7 +114,16 @@ if __name__ == '__main__':
         '*/png/*wide*linear_*.png']
     table_generator(search_list, 'Subimage PNG Files', 'Count', f)
 
-    table_class_list = [Finders, MasterFinders, MasterImages, SubImages, SetsMasterImages]
+    moon_count_dict = count_moons()
+    f.write(BORDER_STRING.format(35 * '-', 8 * '-'))
+    f.write(OUTPUT_STRING.format('Planet', 'Moons'))
+    f.write(BORDER_STRING.format(35 * '-', 8 * '-'))
+    for key in moon_count_dict:
+        f.write(OUTPUT_STRING.format(key, moon_count_dict[key]))
+    f.write(BORDER_STRING.format(35 * '-', 8 * '-'))
+    f.write('\n')  
+
+    table_class_list = [Finders, MasterFinders, MasterImages, SubImages]
     for table_class in table_class_list:
         f.write(BORDER_STRING.format(35 * '-', 8 * '-'))
         f.write(OUTPUT_STRING.format(table_class.__tablename__, 'Records'))
