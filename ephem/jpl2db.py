@@ -7,7 +7,7 @@ and DEC degree coordinates. This information is written to a MySQL
 database using the SQLAlchemy module.
 '''
 
-__version__ = 2
+__version__ = 3
 
 import argparse
 import coords
@@ -16,9 +16,11 @@ import glob
 import os
 import pyfits
 import telnetlib
+import time
 
 from database_interface import counter
 from database_interface import check_type
+from urllib2 import urlopen
 
 #----------------------------------------------------------------------------
 # Load all the SQLAlchemy ORM bindings
@@ -33,6 +35,29 @@ session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
 #----------------------------------------------------------------------------
 # Low-Level Functions
 #----------------------------------------------------------------------------
+
+
+def cgi_session(command_list):
+    '''
+    Interact with NASA JPL HORIZONS via a CGI interface.
+
+    The command_list list characters are replaced to make them URL 
+    safe. The urllib2 module is used to connect. A 5 sec pause is 
+    enforced to prevent the code from hammering the HORIZONS servers.
+
+    *** NOTE (FROM HORIZONS) ***
+
+    This service is in the beta test and development stage. Support 
+    will only be offered to those who've been specifically invited 
+    to use this tool. 
+    '''
+    command_list = [item.replace(' ','%20').replace(':','%3A') for item in command_list]
+    url = "http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND='{0[0]}'&TABLE_TYPE='{0[2]}'&CENTER='{0[3]}'&START_TIME='{0[4]}'&STOP_TIME='{0[5]}'&STEP_SIZE='{0[6]}'&QUANTITIES='{0[8]}'&CSV_FORMAT='YES'".format(command_list)
+    html = urlopen(url).read()
+    time.sleep(5.0)
+    return html
+
+# ----------------------------------------------------------------------------
 
 def convert_datetime(header_dict):
     '''
@@ -67,19 +92,24 @@ def get_header_info(filename):
 
 # ----------------------------------------------------------------------------
 
-def get_jpl_data(moon_dict):
+def get_jpl_data(moon_dict, connection_type='cgi'):
     '''
     Talk to JPL and get the ephemeris information.
     '''
+    assert connection_type in ['telnet', 'cgi'], 'Unexpected connection type.'
     command_list = [moon_dict['id'],
         'e', 'o', 'geo',
         moon_dict['horizons_start_time'],
         moon_dict['horizons_end_time'],
         '1m', 'y','1,2,3,4', 'n']
-    jpl_data = None
-    while jpl_data == None:
-        jpl_data = telnet_session(command_list, verbose=True)
-    jpl_dict = parse_jpl(jpl_data)
+    if connection_type == 'telnet':
+        jpl_data = None
+        while jpl_data == None:
+            jpl_data = telnet_session(command_list, verbose=True)
+        jpl_dict = parse_jpl_telnet(jpl_data)
+    elif connection_type == 'cgi':
+        jpl_data = cgi_session(command_list)
+        jpl_dict = parse_jpl_cgi(jpl_data)
     return jpl_dict
 
 # ----------------------------------------------------------------------------
@@ -145,7 +175,34 @@ def telnet_session(command_list, verbose=False):
 
 # ----------------------------------------------------------------------------
 
-def parse_jpl(data):
+def parse_jpl_cgi(data):
+    '''
+    Parses the relevant information from the cgi output.
+    '''
+    check_type(data, str)
+    output = {}
+    soe_switch = False
+    data = data.split('\n')
+    for line in data:
+        if line == '$$EOE':
+            break
+        if soe_switch:
+            line = line.split(',')
+            line = [item.strip() for item in line if item != ',']
+            output['date'] = line[0]
+            output['jpl_ra'] = line[3].replace(' ',':')
+            output['jpl_dec'] = line[4].replace(' ',':')
+            output['jpl_ra_apparent'] = line[5].replace(' ',':')
+            output['jpl_dec_apparent'] = line[6].replace(' ',':')
+            output['jpl_ra_delta'] = line[7]
+            output['jpl_dec_delta'] = line[8]
+            return output
+        if line == '$$SOE':
+            soe_switch = True
+
+# ----------------------------------------------------------------------------
+
+def parse_jpl_telnet(data):
     '''
     Grab the relevant information from the telnet output.
     '''

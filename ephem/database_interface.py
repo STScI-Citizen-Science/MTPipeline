@@ -96,7 +96,7 @@ def check_type(instance, expected_type):
     '''
     assert isinstance(instance, expected_type), \
         'Expected ' + str(expected_type) + ' got ' +  \
-        str(type(record_dict)) + ' instead.'
+        str(type(instance)) + ' instead.'
 
 
 def insert_record(record_dict, tableclass_instance):
