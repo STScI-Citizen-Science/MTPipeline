@@ -339,8 +339,8 @@ def make_subimage_pngs(input_pngc_instance, output_path, filename, suffix):
     assert isinstance(input_pngc_instance, PNGCreator), \
         'Expected instnace of PNGCreator, got ' + str(type(input_pngc_instance))
     counter = 0
-    for ymin in range(0, 1351, 450):
-        for xmin in range(0, 901, 450):
+    for ymin in range(0, 1351, 425):
+        for xmin in range(0, 901, 425):
             counter += 1
             pngc_trimmed = PNGCreator(input_pngc_instance.data)
             pngc_trimmed.trim(xmin, xmin + 450, ymin, ymin + 450)
@@ -348,7 +348,8 @@ def make_subimage_pngs(input_pngc_instance, output_path, filename, suffix):
 
 # -----------------------------------------------------------------------------
 
-def run_trim(filename, weight_file, output_path):
+def run_trim(filename, weight_file, output_path, log_switch=False, 
+        median_switch=False):
     '''
     The main controller for the png creation. Checks for and creates an
     output folder. Opens the data header extention. Uses a PNGCreator 
@@ -381,20 +382,22 @@ def run_trim(filename, weight_file, output_path):
         make_subimage_pngs(pngc_linear, output_path, filename, 'linear_')
 
     # Create Log full Image
-    print 'Creating log PNGs'
-    pngc_log.positive(output = make_png_name(output_path, filename, 'positive_stat'))
-    pngc_log.log(output = make_png_name(output_path, filename, 'log_stat'))
-    pngc_log.bottom_clip(output = make_png_name(output_path, filename, 'bottom_clip_stat'))
-    pngc_median = PNGCreator(pngc_log.data)
-    pngc_log.compress() 
-    pngc_log.save_png(make_png_name(output_path, filename, 'log'))
+    if log_switch:
+        print 'Creating log PNGs'
+        pngc_log.positive(output = make_png_name(output_path, filename, 'positive_stat'))
+        pngc_log.log(output = make_png_name(output_path, filename, 'log_stat'))
+        pngc_log.bottom_clip(output = make_png_name(output_path, filename, 'bottom_clip_stat'))
+        pngc_median = PNGCreator(pngc_log.data)
+        pngc_log.compress() 
+        pngc_log.save_png(make_png_name(output_path, filename, 'log'))
 
-    # Create and save the trimmed log images.
-    if astrodrizzle_mode == 'wide':
-        make_subimage_pngs(pngc_log, output_path, filename, 'log_')
+        # Create and save the trimmed log images.
+        if astrodrizzle_mode == 'wide':
+            make_subimage_pngs(pngc_log, output_path, filename, 'log_')
+    else:
+        print 'Skipping log pngs.'
 
     # Create and save a full median image.
-    median_switch = False
     if median_switch:
         print 'Creating median PNGs'
         pngc_median.median(output = make_png_name(output_path, filename, 'median_stat'))
@@ -404,7 +407,8 @@ def run_trim(filename, weight_file, output_path):
         # Create and save the trimmed median images. Remeber to switch x and y.
         if astrodrizzle_mode == 'wide':
             make_subimage_pngs(pngc_log, output_path, filename, 'median_')
-        
+    else:
+        print 'Skipping median PNGs.'        
 # -----------------------------------------------------------------------------
 # For command line execution.
 # -----------------------------------------------------------------------------
