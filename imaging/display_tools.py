@@ -4,9 +4,18 @@
 Tools for plotting and displaying images from the MTPipeline
 '''
 
+import matplotlib
+import numpy as N
+
+# Try to use the Agg backend to prevent the images from being 
+# displayed to the screen.
+try: 
+    matplotlib.use('agg')
+except:
+    print 'Failed loading agg backend.'
+
 import matplotlib.cm as cm
 import pylab as P
-import numpy as N
 
 # -----------------------------------------------------------------------------
 
