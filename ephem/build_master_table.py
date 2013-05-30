@@ -165,6 +165,7 @@ def build_master_table_main(filelist, reproc, reproc_sets):
             MasterImages.set_index != None).update(update_dict)
         session.commit()
     file_list = glob.glob(filelist)
+    print 'Processing ' + str(len(file_list)) + ' files.'
     count = 0
     for png_file in file_list:
         fits_file = get_fits_file(png_file)

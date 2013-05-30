@@ -7,6 +7,7 @@ Viewing tools for WFC3 images.
 import argparse
 import matplotlib.pyplot as plt
 import matplotlib.cbook as cbook
+import matplotlib.cm as cm
 import os
 import pyfits
 
@@ -70,19 +71,19 @@ class EphemPlot(object):
         data = Image.open(self.filename)
         fig = plt.figure()
         ax1 = plt.subplot(111)
-        im = ax1.imshow(data)
+        im = ax1.imshow(data, cmap=cm.gray)
         ax1.set_xlim(ax1.get_xlim())
         ax1.set_ylim(ax1.get_ylim())
         for moon in self.master_finders_query:
             ax1.plot(moon.ephem_x, moon.ephem_y, 'o', markersize = 10, 
                 markerfacecolor = 'none', markeredgecolor = 'white')
-            ax1.text(moon.ephem_x, moon.ephem_y, moon.object_name, 
-                color = 'white')
-        ax1.plot(self.crpix1, self.crpix2, 'o', markersize = 10, 
-            markerfacecolor = 'none', markeredgecolor = 'white')
-        ax1.text(self.crpix1, self.crpix2, 
-            'CRPIX: (' + str(self.crpix1) + ',' + str(self.crpix2) + ')', 
-            color = 'white')
+        #   ax1.text(moon.ephem_x, moon.ephem_y, moon.object_name, 
+        #       color = 'white')
+        #ax1.plot(self.crpix1, self.crpix2, 'o', markersize = 10, 
+        #    markerfacecolor = 'none', markeredgecolor = 'white')
+        #ax1.text(self.crpix1, self.crpix2, 
+        #    'CRPIX: (' + str(self.crpix1) + ',' + str(self.crpix2) + ')', 
+        #    color = 'white')
         ax1.set_title(os.path.basename(self.filename))
         plt.draw()
         plt.grid(True)

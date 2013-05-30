@@ -12,8 +12,11 @@ import os
 import pyfits
 
 from build_master_table import get_fits_file
+
 from database_interface import loadConnection
-from ephem import ephem_main
+from database_interface import counter
+
+#from ephem import ephem_main
 
 #----------------------------------------------------------------------------
 # Load all the SQLAlchemy ORM bindings
@@ -121,6 +124,7 @@ def run_ephem_main(filelist, reproc=False):
     and writes the output to the database.
     '''
     file_list = glob.glob(filelist)
+    count = 0
     for filename in file_list:
         file_dict = get_header_info(filename)
 
@@ -142,7 +146,8 @@ def run_ephem_main(filelist, reproc=False):
                 session.query(MasterFinders).filter(\
                     MasterFinders.master_images_id == master_images_query.id, 
                     MasterFinders.object_name == record.object_name).update(update_dict)
-                session.commit()
+        session.commit()
+        count = counter(count)
     session.close()
 
 #----------------------------------------------------------------------------
