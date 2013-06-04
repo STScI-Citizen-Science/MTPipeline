@@ -18,12 +18,12 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import relationship
 
-def loadConnection(connection_string):
+def loadConnection(connection_string, echo=False):
     '''
     Create and engine using an engine string. Declare a base and 
     metadata. Load the session and return a session object.
     '''
-    engine = create_engine(connection_string, echo=False)
+    engine = create_engine(connection_string, echo=echo)
     Base = declarative_base(engine)
     metadata = Base.metadata
     Session = sessionmaker(bind=engine)
@@ -117,5 +117,5 @@ def update_record(record_dict, query):
     insert_record for details.
     '''
     check_type(record_dict, dict)
-    query.update(record_dict)
+    count = query.update(record_dict)
     session.commit()

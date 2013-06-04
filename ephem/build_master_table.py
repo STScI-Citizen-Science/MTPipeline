@@ -26,8 +26,7 @@ from sqlalchemy import distinct
 
 from database_interface import loadConnection
 from database_interface import MasterImages
-
-session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
+from database_interface import session
 
 # ----------------------------------------------------------------------------
 #
@@ -144,9 +143,6 @@ def make_set_info(record_dict):
             desc(MasterImages.set_index)).first()
         record_dict['set_index'] = max_set_index.set_index + 1
     return record_dict
-
-
-
 
 #----------------------------------------------------------------------------
 # The main controller.
