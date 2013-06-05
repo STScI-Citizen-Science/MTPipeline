@@ -21,11 +21,9 @@ from PIL import Image
 # Load all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-from database_interface import loadConnection
 from database_interface import MasterImages
 from database_interface import SubImages
-
-session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
+from database_interface import session
 
 #----------------------------------------------------------------------------
 # Low-Level Functions
@@ -146,6 +144,7 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
     filelist = glob.glob(args.filelist)
+    print 'Processing ' + str(len(filelist)) + ' files.'
     assert isinstance(filelist, list), \
         'Expected list for filelist, got ' + str(type(filelist))
     count = 0

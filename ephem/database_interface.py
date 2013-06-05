@@ -74,7 +74,6 @@ class SubImages(Base):
 
 import datetime
 
-
 def counter(count, update=100):
     '''
     Advance the count and print a status message every 100th item.
