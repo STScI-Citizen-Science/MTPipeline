@@ -98,7 +98,6 @@ def build_finders_table_main(reproc):
             update_record(record_dict, duplicate_query)
         count = counter(count)
 
-test test test 
 #----------------------------------------------------------------------------
 # For command line execution
 #----------------------------------------------------------------------------
