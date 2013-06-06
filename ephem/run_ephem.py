@@ -124,6 +124,7 @@ def run_ephem_main(filelist, reproc=False):
     and writes the output to the database.
     '''
     file_list = glob.glob(filelist)
+    print 'Processing ' + str(len(file_list)) + ' files.'
     count = 0
     for filename in file_list:
         file_dict = get_header_info(filename)
@@ -163,7 +164,7 @@ def parse_args():
     parser.add_argument(
         '-filelist',
         required = True,
-        help = 'Search string for files. Wildcards accepted.')
+        help = 'Search string for FITS files. Wildcards accepted.')
     parser.add_argument(
         '-reproc',
         required = False,
