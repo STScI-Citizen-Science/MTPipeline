@@ -9,12 +9,17 @@ import os
 import pyfits
 
 from sqlalchemy import create_engine
+from sqlalchemy import DateTime
 from sqlalchemy import Column
+from sqlalchemy import Float
 from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import MetaData
 from sqlalchemy import String
+
 from sqlalchemy.ext.declarative import declarative_base
+
+from sqlalchemy.orm import backref
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import relationship
 
@@ -42,16 +47,35 @@ class Finders(Base):
     Subclasses the Base class for the SQLAlchemy declarative base.
     '''
     __tablename__ = 'finders'
-    __table_args__ = {'autoload':True}
-
+    id = Column(Integer(11), primary_key=True)
+    sub_image_id = Column(Integer(11), 
+        ForeignKey('sub_images.id'),
+        nullable=False)
+    x = Column(Float)
+    y = Column(Float)
+    diameter = Column(Float)
+    object_name = Column(String(50))
+    description = Column(String(50))
+    mysql_engine = 'InnoDB'
+    sub_images = relationship("SubImages", backref=backref('finders', order_by=id))
 
 class MasterFinders(Base):
     '''
     Class for interacting with the master_finders MySQL table.
     '''
     __tablename__ = 'master_finders'
-    __table_args__ = {'autoload':True}
-    
+    id = Column(Integer(11), primary_key=True)
+    object_name = Column(String(45))
+    master_images_id = Column(Integer(11), 
+        ForeignKey('master_images.id'),
+        nullable=False)
+    ephem_x = Column(Integer(11))
+    ephem_y = Column(Integer(11))
+    version = Column(Integer(2))
+    jpl_ra = Column(String(15))
+    jpl_dec = Column(String(15))
+    mysql_engine = 'InnoDB'
+    master_images = relationship("MasterImages", backref=backref('master_finders', order_by=id))
 
 class MasterImages(Base):
     '''
@@ -59,14 +83,67 @@ class MasterImages(Base):
     Subclasses the Base class for the SQLAlchemy declarative base.
     '''
     __tablename__ = 'master_images'
-    __table_args__ = {'autoload':True}
+    id  = Column(Integer(11), primary_key=True)
+    project_id  = Column(Integer(11))
+    name = Column(String(50), unique=True)
+    fits_file = Column(String(50), unique=True)
+    object_name = Column(String(50))
+    set_id = Column(Integer(2))
+    set_index = Column(Integer(5))
+    width = Column(Integer(4))
+    height = Column(Integer(4))
+    minimum_ra = Column(Float(30))
+    minimum_dec = Column(Float(30))
+    maximum_ra = Column(Float(30))
+    maximum_dec = Column(Float(30))
+    pixel_resolution = Column(Float(10))
+    priority = Column(Integer(1), default=1)
+    description = Column(String(50))
+    file_location = Column(String(100))
+    visit = Column(Integer(3))
+    orbit = Column(Integer(3))
+    drz_mode  = Column(String(5))
+    mysql_engine = 'InnoDB'
+
 
 class SubImages(Base):
     '''
     Class for interacting with the sub_images MySQL table.
     '''
     __tablename__ = 'sub_images'
-    __table_args__ = {'autoload':True}
+    id  = Column(Integer(11), primary_key=True)
+    project_id = Column(Integer(11))
+    master_images_id = Column(Integer(11), 
+        ForeignKey('master_images.id'),
+        nullable=False)
+    master_image_name = Column(String(50), 
+        ForeignKey('master_images.name'),
+        nullable=False)
+    name = Column(String(50))
+    x = Column(Integer(11))
+    y = Column(Integer(11))
+    width = Column(Integer(11))
+    height = Column(Integer(11))
+    image_width = Column(Integer(11))
+    image_height = Column(Integer(11))
+    scale_level = Column(Integer(11))
+    file_location = Column(String(100))
+    thumbnail_location = Column(String(100))
+    active = Column(Integer(1))
+    confirmed = Column(Integer(1))
+    description = Column(String(50))
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
+    priority = Column(Float)
+    done = Column(Integer(1))
+    view_count = Column(Integer(11))
+    region = Column(Integer(2))
+    mysql_engine = 'InnoDB'
+    master_images = relationship("MasterImages", 
+        backref=backref('sub_images', order_by=id))
+
+Base.metadata.drop_all()
+Base.metadata.create_all()
 
 #----------------------------------------------------------------------------
 # General Utility Functions
