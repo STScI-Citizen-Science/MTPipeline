@@ -142,9 +142,6 @@ class SubImages(Base):
     master_images = relationship("MasterImages", 
         backref=backref('sub_images', order_by=id))
 
-Base.metadata.drop_all()
-Base.metadata.create_all()
-
 #----------------------------------------------------------------------------
 # General Utility Functions
 #----------------------------------------------------------------------------
