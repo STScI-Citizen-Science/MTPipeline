@@ -88,6 +88,7 @@ def make_record_dict(png_file, fits_file):
     linenum = pyfits.getval(fits_file, 'LINENUM')
     record_dict['visit'] = linenum.split('.')[0]
     record_dict['orbit'] = linenum.split('.')[1]
+    record_dict['drz_mode'] = fits_name.split('_')[-3]
     record_dict = make_set_info(record_dict)
     return record_dict
 
