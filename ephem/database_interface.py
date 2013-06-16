@@ -116,7 +116,7 @@ class SubImages(Base):
     master_images_id = Column(Integer(11), 
         ForeignKey('master_images.id'),
         nullable=False)
-    master_image_name = Column(String(50), 
+    master_images_name = Column(String(50), 
         ForeignKey('master_images.name'),
         nullable=False)
     name = Column(String(50))
@@ -143,7 +143,7 @@ class SubImages(Base):
         primaryjoin=(master_images_id==MasterImages.id),
         backref=backref('master_images_id_ref', order_by=id))
     master_images_name_rel = relationship(MasterImages,
-        primaryjoin=(master_image_name==MasterImages.name), 
+        primaryjoin=(master_images_name==MasterImages.name), 
         backref=backref('master_images_name_ref', order_by=id))
  
 

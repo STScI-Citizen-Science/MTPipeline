@@ -95,8 +95,8 @@ def build_sub_images_table_main(filename, reproc):
 
     # Make the input dict
     record_dict = {}
-    record_dict['master_image_id'] = master_images_query.id
-    record_dict['master_image_name'] = master_images_query.name
+    record_dict['master_images_id'] = master_images_query.id
+    record_dict['master_images_name'] = master_images_query.name
     record_dict['name'] = basename
     record_dict['file_location'] = path
     record_dict['image_width'] = image_width 
