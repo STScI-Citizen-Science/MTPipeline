@@ -102,7 +102,7 @@ class MasterImages(Base):
     file_location = Column(String(100))
     visit = Column(Integer(3))
     orbit = Column(Integer(3))
-    drz_mode  = Column(String(5))
+    drz_mode  = Column(String(6))
     mysql_engine = 'InnoDB'
 
 
