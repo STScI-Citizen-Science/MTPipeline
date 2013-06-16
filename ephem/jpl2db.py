@@ -329,6 +329,7 @@ if __name__ == '__main__':
     assert isinstance(filelist, list), \
         'Expected list for filelist, got ' + str(type(filelist))
     assert filelist != [], 'No files found.'
+    print 'Processing ' + str(len(filelist)) + ' files.'
     count = 0
     for filename in filelist:
         jpl2db_main(filename, args.reproc)

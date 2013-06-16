@@ -48,7 +48,7 @@ class Finders(Base):
     '''
     __tablename__ = 'finders'
     id = Column(Integer(11), primary_key=True)
-    sub_image_id = Column(Integer(11), 
+    sub_images_id = Column(Integer(11), 
         ForeignKey('sub_images.id'),
         nullable=False)
     x = Column(Float)
