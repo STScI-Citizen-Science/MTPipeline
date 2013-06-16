@@ -5,8 +5,7 @@ Tests the ephem.py module
 '''
 
 import datetime
-import ephem
-from ephem import *
+from build_master_finders_table import *
 import os
 
 path_to_code = str(ephem.__file__)[:-20]
