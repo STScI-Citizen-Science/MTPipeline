@@ -139,8 +139,13 @@ class SubImages(Base):
     view_count = Column(Integer(11))
     region = Column(Integer(2))
     mysql_engine = 'InnoDB'
-    master_images = relationship("MasterImages", 
-        backref=backref('sub_images', order_by=id))
+    master_images_id_rel = relationship(MasterImages,
+        primaryjoin=(master_images_id==MasterImages.id),
+        backref=backref('master_images_id_ref', order_by=id))
+    master_images_name_rel = relationship(MasterImages,
+        primaryjoin=(master_image_name==MasterImages.name), 
+        backref=backref('master_images_name_ref', order_by=id))
+ 
 
 #----------------------------------------------------------------------------
 # General Utility Functions
