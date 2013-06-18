@@ -11,21 +11,21 @@ import glob
 import os
 import pyfits
 
-from build_master_table import get_fits_file
-
-from database_interface import loadConnection
-from database_interface import counter
-
-#from ephem import ephem_main
+#from build_master_table import get_fits_file
 
 #----------------------------------------------------------------------------
 # Load all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
-
+from database_interface import counter
+from database_interface import session
 from database_interface import MasterImages
 from database_interface import MasterFinders
+
+from sqlalchemy import or_
+
+from sqlalchemy.orm import subqueryload
+from sqlalchemy.orm import subqueryload_all
 
 #----------------------------------------------------------------------------
 # Low-Level Functions
@@ -118,37 +118,38 @@ def get_header_info(filename):
 # The main controller for the module
 #----------------------------------------------------------------------------
 
-def run_ephem_main(filelist, reproc=False):
+def run_ephem_main(reproc=False):
     '''
     The main controller for the module. It executes the code in ephem_main 
     and writes the output to the database.
     '''
-    file_list = glob.glob(filelist)
-    print 'Processing ' + str(len(file_list)) + ' files.'
+    #print 'Processing ' + str(len(file_list)) + ' files.'
     count = 0
-    for filename in file_list:
-        file_dict = get_header_info(filename)
+    query_list = session.query(MasterFinders, MasterImages).\
+        join(MasterImages).\
+        options(subqueryload('master_images_rel')).\
+        filter(or_(MasterFinders.jpl_ra != None, MasterFinders.jpl_dec != None)).\
+        all()
 
-        # Get the unique record from the master_images table.
-        master_images_query = session.query(MasterImages).filter(\
-            MasterImages.fits_file == os.path.basename(filename)).one()
-
-        # Perform the calculation
-        master_finder_query = session.query(MasterFinders).filter(\
-            MasterFinders.master_images_id == master_images_query.id).filter(\
-            MasterFinders.jpl_ra != None)
-        for record in master_finder_query:
-            if record.ephem_x == None or record.ephem_y == None or reproc == True:    
-                delta_x, delta_y = calc_delta(file_dict, record)
-                ephem_x, ephem_y = calc_pixel_position(file_dict, delta_x, delta_y)
-                update_dict = {}
-                update_dict['ephem_x'] = int(ephem_x)
-                update_dict['ephem_y'] = int(ephem_y)
-                session.query(MasterFinders).filter(\
-                    MasterFinders.master_images_id == master_images_query.id, 
-                    MasterFinders.object_name == record.object_name).update(update_dict)
-        session.commit()
+    print 'Processing ' + str(len(query_list)) + ' files.' 
+    for record in query_list:
+        if record.MasterFinders.ephem_x == None \
+                or record.MasterFinders.ephem_y == None \
+                or reproc == True:
+            file_dict = get_header_info(\
+                os.path.join(\
+                    record.MasterImages.file_location[0:-4], 
+                    record.MasterImages.fits_file))
+            delta_x, delta_y = calc_delta(file_dict, record.MasterFinders)
+            ephem_x, ephem_y = calc_pixel_position(file_dict, delta_x, delta_y)
+            update_dict = {}
+            update_dict['ephem_x'] = int(ephem_x)
+            update_dict['ephem_y'] = int(ephem_y)
+            session.query(MasterFinders).\
+                filter(MasterFinders.id == record.MasterFinders.id).\
+                update(update_dict)
         count = counter(count)
+    session.commit()
     session.close()
 
 #----------------------------------------------------------------------------
@@ -161,10 +162,6 @@ def parse_args():
     '''
     parser = argparse.ArgumentParser(
         description = 'Generate the ephemeride data.')
-    parser.add_argument(
-        '-filelist',
-        required = True,
-        help = 'Search string for FITS files. Wildcards accepted.')
     parser.add_argument(
         '-reproc',
         required = False,
@@ -179,4 +176,4 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
-    run_ephem_main(args.filelist, args.reproc)
+    run_ephem_main(args.reproc)

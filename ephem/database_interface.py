@@ -57,7 +57,7 @@ class Finders(Base):
     object_name = Column(String(50))
     description = Column(String(50))
     mysql_engine = 'InnoDB'
-    sub_images = relationship("SubImages", backref=backref('finders', order_by=id))
+    sub_images_rel = relationship("SubImages", backref=backref('finders', order_by=id))
 
 class MasterFinders(Base):
     '''
@@ -75,7 +75,7 @@ class MasterFinders(Base):
     jpl_ra = Column(String(15))
     jpl_dec = Column(String(15))
     mysql_engine = 'InnoDB'
-    master_images = relationship("MasterImages", backref=backref('master_finders', order_by=id))
+    master_images_rel = relationship("MasterImages", backref=backref('master_finders', order_by=id))
 
 class MasterImages(Base):
     '''
