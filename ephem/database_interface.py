@@ -39,17 +39,24 @@ def loadConnection(connection_string, echo=False):
 # Define all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
+session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline', False)
 
 class Finders(Base):
     '''
     Class for interacting with the master_images MySQL table. 
     Subclasses the Base class for the SQLAlchemy declarative base.
     '''
+    #def __init__(self, **kwargs):
+    #    for k, v in kwargs.iteritems():
+    #        setattr(self, k, v)
+
     __tablename__ = 'finders'
     id = Column(Integer(11), primary_key=True)
     sub_images_id = Column(Integer(11), 
         ForeignKey('sub_images.id'),
+        nullable=False)
+    master_finders_id = Column(Integer(11),
+        ForeignKey('master_finders.id'),
         nullable=False)
     x = Column(Float)
     y = Column(Float)
@@ -57,7 +64,11 @@ class Finders(Base):
     object_name = Column(String(50))
     description = Column(String(50))
     mysql_engine = 'InnoDB'
-    sub_images_rel = relationship("SubImages", backref=backref('finders', order_by=id))
+    sub_images_rel = relationship('SubImages', 
+        backref=backref('sub_images', order_by=id))
+    master_finders_rel = relationship('MasterFinders', 
+        backref=backref('master_finders', order_by=id))
+
 
 class MasterFinders(Base):
     '''
@@ -75,7 +86,9 @@ class MasterFinders(Base):
     jpl_ra = Column(String(15))
     jpl_dec = Column(String(15))
     mysql_engine = 'InnoDB'
-    master_images_rel = relationship("MasterImages", backref=backref('master_finders', order_by=id))
+    master_images_rel = relationship("MasterImages", 
+        backref=backref('master_finders', order_by=id))
+
 
 class MasterImages(Base):
     '''
@@ -180,6 +193,9 @@ def check_type(instance, expected_type):
 def insert_record(record_dict, tableclass_instance):
     '''
     Insert the value into the database using SQLAlchemy.
+
+    This is being phased out in favor of a proper __init__ method for 
+    the mapped classes.
     '''
     record = tableclass_instance
     check_type(record_dict, dict)

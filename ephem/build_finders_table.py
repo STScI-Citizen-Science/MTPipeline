@@ -19,7 +19,6 @@ from database_interface import update_record
 #----------------------------------------------------------------------------
 
 from database_interface import session
-from database_interface import insert_record
 from database_interface import Finders
 from database_interface import MasterFinders
 from database_interface import MasterImages
@@ -27,45 +26,61 @@ from database_interface import SubImages
 
 #----------------------------------------------------------------------------
 
-def get_ephem_region(record):
+def get_ephem_region(ephem_x, ephem_y):
     '''
     Figure out which region the ephemeris is in.
     '''
-    ephem_region = (((record.MasterFinders.ephem_x // 425) + 1) * 3) \
-        - (record.MasterFinders.ephem_y // 425)
+    ephem_region = ((min(ephem_x // 425, 3) + 1) * 3) \
+        - min(ephem_y // 425, 2)
+    assert ephem_region in range(1,13),\
+        'Region ' + str(ephem_region) + ' is not in [1,12]'
     return ephem_region
 
-def get_region_list(record):
+
+def get_region_list(ephem_x, ephem_y):
     '''
     Calculate which regions the ephemeris coordinate lays in.
     '''
     region_list = []
-    region_list.append(get_ephem_region(record))
+    region_list.append(get_ephem_region(ephem_x, ephem_y))
+    
     # Overlap in X
-    if record.MasterFinders.ephem_x % 425 <= 25 and record.MasterFinders.ephem_x >= 25:
-        region_list.append(get_ephem_region(record) - 3)
+    if ephem_x % 425 <= 25 and ephem_x >= 425 and ephem_x <= 1300:
+            region_list.append(get_ephem_region(ephem_x, ephem_y) - 3)
+    
     # Overlap in Y
-    if record.MasterFinders.ephem_y % 425 <= 25 and record.MasterFinders.ephem_y >= 25:
-        region_list.append(get_ephem_region(record) + 1)
+    if ephem_y % 425 <= 25 and ephem_y >= 425 and ephem_y <= 875:
+            region_list.append(get_ephem_region(ephem_x, ephem_y) + 1)
+    
     # Overlap in X and Y
-    if record.MasterFinders.ephem_x % 425 <= 25 \
-        and record.MasterFinders.ephem_x >= 25 \
-        and record.MasterFinders.ephem_y % 425 <= 25 \
-        and record.MasterFinders.ephem_y >= 25:
-            region_list.append(get_ephem_region(record) - 2)
+    if ephem_x % 425 <= 25 and ephem_x >= 425 and ephem_x <= 1300\
+        and ephem_y % 425 <= 25 and ephem_y >= 425 and ephem_y <= 875:
+            region_list.append(get_ephem_region(ephem_x, ephem_y) - 2)
+    
+    # Check and return
+    assert len(region_list) in [1, 2, 4], \
+        'Unexpected number of regions in list: {}'.format(len(region_list))
+    for region in region_list:
+        assert region in range(1,13), \
+            'Region {} is not in [1,12]: coords: {}, {}'.\
+            format(region, ephem_x, ephem_y)
     return region_list
 
-def make_record_dict(record):
+
+def add_new_record(record, region):
     '''
     Make a dictionary of all the data for a record.
     '''
-    record_dict = {}
-    record_dict['sub_image_id'] = int(record.SubImages.id)
-    record_dict['object_name'] = record.MasterFinders.object_name
-    record_dict['x'] = record.ephem_x - ((record.ephem_x // 425) * 425)
-    record_dict['y'] = record.ephem_y - ((record.ephem_y // 425) * 425)
-    check_type(record_dict, dict)
-    return record_dict
+    finders = Finders()
+    finders.sub_images_id = session.query(SubImages.id)\
+                .filter(SubImages.master_images_id == record.MasterFinders.master_images_id)\
+                .filter(SubImages.region == region)\
+                .one().id
+    finders.master_finders_id = record.MasterFinders.id
+    finders.object_name = record.MasterFinders.object_name
+    finders.x = record.MasterFinders.ephem_x - ((record.MasterFinders.ephem_x // 425) * 425)
+    finders.y = record.MasterFinders.ephem_y - ((record.MasterFinders.ephem_y // 425) * 425)
+    session.add(finders)
 
 
 #----------------------------------------------------------------------------
@@ -84,22 +99,25 @@ def build_finders_table_main(reproc):
         .filter(MasterFinders.ephem_x >= 0)\
         .filter(MasterFinders.ephem_y >= 0)\
         .filter(MasterFinders.ephem_x <= 1725)\
-        .filter(MasterFinders.ephem_x <= 1300)\
-        .filter(MasterImages.drz_mode == 'center').all()
-    print str(len(query)) + ' ephemerides in image FOVs'
+        .filter(MasterFinders.ephem_y <= 1300)\
+        .filter(MasterImages.drz_mode == 'wide')\
+        .all()
+    print str(len(query)) + ' ephemerides in wide mode image FOVs'
+
+    count = 0
     for record in query:
-        region_list = get_region_list(record)
+        count = counter(count)
+        region_list = get_region_list(record.MasterFinders.ephem_x, record.MasterFinders.ephem_y)
         for region in region_list:
-            print record.MasterFinders.master_images_id
-            print region
-            subimage_query = session.query(SubImages)\
-                .filter(SubImages.master_image_id == record.MasterFinders.master_images_id)\
-                .filter(SubImages.region == region).one()
-            return
+            add_new_record(record, region)
+    session.commit()
+    session.close()
+
 
 #----------------------------------------------------------------------------
 # For command line execution
 #----------------------------------------------------------------------------
+
 
 def parse_args():
     '''
