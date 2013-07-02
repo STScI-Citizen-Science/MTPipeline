@@ -55,15 +55,15 @@ def runScript(path):
     path = os.path.join(path,'png')
     os.chdir(path)
     listDir=os.listdir(path)
-    # #for all wide images
-    # output = os.path.join(PATH,"movies", source + "AllWide.mp4") 
-    # subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
-    #                 '-pattern_type', 'glob', '-i','*wide*.png',
-    #                 output])
-    # #for the comsmic ray rejected wide images   
-    # output = os.path.join(PATH,"movies", source + "CRWide.mp4") 
-    # subprocess.call(['ffmpeg', '-f',' image2', '-r', '1',' -pattern_type',
-    #                 'glob', '-i', '*cr*wide*.png', output])
+    #for all wide images
+    output = os.path.join(PATH,"movies", source + "AllWide.mp4") 
+    subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
+                    '-pattern_type', 'glob', '-i','*wide*.png',
+                    output])
+    #for the comsmic ray rejected wide images   
+    output = os.path.join(PATH,"movies", source + "CRWide.mp4") 
+    subprocess.call(['ffmpeg', '-f',' image2', '-r', '1',' -pattern_type',
+                    'glob', '-i', '*cr*wide*.png', output])
     #for the non-cosmic ray rejected wide images
     output = os.path.join(PATH,"movies", source + "nonCRWide.mp4") 
     #make a list of non-CR rejected wide images
