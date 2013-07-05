@@ -7,32 +7,23 @@ Organisation: Space Telescope Science Institute
 Utility to automatically create mpeg movies from png images. Uses 
 subprocess module calls to the ffmpeg application.
 
-Arguments: 
--source [-s] for carrying out the script on a 
-particular sub-directory only
 """
 
-import argparse #module for parsing command-line arguments easily
-import subprocess #subprocess module to execute external modules
-import os #the standard os module for folder and file operations
-import shutil #module with high level file operations 
+import argparse 
+import subprocess 
+import os 
 
-PATH = "/astro/3/mutchler/mt/drizzled" #default path to the images 
+
+PATH = "/astro/3/mutchler/mt/drizzled" #image path
 
 global source
 
 def parse_args():
     '''
-    parse the command line arguemnts. uses argparse module.
+    parse the command line arguments.
     '''
     parser = argparse.ArgumentParser(
         description = 'Create mpeg movies from pngs using ffmpeg')
-    parser.add_argument(
-        '-name',
-        '-n',
-        required = False,        
-        default = False,
-        help = 'include the name of the objects in the output video')
     parser.add_argument(
         '-source',
         '-s',
@@ -42,86 +33,61 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-def runScript(path):
+def buildMovies(movieType, path):
     """
-    makes a subprocess call to the ffmpeg tool to create 6 different movies:
-    1. All the wide images (<source>.AllWide.mp4)
-    2. The cosmic ray rejected wide images(<source>.CRWide.mp4)
-    3. The non-cosmic ray rejected wide images(<source>.nonCRWide.mp4)
-    4. All the center images (<source>.AllCenter.mp4)
-    5. The cosmic ray rejected center images (<source>.CRCenter.mp4)
-    6. The non-cosmic ray rejected center images (<source>.nonCRCenter.mp4)
+    makes a subprocess call to the ffmpeg tool to create the movies.
     """
-    source =path.split('/')[6] 
     temp=os.path.join(PATH, 'temp')
+    listDir=os.listdir(path)
+
+    output = os.path.join(PATH,"movies", "temp", source + "All" + movieType + ".mp4") 
+    subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
+                    '-pattern_type', 'glob', '-i','*'+ movieType + '*linear.png',
+                    output])
+    #for the comsmic ray rejected images   
+    output = os.path.join(PATH,"movies", "temp", source + "CR" + movieType + ".mp4") 
+    subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
+                    '-pattern_type', 'glob', '-i', '*cr*' + movieType + '*linear.png',
+                    output])
+    #for the non-cosmic ray rejected images
+    output = os.path.join(PATH,"movies", "temp", source + "nonCR" + movieType + ".mp4") 
+    #make a list of non-CR rejected images
+    nonCRWideInput=[i for i in listDir if movieType in i and'linear' in i and 'cr' not in i]
+    #copy all the non-CR rejected images to the temp directory
+    for files in nonCRWideInput:
+        subprocess.call(['cp', files, temp])
+    os.chdir(temp) 
+    #carry out the ffmpeg script for our copied files
+    subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
+                '-pattern_type', 'glob', '-i','*'+ movieType + '*linear.png',
+                output])
+    subprocess.call('rm *.png', shell=True) #delete the temporary files 
+    os.chdir(path) #change back to our PATH
+
+
+def runScript(path):
+    '''
+    run scripts for both center and wide images
+    '''
+    source =path.split('/')[6] 
     path = os.path.join(path,'png')
     try:
         os.chdir(path)
     except:
         return 
-    listDir=os.listdir(path)
 
-    ###WIDE###
+    movieType = 'wide'
+    buildMovies(movieType, path)
+    movieType = 'center'
+    buildMovies(movieType, path)
     
-    #for all wide images
-    output = os.path.join(PATH,"movies", source + "AllWide.mp4") 
-    subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
-                    '-pattern_type', 'glob', '-i','*wide*linear.png',
-                    output])
-    #for the comsmic ray rejected wide images   
-    output = os.path.join(PATH,"movies", source + "CRWide.mp4") 
-    subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
-                    '-pattern_type', 'glob', '-i','*cr*wide*linear.png',
-                    output])
-    #for the non-cosmic ray rejected wide images
-    output = os.path.join(PATH,"movies", source + "nonCRWide.mp4") 
-    #make a list of non-CR rejected wide images
-    nonCRWideInput=[i for i in listDir if 'wide' in i and'linear' in i and 'cr' not in i]
-    #copy all the non-CR rejected wide images to the temp directory
-    for files in nonCRWideInput:
-        subprocess.call(['cp', files, temp])
-    os.chdir(temp) #change to temp directory
-    #carry out the ffmpeg script for our copied files
-    subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
-                '-pattern_type', 'glob', '-i','*wide*linear.png',
-                output])
-    subprocess.call('rm *.png', shell=True) #delete the temporary files 
-    os.chdir(path) #change back to our PATH
-
-    ###CENTER###
-
-      
-    #for all center images
-    output = os.path.join(PATH,"movies", source + "AllCenter.mp4") 
-    subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
-                    '-pattern_type', 'glob', '-i','*center*linear.png',
-                    output])
-    #for the comsmic ray rejected center images   
-    output = os.path.join(PATH,"movies", source + "CRCenter.mp4") 
-    subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
-                    '-pattern_type', 'glob', '-i','*cr*center*linear.png',
-                    output])
-    #for the non-cosmic ray rejected center images
-    output = os.path.join(PATH,"movies", source + "nonCRCenter.mp4") 
-    #make a list of non-CR rejected center images
-    nonCRWideInput=[i for i in listDir if 'center' in i and'linear' in i and 'cr' not in i]
-    #copy all the non-CR rejected center images to the temp directory
-    for files in nonCRWideInput:
-        subprocess.call(['cp', files, temp])
-    os.chdir(temp) #change to temp directory
-    #carry out the ffmpeg script for our copied files
-    subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
-                '-pattern_type', 'glob', '-i','*center*linear.png',
-                output])
-    subprocess.call('rm *.png', shell=True) #delete the temporary files 
-    os.chdir(path) #change back to our PATH
 def createMovie(source):
     """
     parses whether the script is to be run for a particular subfolder or
     all the subfolders and calls the runScript function accordingly.
     If no subfolder given calls runScript iteratively on all subfolders.
     """
-    path = PATH #path to default path
+    path = PATH 
     if source: #add sub-directory to path if given
         path = PATH + '/' + source
         runScript(path)
@@ -131,13 +97,9 @@ def createMovie(source):
                 path=PATH + '/' + dirs
                 runScript(path)
 
-                #runScript(path)
-            # if os.path.isdir(os.path.join(path, dirs)):
-            #     path=os.path.join(path, dirs)
-            #     runScript(path) #run script on subdirs
 
 if __name__ == '__main__':
-    args = parse_args() #parse the input arguments
-    source = args.source #get the source folder name (false if none)
-    currentDir = os.getcwd() #get the current working directory
-    createMovie(source) #run the movie script 
+    args = parse_args() 
+    source = args.source 
+    currentDir = os.getcwd() 
+    createMovie(source) 
