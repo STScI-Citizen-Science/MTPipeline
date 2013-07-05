@@ -19,6 +19,8 @@ import shutil #module with high level file operations
 
 PATH = "/astro/3/mutchler/mt/drizzled" #default path to the images 
 
+global source
+
 def parse_args():
     '''
     parse the command line arguemnts. uses argparse module.
@@ -50,10 +52,13 @@ def runScript(path):
     5. The cosmic ray rejected center images (<source>.CRCenter.mp4)
     6. The non-cosmic ray rejected center images (<source>.nonCRCenter.mp4)
     """
-    global source
+    source =path.split('/')[6] 
     temp=os.path.join(PATH, 'temp')
     path = os.path.join(path,'png')
-    os.chdir(path)
+    try:
+        os.chdir(path)
+    except:
+        return 
     listDir=os.listdir(path)
 
     ###WIDE###
@@ -117,17 +122,22 @@ def createMovie(source):
     If no subfolder given calls runScript iteratively on all subfolders.
     """
     path = PATH #path to default path
-    if source != False: #add sub-directory to path if given
+    if source: #add sub-directory to path if given
         path = PATH + '/' + source
         runScript(path)
     else: #else carry out operation for ALL sub-drectories
-        for dirs in os.listdir(path): 
-            if os.path.isdir(os.path.join(path, dirs)):
-                runScript(os.path.join(path, dirs)) #run script on subdirs
+        for dirs in os.listdir(path):
+            if dirs[0].isdigit():
+                path=PATH + '/' + dirs
+                runScript(path)
+
+                #runScript(path)
+            # if os.path.isdir(os.path.join(path, dirs)):
+            #     path=os.path.join(path, dirs)
+            #     runScript(path) #run script on subdirs
 
 if __name__ == '__main__':
     args = parse_args() #parse the input arguments
     source = args.source #get the source folder name (false if none)
     currentDir = os.getcwd() #get the current working directory
     createMovie(source) #run the movie script 
-
