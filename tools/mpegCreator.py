@@ -16,8 +16,6 @@ import os
 
 PATH = "/astro/3/mutchler/mt/drizzled" #image path
 
-global source
-
 def parse_args():
     '''
     parse the command line arguments.
@@ -37,22 +35,23 @@ def buildMovies(movieType, path):
     """
     makes a subprocess call to the ffmpeg tool to create the movies.
     """
-    temp=os.path.join(PATH, 'temp')
-    listDir=os.listdir(path)
+    SOURCE=path.split('/')[6]
+    temp = os.path.join(PATH, 'temp')
+    listDir = os.listdir(path)
 
-    output = os.path.join(PATH,"movies", "temp", source + "All" + movieType + ".mp4") 
+    output = os.path.join(PATH, "movies", "temp", SOURCE + "All" + movieType + ".mp4") 
     subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
                     '-pattern_type', 'glob', '-i','*'+ movieType + '*linear.png',
                     output])
     #for the comsmic ray rejected images   
-    output = os.path.join(PATH,"movies", "temp", source + "CR" + movieType + ".mp4") 
+    output = os.path.join(PATH, "movies", "temp", SOURCE + "CR" + movieType + ".mp4") 
     subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
                     '-pattern_type', 'glob', '-i', '*cr*' + movieType + '*linear.png',
                     output])
     #for the non-cosmic ray rejected images
-    output = os.path.join(PATH,"movies", "temp", source + "nonCR" + movieType + ".mp4") 
+    output = os.path.join(PATH, "movies", "temp", SOURCE + "nonCR" + movieType + ".mp4") 
     #make a list of non-CR rejected images
-    nonCRWideInput=[i for i in listDir if movieType in i and'linear' in i and 'cr' not in i]
+    nonCRWideInput = [i for i in listDir if movieType in i and'linear' in i and 'cr' not in i]
     #copy all the non-CR rejected images to the temp directory
     for files in nonCRWideInput:
         subprocess.call(['cp', files, temp])
@@ -69,37 +68,32 @@ def runScript(path):
     '''
     run scripts for both center and wide images
     '''
-    source =path.split('/')[6] 
     path = os.path.join(path,'png')
     try:
         os.chdir(path)
     except:
         return 
-
-    movieType = 'wide'
-    buildMovies(movieType, path)
-    movieType = 'center'
-    buildMovies(movieType, path)
+    buildMovies('wide', path)
+    buildMovies('center', path)
     
-def createMovie(source):
+def createMovie():
     """
     parses whether the script is to be run for a particular subfolder or
     all the subfolders and calls the runScript function accordingly.
     If no subfolder given calls runScript iteratively on all subfolders.
     """
     path = PATH 
-    if source: #add sub-directory to path if given
-        path = PATH + '/' + source
+    if SOURCE: #add sub-directory to path if given
+        path = PATH + '/' + SOURCE
         runScript(path)
     else: #else carry out operation for ALL sub-drectories
         for dirs in os.listdir(path):
             if dirs[0].isdigit():
-                path=PATH + '/' + dirs
+                path = PATH + '/' + dirs
                 runScript(path)
 
 
 if __name__ == '__main__':
     args = parse_args() 
-    source = args.source 
-    currentDir = os.getcwd() 
-    createMovie(source) 
+    SOURCE = args.source 
+    createMovie() 
