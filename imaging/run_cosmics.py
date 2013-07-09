@@ -39,10 +39,13 @@ def make_c1m_link(filename):
 
 # -----------------------------------------------------------------------------
 
-def run_cosmics(filename, output):
+def run_cosmics(filename):
     '''
     The main controller.
     '''
+    
+    output = filename.split('_')[0] + "_cr_" + filename.split('_')[1]
+
     # Assert the input file exists
     error = filename + ' input for run_cosmics in '
     error += 'run_cosmics.py does not exist.'
@@ -53,7 +56,7 @@ def run_cosmics(filename, output):
     if query == True:
         os.remove(output)
 
-    # Find the number of extentions.
+        # Find the number of extentions.
     header = pyfits.open(filename)
     header_count = len(header)
     header.close()
