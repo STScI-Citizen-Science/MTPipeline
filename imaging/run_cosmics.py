@@ -39,13 +39,12 @@ def make_c1m_link(filename):
 
 # -----------------------------------------------------------------------------
 
-def run_cosmics(filename):
+def run_cosmics(filename, iters, rn, sc):
     '''
     The main controller.
     '''
     
-    output = filename.split('_')[0] + "_cr_" + filename.split('_')[1]
-
+    output = filename.split('_')[0] + "_cr_" + str(iters) + "iters_" + str(rn)  + "rn_" + str(sc) + "sc_" + filename.split('_')[1]
     # Assert the input file exists
     error = filename + ' input for run_cosmics in '
     error += 'run_cosmics.py does not exist.'
@@ -85,8 +84,8 @@ def run_cosmics(filename):
                         array, 
                         pssl = 0.0, 
                         gain = 1.0, 
-                        readnoise = 5.0,
-                        sigclip = 3.0, 
+                        readnoise = rn, #5.0
+                        sigclip = sc, #3.0
                         sigfrac = 0.01, 
                         objlim = 4.0,
                         satlevel = 4095.0,
@@ -98,15 +97,15 @@ def run_cosmics(filename):
                         array, 
                         pssl = 0.0, 
                         gain=1.0, 
-                        readnoise=5.0,
-                        sigclip = 2.5, 
+                        readnoise = rn, #5.0
+                        sigclip = sc, #2.5 
                         sigfrac = 0.001, 
                         objlim = 5.0,
                         satlevel = 4095.0, 
                         verbose = True)
 
             # Run the full artillery
-            c.run(maxiter = 7)
+            c.run(maxiter = iters)
 
             # Write the cleaned image into a new FITS file
             # conserving the original header :
@@ -144,11 +143,29 @@ def parse_args():
         required = True,
         help = 'Search string for the fits files you want to ingest.\
             e.g. "dir/*.fits"')
+    parser.add_argument(
+        '-rn', 
+        '-readnoise',
+        required = True,
+        help = 'Set readnoise, default = 5.0')
+    parser.add_argument(
+        '-sc', 
+        '-sigclip',
+        required = True,
+        help = 'Set sigclip, default = 3.0')
+    parser.add_argument(
+        '-i',
+        '-iter', 
+        required = True,
+        help = 'Set max iteration, default = 7')
     args = parser.parse_args() 
     return args
 
 if __name__ == '__main__':
     args = parse_args()
     file_list = get_file_list(args.files)
+    iters = int(args.i)
+    rn = float(args.rn)
+    sc = float(args.sc) 
     for filename in file_list:
-        run_cosmics(filename)
+         run_cosmics(filename, iters, rn, sc)
