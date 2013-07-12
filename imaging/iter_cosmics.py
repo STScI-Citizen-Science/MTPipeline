@@ -1,8 +1,9 @@
-# iterate run_cosmics.py with different parameters 
+'''
+iterate run_cosmics.py with different parameters 
+'''
 
 import subprocess
 
-#python run_cosmics.py --files ../../temp/fits/u2mi0102t_c0m.fits -i 1 -sigmaclip 3.0 -readnoise 5.0
 
 for iters in range(0,10):
 	readnoise = 2.5
