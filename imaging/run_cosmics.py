@@ -39,12 +39,12 @@ def make_c1m_link(filename):
 
 # -----------------------------------------------------------------------------
 
-def run_cosmics(filename, iters, rn, sc):
+def run_cosmics(filename, iters, readnoise, sigmaclip):
     '''
     The main controller.
     '''
     
-    output = filename.split('_')[0] + "_cr_" + str(iters) + "iters_" + str(rn)  + "rn_" + str(sc) + "sc_" + filename.split('_')[1]
+    output = filename.split('_')[0] + "_cr_" + str(iters) + "iters_" + str(readnoise)  + "rn_" + str(sigmaclip) + "sc_" + filename.split('_')[1]
     # Assert the input file exists
     error = filename + ' input for run_cosmics in '
     error += 'run_cosmics.py does not exist.'
@@ -84,8 +84,8 @@ def run_cosmics(filename, iters, rn, sc):
                         array, 
                         pssl = 0.0, 
                         gain = 1.0, 
-                        readnoise = rn, #5.0
-                        sigclip = sc, #3.0
+                        readnoise = readnoise, #5.0
+                        sigclip = sigmaclip, #3.0
                         sigfrac = 0.01, 
                         objlim = 4.0,
                         satlevel = 4095.0,
@@ -97,8 +97,8 @@ def run_cosmics(filename, iters, rn, sc):
                         array, 
                         pssl = 0.0, 
                         gain=1.0, 
-                        readnoise = rn, #5.0
-                        sigclip = sc, #2.5 
+                        readnoise = readnoise, #5.0
+                        sigclip = sigmaclip, #2.5 
                         sigfrac = 0.001, 
                         objlim = 5.0,
                         satlevel = 4095.0, 
@@ -144,15 +144,15 @@ def parse_args():
         help = 'Search string for the fits files you want to ingest.\
             e.g. "dir/*.fits"')
     parser.add_argument(
-        '-rn', 
         '-readnoise',
+        '-rn', 
         required = True,
         help = 'Set readnoise, default = 5.0')
     parser.add_argument(
+        '-sigmaclip',
         '-sc', 
-        '-sigclip',
         required = True,
-        help = 'Set sigclip, default = 3.0')
+        help = 'Set sigmaclip, default = 3.0')
     parser.add_argument(
         '-i',
         '-iter', 
@@ -165,7 +165,7 @@ if __name__ == '__main__':
     args = parse_args()
     file_list = get_file_list(args.files)
     iters = int(args.i)
-    rn = float(args.rn)
-    sc = float(args.sc) 
+    readnoise = float(args.readnoise)
+    sigmaclip = float(args.sigmaclip) 
     for filename in file_list:
-         run_cosmics(filename, iters, rn, sc)
+         run_cosmics(filename, iters, readnoise, sigmaclip)
