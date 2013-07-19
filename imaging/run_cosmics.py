@@ -39,12 +39,11 @@ def make_c1m_link(filename):
 
 # -----------------------------------------------------------------------------
 
-def run_cosmics(filename, iters):
+def run_cosmics(filename, output, iters):
     '''
     The main controller.
     '''
     
-    output = filename.split('_')[0] + "_cr_" + filename.split('_')[1]
     # Assert the input file exists
     error = filename + ' input for run_cosmics in '
     error += 'run_cosmics.py does not exist.'
@@ -150,4 +149,5 @@ if __name__ == '__main__':
     args = parse_args()
     file_list = get_file_list(args.files)
     for filename in file_list:
-         run_cosmics(filename, 7)
+        output = filename.split('_')[0] + "_cr_" + filename.split('_')[1]
+        run_cosmics(filename, output, 7)

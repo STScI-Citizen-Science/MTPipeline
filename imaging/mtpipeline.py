@@ -100,7 +100,7 @@ def run_mtpipeline(root_filename, output_path = None, cr_reject_switch=True,
             print 'Not reprocessing cr_reject files.'
         else:
             print 'Running cr_reject'
-            run_cosmics(root_filename, output_file_dict['cr_reject_output'][1])
+            run_cosmics(root_filename, output_file_dict['cr_reject_output'][1], 7)
             print 'Done running cr_reject'
     else:
         print 'Skipping cr_reject'
