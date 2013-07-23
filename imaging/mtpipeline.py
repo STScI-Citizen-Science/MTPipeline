@@ -11,12 +11,19 @@ viana@stsci.edu
 import argparse
 import glob
 import os
+from getpass import getuser
+from socket import gethostname
+from platform import machine
+from platform import platform
+from platform import architecture
+from logger import logger as mtlogger
 from stwcs import updatewcs
 
 # Costum Packages
 from run_cosmics import run_cosmics
 from run_astrodrizzle import run_astrodrizzle
 from run_trim import run_trim
+
 
 # ----------------------------------------------------------------------------
 # Functions (alphabetical)
@@ -93,46 +100,58 @@ def run_mtpipeline(root_filename, output_path = None, cr_reject_switch=True,
     filename = os.path.abspath(root_filename) 
     output_file_dict = make_output_file_dict(root_filename)
 
-    # Run CR reject.
+    # Run CR reject
     if cr_reject_switch:
         output_check = check_for_outputs(output_file_dict['cr_reject_output'][1])
         if reproc_switch == False and output_check == True:
             print 'Not reprocessing cr_reject files.'
+            mtlogger.info("Not reprocessing cr_reject files.")
         else:
+            mtlogger.info("Running cr_reject")
             print 'Running cr_reject'
             run_cosmics(root_filename, output_file_dict['cr_reject_output'][1], 7)
             print 'Done running cr_reject'
+            mtlogger.info("Done running cr_reject")
     else:
+        mtlogger.info("Skipping cr_reject ")
         print 'Skipping cr_reject'
     
     # Run astrodrizzle.         
     if astrodrizzle_switch:
         output_check = check_for_outputs(output_file_dict['drizzle_output'])
         if reproc_switch == False and output_check == True:
+            mtlogger.info("Not reprocessing astrodrizzle files.")
             print 'Not reprocessing astrodrizzle files.'
         else:
+            mtlogger.info("Running Astrodrizzle")
             print 'Running Astrodrizzle'
             for filename in  output_file_dict['cr_reject_output']:
                 updatewcs.updatewcs(filename)
                 run_astrodrizzle(filename)
             print 'Done running astrodrizzle'
+            mtlogger.info("Done running astrodrizzle")
     else:
         print 'Skipping astrodrizzle'
+        mtlogger.info("Skipping astrodrizzle")
         
     # Run trim.
     if png_switch:
         output_check = check_for_outputs(output_file_dict['png_output'])
         if reproc_switch == False and output_check == True:
             print 'Not reprocessing png files.'
+            mtlogger.info("Not reprocessing png files.")
         else:
             print 'Running png'
+            mtlogger.info("Running png")
             for filename, weight_file in zip(output_file_dict['drizzle_output'], \
                     output_file_dict['drizzle_weight']):
                 output_path = os.path.join(os.path.dirname(filename), 'png')
                 run_trim(filename, weight_file, output_path)
             print 'Done running png'
+            mtlogger.info("Done running png")
     else:
         print 'Skipping running png'
+        mtlogger.info("Skipping running png")
         
 # ----------------------------------------------------------------------------
 # For command line execution.
@@ -186,14 +205,25 @@ def parse_args():
 # ------------------------------------------------------------------------------
 
 if __name__ == '__main__':
+    mtlogger.info("User: " + getuser() + " Host: " + gethostname()) 
+    mtlogger.info("Machine: " + machine() + " Platform: " + platform())
     args = parse_args()
+    mtlogger.info("Command-line arguments used:")
+    for arg in args.__dict__:
+        mtlogger.info(arg + ": " + str(args.__dict__[arg]))
     rootfile_list = glob.glob(args.filelist)
     rootfile_list = [x for x in rootfile_list if len(os.path.basename(x)) == 18]
     assert rootfile_list != [], 'empty rootfile_list in mtpipeline.py.'
     for filename in rootfile_list:
-        run_mtpipeline(filename, 
-            output_path =  args.output_path,
-            cr_reject_switch = args.cr_reject,
-            astrodrizzle_switch = args.astrodrizzle, 
-            png_switch = args.png,
-            reproc_switch = args.reproc)
+        mtlogger.info("Current File: " + filename)
+        try:
+            run_mtpipeline(filename, 
+                output_path =  args.output_path,
+                cr_reject_switch = args.cr_reject,
+                astrodrizzle_switch = args.astrodrizzle, 
+                png_switch = args.png,
+                reproc_switch = args.reproc)
+            mtlogger.info("Completed: " + filename)
+        except Exception as err:
+            mtlogger.critical(err)
+    mtlogger.info("Script completed")
