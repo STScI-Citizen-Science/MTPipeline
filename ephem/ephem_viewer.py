@@ -19,8 +19,6 @@ from PIL import Image
 # Connect the SQLAlchemy ORM declaritive base classes.
 #----------------------------------------------------------------------------
 
-#session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
-
 from database_interface import MasterImages
 from database_interface import MasterFinders
 
@@ -92,7 +90,6 @@ class EphemPlot(object):
         plt.savefig(outputFile)
         plt.draw()
         plt.grid(True)
-        raw_input("Waiting for input..")
 
 #----------------------------------------------------------------------------
 
