@@ -11,6 +11,8 @@ viana@stsci.edu
 import argparse
 import glob
 import os
+import logging
+from datetime import datetime
 from getpass import getuser
 from socket import gethostname
 from platform import machine
@@ -205,6 +207,14 @@ def parse_args():
 # ------------------------------------------------------------------------------
 
 if __name__ == '__main__':
+    #logging
+    today = []
+    today.append(str(datetime.now().date()) + str(datetime.now().time()))
+    logFile = logging.FileHandler(os.path.splitext(__file__)[0] + str(today[0]) + '.log')
+    logFile.setLevel(logging.DEBUG)
+    logFormat = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logFile.setFormatter(logFormat)
+    mtlogger.addHandler(logFile)
     mtlogger.info("User: " + getuser() + " Host: " + gethostname()) 
     mtlogger.info("Machine: " + machine() + " Platform: " + platform())
     args = parse_args()
