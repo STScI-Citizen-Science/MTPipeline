@@ -5,23 +5,26 @@ Viewing tools for WFC3 images.
 '''
 
 import argparse
+import glob
 import matplotlib.pyplot as plt
 import matplotlib.cbook as cbook
 import matplotlib.cm as cm
 import os
 import pyfits
 
-from database_interface import loadConnection
+
 from PIL import Image
 
 #----------------------------------------------------------------------------
 # Connect the SQLAlchemy ORM declaritive base classes.
 #----------------------------------------------------------------------------
 
-session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
+#session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
 
 from database_interface import MasterImages
 from database_interface import MasterFinders
+
+from database_interface import session
 
 #----------------------------------------------------------------------------
 # 
@@ -85,9 +88,11 @@ class EphemPlot(object):
         #    'CRPIX: (' + str(self.crpix1) + ',' + str(self.crpix2) + ')', 
         #    color = 'white')
         ax1.set_title(os.path.basename(self.filename))
+        outputFile = sourceFile.split('.')[0] + "_ephem.png"
+        plt.savefig(outputFile)
         plt.draw()
         plt.grid(True)
-        raw_input()
+        raw_input("Waiting for input..")
 
 #----------------------------------------------------------------------------
 
@@ -121,4 +126,6 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
-    ephem_viewer_main(args.file)
+    rootfile_list = glob.glob(args.file)
+    for sourceFile in rootfile_list:
+        ephem_viewer_main(sourceFile)
