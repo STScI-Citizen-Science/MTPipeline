@@ -26,6 +26,7 @@ from run_cosmics import run_cosmics
 from run_astrodrizzle import run_astrodrizzle
 from run_trim import run_trim
 
+LOGFOLDER = "/astro/3/mutchler/mt/logs/"
 
 # ----------------------------------------------------------------------------
 # Functions (alphabetical)
@@ -210,7 +211,8 @@ if __name__ == '__main__':
     #logging
     today = []
     today.append(str(datetime.now().date()) + str(datetime.now().time()))
-    logFile = logging.FileHandler(os.path.splitext(__file__)[0] + str(today[0]) + '.log')
+    logFile = logging.FileHandler(LOGFOLDER + os.path.splitext(__file__)[0] + str(today[0]) + '.log')
+    print os.path.splitext(__file__)[0]
     logFile.setLevel(logging.DEBUG)
     logFormat = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     logFile.setFormatter(logFormat)
