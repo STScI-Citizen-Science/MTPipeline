@@ -31,7 +31,7 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-def buildMovies(movieType, path):
+def buildMovies(movieType, path, scaleType):
     """
     makes a subprocess call to the ffmpeg tool to create the movies.
     """
@@ -39,26 +39,26 @@ def buildMovies(movieType, path):
     temp = os.path.join(ROOTPATH, 'temp')
     listDir = os.listdir(path)
 
-    output = os.path.join(ROOTPATH, "movies", "temp", source + "All" + movieType + ".mp4") 
+    output = os.path.join(ROOTPATH, "movies", "temp", source + "All" + movieType + scaleType + ".mp4") 
     subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
-                    '-pattern_type', 'glob', '-i','*'+ movieType + '*linear.png',
+                    '-pattern_type', 'glob', '-i','*'+ movieType + '*' + scaleType + '.png',
                     output])
     #for the comsmic ray rejected images   
-    output = os.path.join(ROOTPATH, "movies", "temp", source + "CR" + movieType + ".mp4") 
+    output = os.path.join(ROOTPATH, "movies", "temp", source + "CR" + movieType + scaleType + ".mp4") 
     subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
-                    '-pattern_type', 'glob', '-i', '*cr*' + movieType + '*linear.png',
+                    '-pattern_type', 'glob', '-i', '*cr*' + movieType + '*' + scaleType + '.png',
                     output])
     #for the non-cosmic ray rejected images
-    output = os.path.join(ROOTPATH, "movies", "temp", source + "nonCR" + movieType + ".mp4") 
+    output = os.path.join(ROOTPATH, "movies", "temp", source + "nonCR" + movieType + scaleType + ".mp4") 
     #make a list of non-CR rejected images
-    nonCRWideInput = [i for i in listDir if movieType in i and'linear' in i and 'cr' not in i]
+    nonCRWideInput = [i for i in listDir if movieType in i and scaleType in i and 'cr' not in i]
     #copy all the non-CR rejected images to the temp directory
     for files in nonCRWideInput:
         subprocess.call(['cp', files, temp])
     os.chdir(temp) 
     #carry out the ffmpeg script for our copied files
     subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
-                '-pattern_type', 'glob', '-i','*'+ movieType + '*linear.png',
+                '-pattern_type', 'glob', '-i','*'+ movieType + '*' + scaleType + '.png',
                 output])
     subprocess.call('rm *.png', shell=True) #delete the temporary files 
     os.chdir(path) #change back to our ROOTPATH
@@ -72,8 +72,10 @@ def runScript(path):
     
     os.chdir(path)
 
-    buildMovies('wide', path)
-    buildMovies('center', path)
+    buildMovies('wide', path, 'linear')
+    buildMovies('center', path, 'linear')
+    buildMovies('wide', path, 'log')
+    buildMovies('center', path, 'log')
     
 def createMovie():
     """
@@ -89,7 +91,10 @@ def createMovie():
         for dirs in os.listdir(path):
             if dirs[0].isdigit():
                 path = ROOTPATH + '/' + dirs
-                runScript(path)
+                try:
+                    runScript(path)
+                except:
+                    print 'path not valid'
 
 
 if __name__ == '__main__':
