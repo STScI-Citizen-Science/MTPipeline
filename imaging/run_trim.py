@@ -9,6 +9,7 @@ import argparse
 import copy
 import glob
 import Image
+import logging
 import numpy as N
 import os
 import pyfits
@@ -16,6 +17,9 @@ import time
 
 # Custom modules
 from display_tools import before_after
+
+logger = logging.getLogger('mtpipeline.run_trim')
+
 
 # -----------------------------------------------------------------------------
 # Low-Level Functions: Image Manipulation, etc.
@@ -57,7 +61,8 @@ def get_fits_data(filename, ext=0):
     Return the data from the extention as a numpy array.
     '''
     assert os.path.splitext(filename)[1] == '.fits', 'Inputs must be FITS file.'
-    data = pyfits.getdata(filename) 
+    data = pyfits.getdata(filename)
+    data = N.flipud(data) 
     return data
 
 # -----------------------------------------------------------------------------
@@ -107,7 +112,6 @@ def make_png(data, filename):
     encoding before writing.
     '''
     assert isinstance(data, N.ndarray), 'array must be numpy array'
-    data = N.flipud(data)
     data = N.uint8(data)
     image = Image.new('L', (data.shape[1], data.shape[0]))
     image.putdata(data.ravel())
@@ -203,7 +207,7 @@ def replace_by_weight(input_array, weight_array, output=False):
             before_array_name = 'Input Data',
             after_array_name = '0-Weight Corrected',
             output = output,
-            pause = False)  
+            pause = False)
     return output_array
 
 # -----------------------------------------------------------------------------
@@ -355,21 +359,25 @@ def run_trim(filename, weight_file, output_path, log_switch=False,
     output folder. Opens the data header extention. Uses a PNGCreator 
     instance to create trimmed and scaled pngs.
     '''
+    #import pdb; pdb.set_trace()
+    logger.info('filename: {0}'.format(filename))
     astrodrizzle_mode = filename.split('_')[-3]
-    print astrodrizzle_mode
+    logger.info('astrodrizzle mode: {0}'.format(astrodrizzle_mode))
 
-    # Make png folder if it doesn't exist.
-    png_path = os.path.join(os.path.dirname(filename), 'png')
-    test = os.access(png_path, os.F_OK)
+    # Define a default output folder
+    # Make the output folder if it doesn't exist.
+    if output_path == None:
+        output_path = os.path.join(os.path.dirname(filename), 'png')
+    test = os.access(output_path, os.F_OK)
     if test == False:
-        os.mkdir(png_path)
+        os.mkdir(output_path)
 
     # Get the data.
     data = get_fits_data(filename)
     weight_data = get_fits_data(weight_file) 
     
     # Create Linear full image
-    print 'Creating linear PNGs'
+    logger.info('Creating linear PNGs')
     pngc_linear = PNGCreator(data)
     pngc_linear.saturated_clip(weight_data, \
         output = make_png_name(output_path, filename, 'saturated_clip_stat'))
@@ -379,11 +387,12 @@ def run_trim(filename, weight_file, output_path, log_switch=False,
 
     # Create and save the trimmed linear images.
     if astrodrizzle_mode == 'wide':
+        logger.info('Creating linear subimages')
         make_subimage_pngs(pngc_linear, output_path, filename, 'linear_')
 
     # Create Log full Image
     if log_switch:
-        print 'Creating log PNGs'
+        logger.info('Creating log PNGs')
         pngc_log.positive(output = make_png_name(output_path, filename, 'positive_stat'))
         pngc_log.log(output = make_png_name(output_path, filename, 'log_stat'))
         pngc_log.bottom_clip(output = make_png_name(output_path, filename, 'bottom_clip_stat'))
@@ -395,11 +404,11 @@ def run_trim(filename, weight_file, output_path, log_switch=False,
         if astrodrizzle_mode == 'wide':
             make_subimage_pngs(pngc_log, output_path, filename, 'log_')
     else:
-        print 'Skipping log pngs.'
+        logger.info('Skipping log pngs.')
 
     # Create and save a full median image.
     if median_switch:
-        print 'Creating median PNGs'
+        logger.info('Creating median PNGs')
         pngc_median.median(output = make_png_name(output_path, filename, 'median_stat'))
         pngc_median.compress()
         pngc_median.save_png(make_png_name(output_path, filename, 'median'))
@@ -408,7 +417,7 @@ def run_trim(filename, weight_file, output_path, log_switch=False,
         if astrodrizzle_mode == 'wide':
             make_subimage_pngs(pngc_log, output_path, filename, 'median_')
     else:
-        print 'Skipping median PNGs.'        
+        logger.info('Skipping median PNGs.')     
 # -----------------------------------------------------------------------------
 # For command line execution.
 # -----------------------------------------------------------------------------
