@@ -17,6 +17,14 @@ import os
 import pyfits
 import telnetlib
 import time
+import logging
+import sys
+
+from getpass import getuser
+from socket import gethostname
+from platform import machine
+from platform import platform
+from platform import architecture
 
 from database_interface import counter
 from database_interface import check_type
@@ -30,12 +38,13 @@ from database_interface import loadConnection
 from database_interface import MasterImages
 from database_interface import MasterFinders
 
-session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
+from database_interface import session
+
+LOGFOLDER = "/astro/3/mutchler/mt/logs/"
 
 #----------------------------------------------------------------------------
 # Low-Level Functions
 #----------------------------------------------------------------------------
-
 
 def cgi_session(command_list):
     '''
@@ -101,7 +110,8 @@ def get_jpl_data(moon_dict, connection_type='cgi'):
         'e', 'o', 'geo',
         moon_dict['horizons_start_time'],
         moon_dict['horizons_end_time'],
-        '1m', 'y','1,2,3,4', 'n']
+                # '1m', 'y','1,2,3,4', 'n']
+        '1m', 'y','1,2,3,4,9,13', 'n']
     if connection_type == 'telnet':
         jpl_data = None
         while jpl_data == None:
@@ -120,7 +130,7 @@ def make_all_moon_dict(filename, file_dict):
     Returns a dict.
     '''
     path_to_code = os.path.dirname(__file__)
-    f = open(os.path.join(path_to_code, 'planets_and_moons.txt'))
+    f = open(os.path.join(path_to_code, 'planets_and_moons.txt'), 'r')
     full_moon_list = f.readlines()
     f.close()
 
@@ -147,6 +157,8 @@ def insert_record(moon_dict,  master_images_id):
     record.object_name = moon_dict['object']
     record.jpl_ra = moon_dict['jpl_ra']
     record.jpl_dec = moon_dict['jpl_dec']
+    record.diameter = moon_dict['jpl_ang_diam']
+    record.magnitude = moon_dict['jpl_APmag']
     record.master_images_id = master_images_id
     record.version = __version__
     session.add(record)
@@ -196,6 +208,8 @@ def parse_jpl_cgi(data):
             output['jpl_dec_apparent'] = line[6].replace(' ',':')
             output['jpl_ra_delta'] = line[7]
             output['jpl_dec_delta'] = line[8]
+            output['jpl_APmag'] = line[11]
+            output['jpl_ang_diam'] = line[13]
             return output
         if line == '$$SOE':
             soe_switch = True
@@ -204,7 +218,8 @@ def parse_jpl_cgi(data):
 
 def parse_jpl_telnet(data):
     '''
-    Grab the relevant information from the telnet output.
+    Grab the relevant information from the telnet output. 
+    (Not updated to include magnitude and diameter information)
     '''
     section = 0
     output = {}
@@ -233,6 +248,7 @@ def parse_jpl_telnet(data):
                     output['jpl_dec_apparent'] = line[11] + ':' + line[12] + ':' + line[13]
                     output['jpl_ra_delta'] = line[14]
                     output['jpl_dec_delta'] = line[15]
+                    # output['']
                     return output
 
 # ----------------------------------------------------------------------------
@@ -245,6 +261,10 @@ def update_record(moon_dict, master_images_id):
     update_dict['object_name'] = moon_dict['object']
     update_dict['jpl_ra'] = moon_dict['jpl_ra']
     update_dict['jpl_dec'] = moon_dict['jpl_dec']
+    if isinstance(moon_dict['jpl_APmag'], float):
+        update_dict['magnitude'] = moon_dict['jpl_APmag']
+    if isinstance(moon_dict['jpl_ang_diam'], float):
+        update_dict['diameter'] = moon_dict['jpl_ang_diam']
     update_dict['master_images_id'] = master_images_id
     update_dict['version'] = __version__
     session.query(MasterFinders).filter(\
@@ -322,15 +342,41 @@ def parse_args():
     return args
 
 #----------------------------------------------------------------------------
-
+    
 if __name__ == '__main__':
     args = parse_args()
     filelist = glob.glob(args.filelist)
+    logger = logging.getLogger('jpl2db')
+    logger.setLevel(logging.DEBUG)
+    log_file = logging.FileHandler(
+        os.path.join(
+            LOGFOLDER, 
+            'jpl2db-' + datetime.datetime.now().strftime('%Y-%m-%d') + '.log'))
+    log_file.setLevel(logging.DEBUG)
+    log_file.setFormatter(
+        logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+    logger.addHandler(log_file)
+    logger.info('User: {0}'.format(getuser()))
+    logger.info('Host: {0}'.format(gethostname())) 
+    logger.info('Machine: {0}'.format(machine()))
+    logger.info('Platform: {0}'.format(platform()))
+    logger.info("Command-line arguments used:")
+    for arg in args.__dict__:
+        logger.info(arg + ": " + str(args.__dict__[arg]))
+    rootfile_list = glob.glob(args.filelist)
+    rootfile_list = [x for x in rootfile_list if len(os.path.basename(x)) == 18]
     assert isinstance(filelist, list), \
         'Expected list for filelist, got ' + str(type(filelist))
     assert filelist != [], 'No files found.'
     print 'Processing ' + str(len(filelist)) + ' files.'
+    logger.info('Processing' + str(len(filelist)) + 'f iles.')
     count = 0
     for filename in filelist:
-        jpl2db_main(filename, args.reproc)
+        logger.info ('Now running for ' + filename)
+        try:
+            jpl2db_main(filename, args.reproc)
+            logger.info ("Completed for  : " + filename)
+        except Exception as err:
+            logger.critical('{0} {1} {2}'.format(
+                type(err), err.message, sys.exc_traceback.tb_lineno))
         count = counter(count, update = 10)
