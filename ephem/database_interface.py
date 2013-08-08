@@ -7,6 +7,7 @@ base.
 
 import os
 import pyfits
+import yaml
 
 from sqlalchemy import create_engine
 from sqlalchemy import DateTime
@@ -39,7 +40,10 @@ def loadConnection(connection_string, echo=False):
 # Define all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline', False)
+connection = yaml.load(open('connection.yaml'))
+connectionString = connection['connection']
+
+session, Base = loadConnection(connectionString, connection['echo'])
 
 class Finders(Base):
     '''
@@ -85,6 +89,8 @@ class MasterFinders(Base):
     version = Column(Integer(2))
     jpl_ra = Column(String(15))
     jpl_dec = Column(String(15))
+    magnitude = Column(Float)
+    diameter = Column(Float)
     mysql_engine = 'InnoDB'
     master_images_rel = relationship("MasterImages", 
         backref=backref('master_finders', order_by=id))
