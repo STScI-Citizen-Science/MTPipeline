@@ -9,6 +9,7 @@ import glob
 import matplotlib.pyplot as plt
 import matplotlib.cbook as cbook
 import matplotlib.cm as cm
+import matplotlib.patches as mpatches 
 import os
 import pyfits
 
@@ -76,10 +77,22 @@ class EphemPlot(object):
         ax1.set_xlim(ax1.get_xlim())
         ax1.set_ylim(ax1.get_ylim())
         for moon in self.master_finders_query:
-            ax1.plot(moon.ephem_x, moon.ephem_y, 'o', markersize = 10, 
-                markerfacecolor = 'none', markeredgecolor = 'white')
-        #   ax1.text(moon.ephem_x, moon.ephem_y, moon.object_name, 
-        #       color = 'white')
+            if isinstance(moon.diameter, float) and (  moon.diameter/0.05) > 10:
+                diam = moon.diameter/0.05 #conversion form arcsecs to pixels
+            else:
+                diam = 10
+            # old way of marking objects using markersize and not mpatches    
+            # ax1.plot(moon.ephem_x, moon.ephem_y, 'o', markersize = 10,    
+            #     markerfacecolor = 'none', markeredgecolor = 'white')
+            circle = mpatches.Circle((moon.ephem_x, moon.ephem_y),
+                     diam/2, fill = False, ec = "r")
+            ax1.add_patch(circle)
+            print args.label
+            if args.label == "True":
+                ax1.text(moon.ephem_x + 20, moon.ephem_y + 20, moon.object_name.title(),
+                        color="blue")
+          # ax1.text(moon.ephem_x, moon.ephem_y, moon.object_name, 
+          #   color = 'white')
         #ax1.plot(self.crpix1, self.crpix2, 'o', markersize = 10, 
         #    markerfacecolor = 'none', markeredgecolor = 'white')
         #ax1.text(self.crpix1, self.crpix2, 
@@ -116,6 +129,12 @@ def parse_args():
         '-file',
         required = True,
         help = 'The file to display.')
+    parser.add_argument(
+        '-label',
+        required = False,
+        default = False,
+        help = 'Toggle labelling of objects.'
+        )
     args = parser.parse_args()
     return args
 
