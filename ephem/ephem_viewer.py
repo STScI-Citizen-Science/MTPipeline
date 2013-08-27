@@ -87,7 +87,6 @@ class EphemPlot(object):
             circle = mpatches.Circle((moon.ephem_x, moon.ephem_y),
                      diam/2, fill = False, ec = "r")
             ax1.add_patch(circle)
-            print args.label
             if args.label == "True":
                 ax1.text(moon.ephem_x + 20, moon.ephem_y + 20, moon.object_name.title(),
                         color="blue")
@@ -99,7 +98,10 @@ class EphemPlot(object):
         #    'CRPIX: (' + str(self.crpix1) + ',' + str(self.crpix2) + ')', 
         #    color = 'white')
         ax1.set_title(os.path.basename(self.filename))
-        outputFile = sourceFile.split('.')[0] + "_ephem.png"
+        if args.label == "True":
+            outputFile = sourceFile.split('.')[0] + "_ephem_lb.png"
+        else:
+            outputFile = sourceFile.split('.')[0] + "_ephem.png"
         plt.savefig(outputFile)
         plt.draw()
         plt.grid(True)
