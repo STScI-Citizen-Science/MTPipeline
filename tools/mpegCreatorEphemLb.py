@@ -40,26 +40,26 @@ def buildMovies(movieType, path, scaleType):
     temp = os.path.join(ROOTPATH, 'temp')
     listDir = os.listdir(path)
 
-    output = os.path.join(ROOTPATH, "movies", "temp", source + "All" + movieType + scaleType + "_ephem.mp4") 
+    output = os.path.join(ROOTPATH, "movies", "temp", source + "All" + movieType + scaleType + "_ephem_lb.mp4") 
     subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
-                    '-pattern_type', 'glob', '-i','*'+ movieType + '*'+ scaleType + '_ephem.png',
+                    '-pattern_type', 'glob', '-i','*'+ movieType + '*'+ scaleType + '_ephem_lb.png',
                     output])
     #for the comsmic ray rejected images   
-    output = os.path.join(ROOTPATH, "movies", "temp", source + "CR" + movieType + scaleType + "_ephem.mp4") 
+    output = os.path.join(ROOTPATH, "movies", "temp", source + "CR" + movieType + scaleType + "_ephem_lb.mp4") 
     subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
-                    '-pattern_type', 'glob', '-i', '*cr*' + movieType + '*' + scaleType + '_ephem.png', 
+                    '-pattern_type', 'glob', '-i', '*cr*' + movieType + '*' + scaleType + '_ephem_lb.png', 
                     output])
     #for the non-cosmic ray rejected images
-    output = os.path.join(ROOTPATH, "movies", "temp", source + "nonCR" + movieType + scaleType + "_ephem.mp4") 
+    output = os.path.join(ROOTPATH, "movies", "temp", source + "nonCR" + movieType + scaleType + "_ephem_lb.mp4") 
     #make a list of non-CR rejected images
-    nonCRWideInput = [i for i in listDir if movieType in i and scaleType + '_ephem' in i and 'cr' not in i]
+    nonCRWideInput = [i for i in listDir if movieType in i and scaleType + '_ephem_lb' in i and 'cr' not in i]
     #copy all the non-CR rejected images to the temp directory
     for files in nonCRWideInput:
         subprocess.call(['cp', files, temp])
     os.chdir(temp) 
     #carry out the ffmpeg script for our copied files
     subprocess.call(['ffmpeg', '-f', 'image2', '-r', '1',
-                '-pattern_type', 'glob', '-i','*'+ movieType + '*' + scaleType + '_ephem.png',
+                '-pattern_type', 'glob', '-i','*'+ movieType + '*' + scaleType + '_ephem_lb.png',
                 output])
     subprocess.call('rm *.png', shell=True) #delete the temporary files 
     os.chdir(path) #change back to our ROOTPATH
