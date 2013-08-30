@@ -157,8 +157,16 @@ def insert_record(moon_dict,  master_images_id):
     record.object_name = moon_dict['object']
     record.jpl_ra = moon_dict['jpl_ra']
     record.jpl_dec = moon_dict['jpl_dec']
-    record.diameter = moon_dict['jpl_ang_diam']
-    record.magnitude = moon_dict['jpl_APmag']
+    try:
+        record.diameter = float(moon_dict['jpl_ang_diam'])
+    except Exception as err:
+        logger.critical('{0} {1} {2}'.format(
+            type(err), err.message, sys.exc_traceback.tb_lineno))
+    try:
+        record.magnitude = float(moon_dict['jpl_APmag'])
+    except Exception as err:
+        logger.critical('{0} {1} {2}'.format(
+            type(err), err.message, sys.exc_traceback.tb_lineno))
     record.master_images_id = master_images_id
     record.version = __version__
     session.add(record)
@@ -261,10 +269,16 @@ def update_record(moon_dict, master_images_id):
     update_dict['object_name'] = moon_dict['object']
     update_dict['jpl_ra'] = moon_dict['jpl_ra']
     update_dict['jpl_dec'] = moon_dict['jpl_dec']
-    if isinstance(moon_dict['jpl_APmag'], float):
-        update_dict['magnitude'] = moon_dict['jpl_APmag']
-    if isinstance(moon_dict['jpl_ang_diam'], float):
-        update_dict['diameter'] = moon_dict['jpl_ang_diam']
+    try:
+        update_dict['magnitude'] = float(moon_dict['jpl_APmag'])
+    except Exception as err:
+        logger.critical('{0} {1} {2}'.format(
+            type(err), err.message, sys.exc_traceback.tb_lineno))
+    try:
+        update_dict['diameter'] = float(moon_dict['jpl_ang_diam'])
+    except Exception as err:
+        logger.critical('{0} {1} {2}'.format(
+            type(err), err.message, sys.exc_traceback.tb_lineno))
     update_dict['master_images_id'] = master_images_id
     update_dict['version'] = __version__
     session.query(MasterFinders).filter(\
