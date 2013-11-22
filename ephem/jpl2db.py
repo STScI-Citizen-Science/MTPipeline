@@ -218,6 +218,9 @@ def parse_jpl_cgi(data):
             output['jpl_dec_delta'] = line[8]
             output['jpl_APmag'] = line[11]
             output['jpl_ang_diam'] = line[13]
+            for key in ['jpl_APmag', 'jpl_ang_diam']:
+                if output[key] == 'n.a.':
+                    output[key] = '-999'
             return output
         if line == '$$SOE':
             soe_switch = True

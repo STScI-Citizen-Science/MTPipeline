@@ -119,7 +119,7 @@ class MasterImages(Base):
     priority = Column(Integer(1), default=1)
     description = Column(String(50))
     file_location = Column(String(100))
-    visit = Column(Integer(3))
+    visit = Column(String(11))
     orbit = Column(Integer(3))
     drz_mode  = Column(String(6))
     mysql_engine = 'InnoDB'
