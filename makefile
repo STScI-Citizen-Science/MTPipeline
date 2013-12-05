@@ -1,7 +1,14 @@
 INPUT_BASE=/astro/3/mutchler/mt/drizzled/
 
 help:
-	@echo 'Your guess is as good as mine.'
+	@echo 'makefile for the mtpipeline.                                                    '
+	@echo '                                                                                '
+	@echo 'Usage':
+	@echo '    master_images TARGET=???             Generate master_images table for TARGET'
+	@echo '    master_finders                                Genereate master_finders table'
+	@echo '    sub_images TARGET=???'                  Generate sub_images table for TARGET' 
+	@echo '    finders                                               Generate finders table'
+	@echo '                                                                                '
 
 master_images:
 ifdef TARGET
