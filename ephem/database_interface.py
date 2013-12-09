@@ -5,6 +5,7 @@ Creates and returns a sqlalchemy session object using the declaarative
 base.
 '''
 
+import inspect
 import os
 import pyfits
 import yaml
@@ -40,7 +41,12 @@ def loadConnection(connection_string, echo=False):
 # Define all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-connection = yaml.load(open('connection.yaml'))
+# Note the os.path.dirname is called twice because the yaml file is 
+# expected to be one level above this module.
+settings_path = os.path.dirname(os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe()))))
+
+connection = yaml.load(open(os.path.join(settings_path,'connection.yaml')))
 connectionString = connection['connection']
 
 session, Base = loadConnection(connectionString, connection['echo'])
