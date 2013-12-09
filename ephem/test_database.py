@@ -10,23 +10,22 @@ import os
 # Load all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-from database_interface import loadConnection
+from database_interface import session
+from database_interface import Base
 from database_interface import Finders
 from database_interface import MasterFinders
 from database_interface import MasterImages
 from database_interface import SubImages
 
-session, Base = loadConnection('mysql+pymysql://root@localhost/mtpipeline')
-
 #----------------------------------------------------------------------------
 # Global Variables
 #----------------------------------------------------------------------------
 
-ARCHIVE = '/Users/viana/mtpipeline/archive'
+ARCHIVE = '/astro/3/mutchler/mt/drizzled'
 OUTPUT_FILE = '/Users/viana/Dropbox/Work/MTPipeline/Other/project_status.txt'
 OUTPUT_STRING = '| {:35} | {:8} |\n'
 BORDER_STRING = '+ {:35} + {:8} +\n'
-PLANET_LIST = ['mars', 'neptune']
+PLANET_LIST = ['mars', 'neptune', 'saturn', 'uranus', 'jupiter']
 
 #----------------------------------------------------------------------------
 # Functions
