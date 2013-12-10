@@ -19,6 +19,13 @@ def get_target_name(item):
     return item.file_location.split('/')[-2].split('_')[-1]
 
 
+def print_dict(input_dict):
+    """Print the contents of the counting dictionaries."""
+    for target in input_dict:
+        print target
+        for key in input_dict[target]:
+            print '\t{}: {}'.format(key, input_dict[target][key])
+
 fits_count_dict = {'mars': defaultdict(int), 
                    'saturn':defaultdict(int), 
                    'neptune':defaultdict(int)}
@@ -35,7 +42,7 @@ for item in fits_query:
     else:
         print 'Derp!'
         break
-pprint.pprint(fits_count_dict)
+print_dict(fits_count_dict)
 
 subimages_query = session.query(MasterImages, SubImages).\
     join(SubImages, SubImages.master_images_id == MasterImages.id)\
@@ -48,10 +55,7 @@ for record in subimages_query:
     subimage_count_dict[target]['total_records'] += 1
 for key in subimage_count_dict:
     subimage_count_dict[key]['expected_records'] = fits_count_dict[key]['fits_count'] * 13
-for target in subimage_count_dict:
-    print target
-    for key in subimage_count_dict[target]:
-        print key, subimage_count_dict[target][key]
+print_dict(subimage_count_dict)
 
 ephemeris_query = session.query(MasterFinders, MasterImages)\
     .join(MasterImages, MasterImages.id == MasterFinders.master_images_id)\
@@ -79,4 +83,4 @@ for item in ephemeris_query:
     moon_count_dict[target]['total_records'] += 1
 for key in moon_count_dict:
     moon_count_dict[key]['expected_records'] = moons_per_planet_dict[key] * fits_count_dict[key]['fits_count']
-print moon_count_dict
+print_dict(moon_count_dict)
