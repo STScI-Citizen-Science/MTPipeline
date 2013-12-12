@@ -6,13 +6,6 @@ import logging
 import os
 import time
 
-from database_interface import session
-from database_interface import Base
-from database_interface import Finders
-from database_interface import MasterFinders
-from database_interface import MasterImages
-from database_interface import SubImages
-
 ARCHIVE_PATH = '/astro/3/mutchler/mt/drizzled'
 
 

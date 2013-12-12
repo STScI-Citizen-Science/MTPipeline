@@ -50,7 +50,7 @@ def check_database_completeness_main():
 		if master_finders_count != MOONS_PER_PLANET_DICT[target_name]:
 			logging.error('Expected {} moons for {} got {}'.\
 				format(MOONS_PER_PLANET_DICT[target_name], 
-					os.path.join(record.name, record.file_location), 
+					os.path.join(record.file_location, record.name), 
 					master_finders_count))
 
 if __name__ == '__main__':
