@@ -5,6 +5,7 @@ help:
 	@echo '                                                                                '
 	@echo 'Usage:                                                                          '
 	@echo '    master_images TARGET=???             Generate master_images table for TARGET'
+	@echo '    jpl2db TARGET=???                              Seed the master_finders table'
 	@echo '    master_finders                                Genereate master_finders table'
 	@echo '    sub_images TARGET=???                   Generate sub_images table for TARGET'
 	@echo '    finders                                               Generate finders table'
@@ -13,6 +14,13 @@ help:
 master_images:
 ifdef TARGET
 	python ephem/build_master_table.py -filelist '$(INPUT_BASE)*$(TARGET)/png/*single_sci_linear.png'
+else
+	@echo "You must specify a target, e.g. TARGET=jupiter."
+endif
+
+jpl2db:
+ifdef TARGET
+	python ephem/jpl2db.py -filelist '$(INPUT_BASE)*$(TARGET)/*single_sci.fits'
 else
 	@echo "You must specify a target, e.g. TARGET=jupiter."
 endif
