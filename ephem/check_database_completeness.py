@@ -38,21 +38,21 @@ def setup_logging():
 
 
 def check_database_completeness_main():
-	"""The main function for the module."""
-	logging.info('Host is {}'.format(socket.gethostname()))
-	master_images_query = session.query(MasterImages).all()
-	logging.info('{} records found in master_images'.\
-		format(len(master_images_query)))
-	for record in master_images_query:
-		target_name = get_target_name(record)
-		master_finders_count = session.query(MasterFinders).\
-			filter(MasterFinders.master_images_id == record.id).count()
-		if master_finders_count != MOONS_PER_PLANET_DICT[target_name]:
-			logging.error('Expected {} moons for {} got {}'.\
-				format(MOONS_PER_PLANET_DICT[target_name], 
-					os.path.join(record.file_location, record.name), 
-					master_finders_count))
+    """The main function for the module."""
+    logging.info('Host is {}'.format(socket.gethostname()))
+    master_images_query = session.query(MasterImages).all()
+    logging.info('{} records found in master_images'.\
+        format(len(master_images_query)))
+    for record in master_images_query:
+        target_name = get_target_name(record)
+        master_finders_count = session.query(MasterFinders).\
+            filter(MasterFinders.master_images_id == record.id).count()
+        if master_finders_count != MOONS_PER_PLANET_DICT[target_name]:
+            logging.error('Expected {} moons for {} got {}'.\
+                format(MOONS_PER_PLANET_DICT[target_name], 
+                    os.path.join(record.file_location, record.name), 
+                    master_finders_count))
 
 if __name__ == '__main__':
-	setup_logging()
-	check_database_completeness_main()
+    setup_logging()
+    check_database_completeness_main()

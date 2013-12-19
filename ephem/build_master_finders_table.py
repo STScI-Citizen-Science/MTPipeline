@@ -8,8 +8,12 @@ the FITS file and the database. Write the results back to the database.
 import argparse
 import coords
 import glob
+import logging
 import os
 import pyfits
+import socket
+
+from mt_logging import setup_logging
 
 #from build_master_table import get_fits_file
 
@@ -123,6 +127,9 @@ def run_ephem_main(reproc=False):
     The main controller for the module. It executes the code in ephem_main 
     and writes the output to the database.
     '''
+
+    logging.info('Host is {}'.format(socket.gethostname()))
+
     #print 'Processing ' + str(len(file_list)) + ' files.'
     count = 0
     query_list = session.query(MasterFinders, MasterImages).\
@@ -131,7 +138,10 @@ def run_ephem_main(reproc=False):
         filter(or_(MasterFinders.jpl_ra != None, MasterFinders.jpl_dec != None)).\
         all()
 
-    print 'Processing ' + str(len(query_list)) + ' files.' 
+    print 'Processing {} files.'.format(len(query_list))
+    logging.info('Processing {} files.'.format(len(query_list)))
+    import sys; sys.exit()
+
     for record in query_list:
         if record.MasterFinders.ephem_x == None \
                 or record.MasterFinders.ephem_y == None \
@@ -176,4 +186,5 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
+    setup_logging('build_master_finders_table')
     run_ephem_main(args.reproc)
