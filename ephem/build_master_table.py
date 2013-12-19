@@ -11,10 +11,10 @@ import glob
 import os
 import pyfits
 
-from database_interface import counter
-from database_interface import check_type
-from database_interface import insert_record
-from database_interface import update_record
+from .database.database_interface import counter
+from .database.database_interface import check_type
+from .database.database_interface import insert_record
+from .database.database_interface import update_record
 
 from sqlalchemy.sql import func
 from sqlalchemy import desc
@@ -24,9 +24,9 @@ from sqlalchemy import distinct
 # Load all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-from database_interface import loadConnection
-from database_interface import MasterImages
-from database_interface import session
+from .database.database_interface import loadConnection
+from .database.database_interface import MasterImages
+from .database.database_interface import session
 
 # ----------------------------------------------------------------------------
 #

@@ -21,10 +21,10 @@ from mt_logging import setup_logging
 # Load all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-from database_interface import counter
-from database_interface import session
-from database_interface import MasterImages
-from database_interface import MasterFinders
+from .database.database_interface import counter
+from .database.database_interface import session
+from .database.database_interface import MasterImages
+from .database.database_interface import MasterFinders
 
 from sqlalchemy import or_
 

@@ -5,12 +5,12 @@ import logging
 import os
 import socket
 
-from database_interface import session
-from database_interface import Base
-from database_interface import Finders
-from database_interface import MasterFinders
-from database_interface import MasterImages
-from database_interface import SubImages
+from ..database.database_interface import session
+from ..database.database_interface import Base
+from ..database.database_interface import Finders
+from ..database.database_interface import MasterFinders
+from ..database.database_interface import MasterImages
+from ..database.database_interface import SubImages
 
 
 MOONS_PER_PLANET_DICT = {'neptune':14, 

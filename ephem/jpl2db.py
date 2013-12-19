@@ -26,19 +26,19 @@ from platform import machine
 from platform import platform
 from platform import architecture
 
-from database_interface import counter
-from database_interface import check_type
+from .database.database_interface import counter
+from .database.database_interface import check_type
 from urllib2 import urlopen
 
 #----------------------------------------------------------------------------
 # Load all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-from database_interface import loadConnection
-from database_interface import MasterImages
-from database_interface import MasterFinders
+from .database.database_interface import loadConnection
+from .database.database_interface import MasterImages
+from .database.database_interface import MasterFinders
 
-from database_interface import session
+from .database.database_interface import session
 
 LOGFOLDER = "/astro/3/mutchler/mt/logs/"
 

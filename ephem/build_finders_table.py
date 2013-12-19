@@ -9,20 +9,20 @@ import argparse
 import os
 import string
 
-from database_interface import counter
-from database_interface import check_type
-#from database_interface import insert_record
-from database_interface import update_record
+from .database.database_interface import counter
+from .database.database_interface import check_type
+#from .database.database_interface import insert_record
+from .database.database_interface import update_record
 
 #----------------------------------------------------------------------------
 # Load all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-from database_interface import session
-from database_interface import Finders
-from database_interface import MasterFinders
-from database_interface import MasterImages
-from database_interface import SubImages
+from .database.database_interface import session
+from .database.database_interface import Finders
+from .database.database_interface import MasterFinders
+from .database.database_interface import MasterImages
+from .database.database_interface import SubImages
 
 #----------------------------------------------------------------------------
 

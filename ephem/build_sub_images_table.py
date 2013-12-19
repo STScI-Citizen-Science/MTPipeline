@@ -10,10 +10,10 @@ import glob
 import os
 import string
 
-from database_interface import counter
-from database_interface import check_type
-from database_interface import insert_record
-from database_interface import update_record
+from .database.database_interface import counter
+from .database.database_interface import check_type
+from .database.database_interface import insert_record
+from .database.database_interface import update_record
 
 from PIL import Image
 
@@ -21,9 +21,9 @@ from PIL import Image
 # Load all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-from database_interface import MasterImages
-from database_interface import SubImages
-from database_interface import session
+from .database.database_interface import MasterImages
+from .database.database_interface import SubImages
+from .database.database_interface import session
 
 #----------------------------------------------------------------------------
 # Low-Level Functions
