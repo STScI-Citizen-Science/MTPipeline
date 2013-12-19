@@ -20,10 +20,10 @@ from PIL import Image
 # Connect the SQLAlchemy ORM declaritive base classes.
 #----------------------------------------------------------------------------
 
-from database_interface import MasterImages
-from database_interface import MasterFinders
+from .database.database_interface import MasterImages
+from .database.database_interface import MasterFinders
 
-from database_interface import session
+from .database.database_interface import session
 
 #----------------------------------------------------------------------------
 # 
