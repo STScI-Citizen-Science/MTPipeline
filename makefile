@@ -9,6 +9,7 @@ help:
 	@echo '    master_finders                                Genereate master_finders table'
 	@echo '    sub_images TARGET=???                   Generate sub_images table for TARGET'
 	@echo '    finders                                               Generate finders table'
+	@echo '    dump DATE=YYYY-MM-DD                                  Create a database dump'
 	@echo '                                                                                '
 
 master_images:
@@ -37,3 +38,10 @@ endif
 
 finders:
 	python ephem/build_finders_table.py
+
+dump:
+ifdef DATE
+	mysql -u root mtpipeline -p -V > /astro/3/mutchler/mt/databasedump/mtdump-$(DATE).sql
+else
+	@echo "You must specify today's date e.g. DATE=YYYY-MM-DD"
+endif	
