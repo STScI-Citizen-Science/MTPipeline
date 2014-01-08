@@ -39,19 +39,41 @@ def setup_logging():
 
 def check_database_completeness_main():
 	"""The main function for the module."""
+
+	# Log the hostname and database record counds.
 	logging.info('Host is {}'.format(socket.gethostname()))
-	master_images_query = session.query(MasterImages).all()
 	logging.info('{} records found in master_images'.\
-		format(len(master_images_query)))
-	for record in master_images_query:
-		target_name = get_target_name(record)
-		master_finders_count = session.query(MasterFinders).\
-			filter(MasterFinders.master_images_id == record.id).count()
-		if master_finders_count != MOONS_PER_PLANET_DICT[target_name]:
-			logging.error('Expected {} moons for {} got {}'.\
-				format(MOONS_PER_PLANET_DICT[target_name], 
-					os.path.join(record.file_location, record.name), 
-					master_finders_count))
+		format(session.query(MasterImages).count()))
+	logging.info('{} records found in master_finders'.\
+		format(session.query(MasterFinders).count()))
+	logging.info('{} records found in master_images LEFT JOIN master_finders'.\
+		format(session.query(MasterImages, MasterFinders).\
+			outerjoin(MasterFinders).count()))
+	logging.info('{} records with object_name IS NULL in master_images LEFT JOIN master_finders'.\
+		format(session.query(MasterImages, MasterFinders).\
+			outerjoin(MasterFinders).\
+			filter(MasterFinders.object_name == None).count()))
+
+	# Log the missing master_finders records
+	master_finders_query = session.query(MasterImages, MasterFinders).\
+			outerjoin(MasterFinders).\
+			filter(MasterFinders.object_name == None).all()
+	if len(master_finders_query) != 0:
+		for record in master_finders_query:
+			logging.error('No ephem_x value for {}'.\
+				format(os.path.join(record.MasterImages.file_location,
+					record.MasterImages.name)))
+
+	# Keeping this in case I need it in the future. Sorry for the mess!
+	# for record in master_images_query:
+	# 	target_name = get_target_name(record)
+	# 	master_finders_count = session.query(MasterFinders).\
+	# 		filter(MasterFinders.master_images_id == record.id).count()
+	# 	if master_finders_count != MOONS_PER_PLANET_DICT[target_name]:
+	# 		logging.error('Expected {} moons for {} got {}'.\
+	# 			format(MOONS_PER_PLANET_DICT[target_name], 
+	# 				os.path.join(record.file_location, record.name), 
+	# 				master_finders_count))
 
 if __name__ == '__main__':
 	setup_logging()
