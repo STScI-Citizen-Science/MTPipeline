@@ -40,7 +40,7 @@ from .database.database_interface import MasterFinders
 
 from .database.database_interface import session
 
-LOGFOLDER = "/astro/3/mutchler/mt/logs/"
+LOGFOLDER = "/astro/3/mutchler/mt/logs/jpl2db"
 
 #----------------------------------------------------------------------------
 # Low-Level Functions
