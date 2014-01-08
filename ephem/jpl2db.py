@@ -26,19 +26,21 @@ from platform import machine
 from platform import platform
 from platform import architecture
 
-from .database.database_interface import counter
-from .database.database_interface import check_type
+from database_interface import counter
+from database_interface import check_type
+
+from mt_logging import setup_logging
+
 from urllib2 import urlopen
 
 #----------------------------------------------------------------------------
 # Load all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-from .database.database_interface import loadConnection
-from .database.database_interface import MasterImages
-from .database.database_interface import MasterFinders
-
-from .database.database_interface import session
+from database_interface import loadConnection
+from database_interface import MasterImages
+from database_interface import MasterFinders
+from database_interface import session
 
 LOGFOLDER = "/astro/3/mutchler/mt/logs/jpl2db"
 
@@ -160,12 +162,12 @@ def insert_record(moon_dict,  master_images_id):
     try:
         record.diameter = float(moon_dict['jpl_ang_diam'])
     except Exception as err:
-        logger.critical('{0} {1} {2}'.format(
+        logging.critical('{0} {1} {2}'.format(
             type(err), err.message, sys.exc_traceback.tb_lineno))
     try:
         record.magnitude = float(moon_dict['jpl_APmag'])
     except Exception as err:
-        logger.critical('{0} {1} {2}'.format(
+        logging.critical('{0} {1} {2}'.format(
             type(err), err.message, sys.exc_traceback.tb_lineno))
     record.master_images_id = master_images_id
     record.version = __version__
@@ -275,12 +277,12 @@ def update_record(moon_dict, master_images_id):
     try:
         update_dict['magnitude'] = float(moon_dict['jpl_APmag'])
     except Exception as err:
-        logger.critical('{0} {1} {2}'.format(
+        logging.critical('{0} {1} {2}'.format(
             type(err), err.message, sys.exc_traceback.tb_lineno))
     try:
         update_dict['diameter'] = float(moon_dict['jpl_ang_diam'])
     except Exception as err:
-        logger.critical('{0} {1} {2}'.format(
+        logging.critical('{0} {1} {2}'.format(
             type(err), err.message, sys.exc_traceback.tb_lineno))
     update_dict['master_images_id'] = master_images_id
     update_dict['version'] = __version__
@@ -308,6 +310,7 @@ def jpl2db_main(filename, reproc=False):
     file_dict = convert_datetime(file_dict)
     all_moon_dict = make_all_moon_dict('planets_and_moons.txt', file_dict)
     for moon in all_moon_dict.keys():
+        logging.info('Processing {} for {}'.format(moon, filename))
         moon_dict = all_moon_dict[moon]
         moon_dict.update(file_dict)
 
@@ -343,11 +346,20 @@ def parse_args():
     parse the command line arguemnts.
     '''
     parser = argparse.ArgumentParser(
-        description = 'Populate the database with the jpl coordinates.')
-    parser.add_argument(
+        description = 'Populate the database with the jpl coordinates.',
+        epilog='-missing_only and -filelist are mutually exclusive.')
+    
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
         '-filelist',
-        required = True,
-        help = 'Search string for FITS files. Wildcards accepted.')
+        required = False,
+        help = 'Search string for FITS files. Wildcards accepted. \
+            Must be used if missing_only is not used.')
+    group.add_argument(
+        '-missing_only',
+        action = 'store_true',        
+        default = None,
+        required = False)
     parser.add_argument(
         '-reproc',
         required = False,
@@ -361,39 +373,44 @@ def parse_args():
 #----------------------------------------------------------------------------
     
 if __name__ == '__main__':
+    
+    # Set up the inputs and logging.
     args = parse_args()
-    filelist = glob.glob(args.filelist)
-    logger = logging.getLogger('jpl2db')
-    logger.setLevel(logging.DEBUG)
-    log_file = logging.FileHandler(
-        os.path.join(
-            LOGFOLDER, 
-            'jpl2db-' + datetime.datetime.now().strftime('%Y-%m-%d') + '.log'))
-    log_file.setLevel(logging.DEBUG)
-    log_file.setFormatter(
-        logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-    logger.addHandler(log_file)
-    logger.info('User: {0}'.format(getuser()))
-    logger.info('Host: {0}'.format(gethostname())) 
-    logger.info('Machine: {0}'.format(machine()))
-    logger.info('Platform: {0}'.format(platform()))
-    logger.info("Command-line arguments used:")
+    setup_logging('jpl2db')
+   
+    # Log the system and user information.
+    logging.info('User: {0}'.format(getuser()))
+    logging.info('Host: {0}'.format(gethostname())) 
+    logging.info('Machine: {0}'.format(machine()))
+    logging.info('Platform: {0}'.format(platform()))
+    logging.info("Command-line arguments used:")
     for arg in args.__dict__:
-        logger.info(arg + ": " + str(args.__dict__[arg]))
-    rootfile_list = glob.glob(args.filelist)
-    rootfile_list = [x for x in rootfile_list if len(os.path.basename(x)) == 18]
-    assert isinstance(filelist, list), \
-        'Expected list for filelist, got ' + str(type(filelist))
-    assert filelist != [], 'No files found.'
+        logging.info(arg + ": " + str(args.__dict__[arg]))
+
+    # Create the filelist.
+    if args.filelist != None:
+        filelist = glob.glob(args.filelist)
+        filelist = [x for x in filelist if len(os.path.basename(x)) == 18]
+        assert isinstance(filelist, list), \
+            'Expected list for filelist, got ' + str(type(filelist))
+        assert filelist != [], 'No files found.'
+    elif args.missing_only == True:
+        master_finders_query = session.query(MasterImages).\
+                               outerjoin(MasterFinders).\
+                               filter(MasterFinders.object_name == None).all()
+        filelist = [os.path.join(record.file_location[:-4], record.fits_file) \
+                    for record in master_finders_query]
     print 'Processing ' + str(len(filelist)) + ' files.'
-    logger.info('Processing' + str(len(filelist)) + 'f iles.')
+    logging.info('Processing ' + str(len(filelist)) + ' files.')
+
+    # Run with exception handling.
     count = 0
     for filename in filelist:
-        logger.info ('Now running for ' + filename)
+        logging.info ('Now running for ' + filename)
         try:
             jpl2db_main(filename, args.reproc)
-            logger.info ("Completed for  : " + filename)
+            logging.info ("Completed for  : " + filename)
         except Exception as err:
-            logger.critical('{0} {1} {2}'.format(
+            logging.critical('{0} {1} {2}'.format(
                 type(err), err.message, sys.exc_traceback.tb_lineno))
         count = counter(count, update = 10)
