@@ -33,13 +33,31 @@ def check_database_completeness_main():
     # Log the hostname and database record counds.
     logging.info('Host is {}'.format(socket.gethostname()))
     
-    # Do the record counts for the master table.
+    # Log the total number of records in master_images table.
     master_images_query = session.query(MasterImages).all()
     master_images_count = len(master_images_query)
+    logging.info('{} records found in master_images'.format(master_images_count))
+
+    # Use a wildcard search to log the number of existing records in 
+    # master_images for the 2 different modes.
+    wide_count = session.query(MasterImages).\
+                 filter(MasterImages.fits_file.like('%wide_single_sci.fits')).\
+                 count()
+    logging.info('{} of expected {} wide records found in master_finders'.\
+                 format(wide_count, master_images_count / 2))
+    center_count = session.query(MasterImages).\
+                   filter(MasterImages.fits_file.like('%center_single_sci.fits')).\
+                   count()
+    logging.info('{} of expected {} center records found in master_finders'.\
+                 format(center_count, master_images_count / 2))
+    
+    # Use a length count for the fits_file field to infer the number
+    # of records in the 4 combinations of the 2 cr mode and the 2 
+    # astro drizzle modes.
     cr_wide_count = 0
     cr_center_count = 0
-    wide_count = 0
-    center_count = 0
+    non_cr_wide_count = 0
+    non_cr_center_count = 0
     unknown_type_count = 0
     for record in master_images_query:
         if len(record.fits_file) == 37:
@@ -47,17 +65,21 @@ def check_database_completeness_main():
         elif len(record.fits_file) == 39:
             cr_center_count += 1
         elif len(record.fits_file) == 34:
-            wide_count += 1
+            non_cr_wide_count += 1
         elif len(record.fits_file) == 36:
-            center_count += 1
+            non_cr_center_count += 1
         else:
             unknown_type_count += 1
-    logging.info('{} records found in master_images'.format(master_images_count))
-    logging.info('{} cr wide records found in master_images'.format(cr_wide_count))
-    logging.info('{} cr center records found in master_images'.format(cr_center_count))
-    logging.info('{} non-cr wide records found in master_images'.format(wide_count))
-    logging.info('{} non-cr center records found in master_images'.format(center_count))
-    logging.info('{} unknown type records found in master_images'.format(unknown_type_count))
+    logging.info('{} of {} expected cr wide records found in master_images by length.'.\
+        format(cr_wide_count, master_images_count / 4))
+    logging.info('{} of {} expected cr center records found in master_images by length.'.\
+        format(cr_center_count, master_images_count / 4))
+    logging.info('{} of {} expected non-cr wide records found in master_images by length.'.\
+        format(non_cr_wide_count, master_images_count / 4))
+    logging.info('{} of {} expected non-cr center records found in master_images by length.'.\
+        format(non_cr_center_count, master_images_count / 4))
+    logging.info('{} of 0 expected unknown type records found in master_images by length.'.\
+        format(unknown_type_count))
 
 
     # Do the record counts for the master_finders records
