@@ -32,8 +32,35 @@ def check_database_completeness_main():
 
     # Log the hostname and database record counds.
     logging.info('Host is {}'.format(socket.gethostname()))
-    logging.info('{} records found in master_images'.\
-        format(session.query(MasterImages).count()))
+    
+    # Do the record counts for the master table.
+    master_images_query = session.query(MasterImages).all()
+    master_images_count = len(master_images_query)
+    cr_wide_count = 0
+    cr_center_count = 0
+    wide_count = 0
+    center_count = 0
+    unknown_type_count = 0
+    for record in master_images_query:
+        if len(record.fits_file) == 37:
+            cr_wide_count += 1
+        elif len(record.fits_file) == 39:
+            cr_center_count += 1
+        elif len(record.fits_file) == 34:
+            wide_count += 1
+        elif len(record.fits_file) == 36:
+            center_count += 1
+        else:
+            unknown_type_count += 1
+    logging.info('{} records found in master_images'.format(master_images_count))
+    logging.info('{} cr wide records found in master_images'.format(cr_wide_count))
+    logging.info('{} cr center records found in master_images'.format(cr_center_count))
+    logging.info('{} non-cr wide records found in master_images'.format(wide_count))
+    logging.info('{} non-cr center records found in master_images'.format(center_count))
+    logging.info('{} unknown type records found in master_images'.format(unknown_type_count))
+
+
+    # Do the record counts for the master_finders records
     logging.info('{} records found in master_finders'.\
         format(session.query(MasterFinders).count()))
     logging.info('{} records found in master_images LEFT JOIN master_finders'.\
