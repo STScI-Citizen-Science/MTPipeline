@@ -47,9 +47,11 @@ settings_path = os.path.dirname(os.path.dirname(
     os.path.abspath(inspect.getfile(inspect.currentframe()))))
 
 connection = yaml.load(open(os.path.join(settings_path,'connection.yaml')))
-connectionString = connection['connection']
+session, Base = loadConnection(connection['connection'], connection['echo'])
 
-session, Base = loadConnection(connectionString, connection['echo'])
+class Foo(Base):
+    __tablename__ = 'foo'
+    id = Column(Integer, primary_key=True)
 
 class Finders(Base):
     '''
@@ -61,11 +63,11 @@ class Finders(Base):
     #        setattr(self, k, v)
 
     __tablename__ = 'finders'
-    id = Column(Integer(11), primary_key=True)
-    sub_images_id = Column(Integer(11), 
+    id = Column(Integer, primary_key=True)
+    sub_images_id = Column(Integer, 
         ForeignKey('sub_images.id'),
         nullable=False)
-    master_finders_id = Column(Integer(11),
+    master_finders_id = Column(Integer,
         ForeignKey('master_finders.id'),
         nullable=False)
     x = Column(Float)
@@ -85,14 +87,14 @@ class MasterFinders(Base):
     Class for interacting with the master_finders MySQL table.
     '''
     __tablename__ = 'master_finders'
-    id = Column(Integer(11), primary_key=True)
+    id = Column(Integer, primary_key=True)
     object_name = Column(String(45))
-    master_images_id = Column(Integer(11), 
+    master_images_id = Column(Integer, 
         ForeignKey('master_images.id'),
         nullable=False)
-    ephem_x = Column(Integer(11))
-    ephem_y = Column(Integer(11))
-    version = Column(Integer(2))
+    ephem_x = Column(Integer)
+    ephem_y = Column(Integer)
+    version = Column(Integer)
     jpl_ra = Column(String(15))
     jpl_dec = Column(String(15))
     magnitude = Column(Float)
@@ -108,25 +110,25 @@ class MasterImages(Base):
     Subclasses the Base class for the SQLAlchemy declarative base.
     '''
     __tablename__ = 'master_images'
-    id  = Column(Integer(11), primary_key=True)
-    project_id  = Column(Integer(11))
+    id  = Column(Integer, primary_key=True)
+    project_id  = Column(Integer)
     name = Column(String(50), unique=True)
     fits_file = Column(String(50), unique=True)
     object_name = Column(String(50))
-    set_id = Column(Integer(2))
-    set_index = Column(Integer(5))
-    width = Column(Integer(4))
-    height = Column(Integer(4))
+    set_id = Column(Integer)
+    set_index = Column(Integer)
+    width = Column(Integer)
+    height = Column(Integer)
     minimum_ra = Column(Float(30))
     minimum_dec = Column(Float(30))
     maximum_ra = Column(Float(30))
     maximum_dec = Column(Float(30))
     pixel_resolution = Column(Float(10))
-    priority = Column(Integer(1), default=1)
+    priority = Column(Integer, default=1)
     description = Column(String(50))
     file_location = Column(String(100))
     visit = Column(String(11))
-    orbit = Column(Integer(3))
+    orbit = Column(Integer)
     drz_mode  = Column(String(6))
     mysql_engine = 'InnoDB'
 
@@ -136,33 +138,33 @@ class SubImages(Base):
     Class for interacting with the sub_images MySQL table.
     '''
     __tablename__ = 'sub_images'
-    id  = Column(Integer(11), primary_key=True)
-    project_id = Column(Integer(11))
-    master_images_id = Column(Integer(11), 
+    id  = Column(Integer, primary_key=True)
+    project_id = Column(Integer)
+    master_images_id = Column(Integer, 
         ForeignKey('master_images.id'),
         nullable=False)
     master_images_name = Column(String(50), 
         ForeignKey('master_images.name'),
         nullable=False)
     name = Column(String(50))
-    x = Column(Integer(11))
-    y = Column(Integer(11))
-    width = Column(Integer(11))
-    height = Column(Integer(11))
-    image_width = Column(Integer(11))
-    image_height = Column(Integer(11))
-    scale_level = Column(Integer(11))
+    x = Column(Integer)
+    y = Column(Integer)
+    width = Column(Integer)
+    height = Column(Integer)
+    image_width = Column(Integer)
+    image_height = Column(Integer)
+    scale_level = Column(Integer)
     file_location = Column(String(100))
     thumbnail_location = Column(String(100))
-    active = Column(Integer(1))
-    confirmed = Column(Integer(1))
+    active = Column(Integer)
+    confirmed = Column(Integer)
     description = Column(String(50))
     created_at = Column(DateTime)
     updated_at = Column(DateTime)
     priority = Column(Float)
-    done = Column(Integer(1))
-    view_count = Column(Integer(11))
-    region = Column(Integer(2))
+    done = Column(Integer)
+    view_count = Column(Integer)
+    region = Column(Integer)
     mysql_engine = 'InnoDB'
     master_images_id_rel = relationship(MasterImages,
         primaryjoin=(master_images_id==MasterImages.id),
