@@ -41,7 +41,7 @@ finders:
 
 dump:
 ifdef DATE
-	mysqldump -u root mtpipeline -p > /astro/3/mutchler/mt/databasedump/mtdump-$(DATE).sql
+	mysqldump -u root mtpipeline -p > /astro/3/mutchler/mt/databasedump/mtdump-$(DATE).dump
 else
 	@echo "You must specify today's date e.g. DATE=YYYY-MM-DD"
 endif	
