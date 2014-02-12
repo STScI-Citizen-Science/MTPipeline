@@ -11,10 +11,10 @@ import glob
 import os
 import pyfits
 
-from .database.database_interface import counter
-from .database.database_interface import check_type
-from .database.database_interface import insert_record
-from .database.database_interface import update_record
+from database_interface import counter
+from database_interface import check_type
+from database_interface import insert_record
+from database_interface import update_record
 
 from sqlalchemy.sql import func
 from sqlalchemy import desc
@@ -24,9 +24,9 @@ from sqlalchemy import distinct
 # Load all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-from .database.database_interface import loadConnection
-from .database.database_interface import MasterImages
-from .database.database_interface import session
+from database_interface import loadConnection
+from database_interface import MasterImages
+from database_interface import session
 
 # ----------------------------------------------------------------------------
 #
@@ -39,16 +39,20 @@ def get_fits_file(png_file):
     directory tree. Checks to ensure the input file is .png and that 
     the output is .fits.
     '''    
-    png_path, png_name = os.path.split(os.path.abspath(png_file))
-    assert os.path.splitext(png_name)[1] == '.png', 'png file required'
-    fits_path = os.path.split(png_path)[0]
-    fits_name = os.path.splitext(png_name)[0]
-    if fits_name[-4:] == '_log':
-        fits_name = fits_name[:-4] + '.fits'
-    elif fits_name[-7:] in ['_median', '_linear']:
-        fits_name = fits_name[:-7] + '.fits'
-    fits_file = os.path.join(fits_path, fits_name)
-    assert os.path.splitext(fits_file)[1] == '.fits', 'unexpected output.'
+    assert os.path.splitext(png_file)[1] == '.png', 'png file required'
+    
+    # png_path, png_name = os.path.split(os.path.abspath(png_file))
+    # fits_path = os.path.split(png_path)[0]
+    # fits_name = os.path.splitext(png_name)[0]
+    # if fits_name[-4:] == '_log':
+    #     fits_name = fits_name[:-4] + '.fits'
+    # elif fits_name[-7:] in ['_median', '_linear']:
+    #     fits_name = fits_name[:-7] + '.fits'
+    # fits_file = os.path.join(fits_path, fits_name)
+
+    fits_file = png_file.replace('png/','').replace('.png','.fits')
+    assert os.path.splitext(fits_file)[1] == '.fits', \
+        'expected .fits got {}'.format(os.path.splitext(fits_file)[1])
     return fits_file
 
 
@@ -149,7 +153,7 @@ def make_set_info(record_dict):
 # The main controller.
 #----------------------------------------------------------------------------
 
-def build_master_table_main(filelist, reproc, reproc_sets):
+def build_master_images_table_main(file_list, reproc, reproc_sets):
     '''
     The main controller.    
     '''
@@ -161,7 +165,10 @@ def build_master_table_main(filelist, reproc, reproc_sets):
         session.query(MasterImages).filter(\
             MasterImages.set_index != None).update(update_dict)
         session.commit()
-    file_list = glob.glob(filelist)
+    if isinstance(file_list, str):
+        file_list = glob.glob(file_list)
+    assert isinstance(file_list, list), \
+        'Expected a list for file_list, got {}'.format(type(file_list))
     print 'Processing ' + str(len(file_list)) + ' files.'
     count = 0
     for png_file in file_list:
@@ -215,4 +222,4 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
-    build_master_table_main(args.filelist, args.reproc, args.reproc_sets)
+    build_master_images_table_main(args.filelist, args.reproc, args.reproc_sets)
