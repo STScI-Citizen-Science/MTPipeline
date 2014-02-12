@@ -10,25 +10,31 @@ import glob
 import os
 import shutil
 
-PATH_TO_FILES = '/Users/viana/mtpipeline/archive/*/png/'
-STAGING = '/Users/viana/mtpipeline/staging/'
+PATH_TO_FILES = '/astro/3/mutchler/mt/drizzled/[01]*/png/'
+STAGING = '/astro/3/mutchler/mt/staging'
 
 def update_staging_main(reproc=False):
     '''
     The main module.
     '''
+
+    # Build the file lists.
     print datetime.datetime.now().strftime("%Y-%m-%d %H:%M") + ': Buidling file list.'
-    wide_list = glob.glob(os.path.join(PATH_TO_FILES, '*linear_*.png'))
-    center_list = glob.glob(os.path.join(PATH_TO_FILES, '*center*linear.png'))
+    wide_list = glob.glob(os.path.join(PATH_TO_FILES, '*wide_single_sci_linear_*.png'))
+    center_list = glob.glob(os.path.join(PATH_TO_FILES, '*center_single_sci_linear.png'))
     file_list = wide_list + center_list
     print datetime.datetime.now().strftime("%Y-%m-%d %H:%M") + ': Checking ' + str(len(file_list)) + ' files.'
     count = 0
+    
+    # Loop over the file list.
     for filename in file_list:
         output_path = os.path.join(STAGING, filename.split('/')[-3])
         if not os.path.isdir(output_path):
             os.mkdir(output_path)
             os.chmod(output_path, 0775)
         dst = os.path.join(output_path, filename.split('/')[-1])
+
+        # Check for file existence if not reprocessing.
         if os.path.exists(dst):
             if reproc:
                 os.remove(dst)
