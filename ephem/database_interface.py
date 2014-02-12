@@ -130,6 +130,7 @@ class MasterImages(Base):
     visit = Column(String(11))
     orbit = Column(Integer)
     drz_mode  = Column(String(6))
+    cr_mode = Column(String(6))
     mysql_engine = 'InnoDB'
 
 

@@ -93,6 +93,11 @@ def make_record_dict(png_file, fits_file):
     record_dict['visit'] = linenum.split('.')[0]
     record_dict['orbit'] = linenum.split('.')[1]
     record_dict['drz_mode'] = fits_name.split('_')[-3]
+    cr_mode = fits_name.split('_')[1]
+    if cr_mode == 'c0m':
+        cr_mode = 'no_cr'
+    assert cr_mode in ['no_cr', 'cr'], 'Unexpected CR mode.'
+    record_dict['cr_mode'] = cr_mode        
     record_dict = make_set_info(record_dict)
     return record_dict
 
