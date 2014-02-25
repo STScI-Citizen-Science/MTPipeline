@@ -96,7 +96,7 @@ def run_astrodrizzle(filename, output_path = None):
     '''
     Executes astrodrizzle.AstroDrizzle.
     '''
-    path = '/Users/viana/Dropbox/Work/MTPipeline/Code/astrodrizzle_cfg/'
+    path = '../astrodrizzle_cfg/'
 
     configobj_list = [
         'z3_neptune_centerslice.cfg',
