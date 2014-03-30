@@ -8,14 +8,16 @@ ORM.
 import argparse
 import datetime
 import glob
+import logging
 import os
 import pyfits
 
+from astropy.io.fits import getheader
 from database_interface import counter
 from database_interface import check_type
 from database_interface import insert_record
 from database_interface import update_record
-
+from mt_logging import setup_logging
 from sqlalchemy.sql import func
 from sqlalchemy import desc
 from sqlalchemy import distinct
@@ -71,25 +73,26 @@ def make_record_dict(png_file, fits_file):
     '''
     png_path, png_name = os.path.split(os.path.abspath(png_file))
     fits_path, fits_name = os.path.split(os.path.abspath(fits_file))
+    header_dict = getheader(fits_file)
     record_dict = {}
-    record_dict['project_id'] = pyfits.getval(fits_file, 'proposid')
+    record_dict['project_id'] = header_dict['proposid']
     record_dict['name'] = png_name
     record_dict['fits_file'] = fits_name
-    record_dict['object_name'] = pyfits.getval(fits_file, 'targname')
-    record_dict['width'] = pyfits.getval(fits_file, 'NAXIS1')
-    record_dict['height'] = pyfits.getval(fits_file, 'NAXIS2')
-    record_dict['minimum_ra'] = pyfits.getval(fits_file, 'RA_TARG') - \
+    record_dict['object_name'] = header_dict['targname']
+    record_dict['width'] = header_dict['NAXIS1']
+    record_dict['height'] = header_dict['NAXIS2']
+    record_dict['minimum_ra'] = header_dict['RA_TARG'] - \
         (420.0 / 72000)
-    record_dict['minimum_dec'] = pyfits.getval(fits_file, 'DEC_TARG') - \
+    record_dict['minimum_dec'] = header_dict['DEC_TARG'] - \
         (424.5 / 72000)
-    record_dict['maximum_ra'] = pyfits.getval(fits_file, 'RA_TARG') + \
+    record_dict['maximum_ra'] = header_dict['RA_TARG'] + \
         ((record_dict['width'] - 420.0) / 72000) 
-    record_dict['maximum_dec'] = pyfits.getval(fits_file, 'DEC_TARG') + \
+    record_dict['maximum_dec'] = header_dict['DEC_TARG'] + \
         ((record_dict['height'] - 424.5) / 72000) 
     record_dict['pixel_resolution'] = 0.05 #arcsec / pix
-    record_dict['description'] = pyfits.getval(fits_file, 'FILTNAM1')
+    record_dict['description'] = header_dict['FILTNAM1']
     record_dict['file_location'] = png_path
-    linenum = pyfits.getval(fits_file, 'LINENUM')
+    linenum = header_dict['LINENUM']
     record_dict['visit'] = linenum.split('.')[0]
     record_dict['orbit'] = linenum.split('.')[1]
     record_dict['drz_mode'] = fits_name.split('_')[-3]
@@ -162,19 +165,29 @@ def build_master_images_table_main(file_list, reproc, reproc_sets):
     '''
     The main controller.    
     '''
+    logging.info('Beginning Processing')
+    logging.info('-reproc setting is {}'.format(reproc))
+    logging.info('-reproc_sets setting is {}'.format(reproc_sets))
+
+    # If the set information is being reprocessed set it to NULL and 
+    # let the regular set processing handle it.
     if reproc == True and reproc_sets == False:
         print 'REMINDER: You are reprocessing everything BUT the set information.'
     if reproc_sets:
         reproc = True
         update_dict = {'set_id':None, 'set_index':None}
+        logging.info('Updating all set_index and set_id information to NULL.')
         session.query(MasterImages).filter(\
             MasterImages.set_index != None).update(update_dict)
         session.commit()
+        logging.info('Update complete')
+
+
     if isinstance(file_list, str):
         file_list = glob.glob(file_list)
     assert isinstance(file_list, list), \
         'Expected a list for file_list, got {}'.format(type(file_list))
-    print 'Processing ' + str(len(file_list)) + ' files.'
+    logging.info('Processing {} files'.format(len(file_list)))
     count = 0
     for png_file in file_list:
         fits_file = get_fits_file(png_file)
@@ -191,6 +204,7 @@ def build_master_images_table_main(file_list, reproc, reproc_sets):
             update_record(record_dict, master_images_query)
         count = counter(count)
     session.close()
+    logging.info('Processing Completed')
 
 #----------------------------------------------------------------------------
 # For command line execution
@@ -227,4 +241,5 @@ def parse_args():
 
 if __name__ == '__main__':
     args = parse_args()
+    setup_logging('build_master_images_table')
     build_master_images_table_main(args.filelist, args.reproc, args.reproc_sets)
