@@ -96,20 +96,14 @@ def run_astrodrizzle(filename, output_path = None):
     '''
     Executes astrodrizzle.AstroDrizzle.
     '''
-    path = '../astrodrizzle_cfg/'
-
-    configobj_list = [
-        'z3_neptune_centerslice.cfg',
-        'z3_neptune_wideslice.cfg']
-        
-    mode_list = [
-        'center',
-        'wide']
-
+    cfg_path = os.path.dirname(os.path.dirname(
+               os.path.abspath(inspect.getfile(inspect.currentframe()))))
+    configobj_list = ['z3_neptune_centerslice.cfg', 'z3_neptune_wideslice.cfg']
+    mode_list = ['center', 'wide']
     for configobj, mode in zip(configobj_list, mode_list):
         astrodrizzle.AstroDrizzle(
             input = filename,
-            configobj = os.path.join(path, configobj))
+            configobj = os.path.join(path, 'astrodrizzle_cfg', configobj))
         rename_files(filename, mode, output_path)
             
 # ------------------------------------------------------------------------------
