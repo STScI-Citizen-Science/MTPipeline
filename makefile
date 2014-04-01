@@ -4,6 +4,7 @@ help:
 	@echo 'makefile for the mtpipeline.                                                    '
 	@echo '                                                                                '
 	@echo 'Usage:                                                                          '
+	@echo '    new_data                      Copy over any new data from the "archive" area'
 	@echo '    master_images TARGET=???             Generate master_images table for TARGET'
 	@echo '    jpl2db TARGET=???                              Seed the master_finders table'
 	@echo '    master_finders                                Genereate master_finders table'
@@ -12,6 +13,10 @@ help:
 	@echo '    stage                            Update the contents of the ftp staging tree'
 	@echo '    dump DATE=YYYY-MM-DD                                  Create a database dump'
 	@echo '                                                                                '
+
+
+new_data:
+	cp -vru /astro/3/mutchler/mt/archive/ /astro/3/mutchler/mt/drizzled/
 
 master_images:
 ifdef TARGET
