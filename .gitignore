@@ -1,2 +1,4 @@
 *.pyc
 connection.yaml
+astrodrizzle.log
+
