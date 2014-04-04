@@ -220,7 +220,7 @@ if __name__ == '__main__':
     logger.setLevel(logging.DEBUG)
     log_file = logging.FileHandler(
         os.path.join(
-            LOGFOLDER, 
+            LOGFOLDER, 'mtpipeline', 
             'mtpipeline-' + datetime.now().strftime('%Y-%m-%d') + '.log'))
     log_file.setLevel(logging.DEBUG)
     log_file.setFormatter(
