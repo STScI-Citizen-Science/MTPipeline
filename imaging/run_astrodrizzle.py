@@ -5,6 +5,7 @@ A script to run Astrodrizzle.
 import argparse
 from drizzlepac import astrodrizzle
 import glob
+import inspect
 import os
 import string
 import shutil
