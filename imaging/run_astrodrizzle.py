@@ -104,7 +104,7 @@ def run_astrodrizzle(filename, output_path = None):
     for configobj, mode in zip(configobj_list, mode_list):
         astrodrizzle.AstroDrizzle(
             input = filename,
-            configobj = os.path.join(path, 'astrodrizzle_cfg', configobj))
+            configobj = os.path.join(cfg_path, 'astrodrizzle_cfg', configobj))
         rename_files(filename, mode, output_path)
             
 # ------------------------------------------------------------------------------

@@ -8,12 +8,14 @@ Scales the images and produces the output images.
 import argparse
 import copy
 import glob
-import Image
 import logging
 import numpy as N
 import os
 import pyfits
 import time
+
+from PIL import Image
+
 
 # Custom modules
 from display_tools import before_after
