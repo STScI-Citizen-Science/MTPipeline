@@ -92,10 +92,10 @@ def make_output_file_dict(filename):
     return output_file_dict
 
 # ----------------------------------------------------------------------------
-# The main module.
+# The main function.
 # ----------------------------------------------------------------------------
 
-def run_mtpipeline(root_filename, output_path = None, cr_reject_switch=True, 
+def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True, 
         astrodrizzle_switch=True, png_switch=True, reproc_switch=False):
     '''
     This is the main controller for all the steps in the pipeline.
@@ -156,97 +156,3 @@ def run_mtpipeline(root_filename, output_path = None, cr_reject_switch=True,
         print 'Skipping running png'
         logger.info("Skipping running png")
         
-# ----------------------------------------------------------------------------
-# For command line execution.
-# ----------------------------------------------------------------------------
-
-
-def parse_args():
-    '''
-    parse the command line arguemnts.
-    '''
-    parser = argparse.ArgumentParser(
-        description = 'Run the moving target pipeline.' )
-    parser.add_argument(
-        '-filelist',
-        required = True,
-        help = 'Search string for files. Wildcards accepted.')
-    parser.add_argument(
-        '-output_path',
-        required = False,
-        help = 'Set the path for the output. Default is the input directory.')
-    parser.add_argument(
-        '-no_cr_reject',
-        required = False,
-        action='store_false',
-        default = True,
-        dest = 'cr_reject',
-        help = 'Toggle off the cosmic ray rejection step.')
-    parser.add_argument(    
-        '-no_astrodrizzle',
-        required = False,
-        action='store_false',        
-        default = True,
-        dest = 'astrodrizzle',
-        help = 'Toggle off the astrodrizzle step.')
-    parser.add_argument(
-        '-no_png',
-        required = False,
-        action = 'store_false',        
-        default = True,
-        dest = 'png',
-        help = 'Toggle off the png step.')
-    parser.add_argument(
-        '-reproc',
-        required = False,
-        action = 'store_true',
-        default = False,
-        dest = 'reproc',
-        help = 'Reprocess all files, even if outputs already exist.')
-    args = parser.parse_args()
-    return args
-
-# ------------------------------------------------------------------------------
-
-if __name__ == '__main__':
-    
-    @email_decorator
-    def wrapper():
-        args = parse_args()
-        logger = logging.getLogger('mtpipeline')
-        logger.setLevel(logging.DEBUG)
-        log_file = logging.FileHandler(
-            os.path.join(
-                LOGFOLDER, 'mtpipeline', 
-                'mtpipeline-' + datetime.now().strftime('%Y-%m-%d') + '.log'))
-        log_file.setLevel(logging.DEBUG)
-        log_file.setFormatter(
-            logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-
-        logger.addHandler(log_file)
-        logger.info('User: {0}'.format(getuser()))
-        logger.info('Host: {0}'.format(gethostname())) 
-        logger.info('Machine: {0}'.format(machine()))
-        logger.info('Platform: {0}'.format(platform()))
-        logger.info("Command-line arguments used:")
-        for arg in args.__dict__:
-            logger.info(arg + ": " + str(args.__dict__[arg]))
-        rootfile_list = glob.glob(args.filelist)
-        rootfile_list = [x for x in rootfile_list if len(os.path.basename(x)) == 18]
-        assert rootfile_list != [], 'empty rootfile_list in mtpipeline.py.'
-        for filename in rootfile_list:
-            logger.info("Current File: " + filename)
-            try:
-                run_mtpipeline(filename, 
-                    output_path =  args.output_path,
-                    cr_reject_switch = args.cr_reject,
-                    astrodrizzle_switch = args.astrodrizzle, 
-                    png_switch = args.png,
-                    reproc_switch = args.reproc)
-                logger.info("Completed: " + filename)
-            except Exception as err:
-                logger.critical('{0} {1} {2}'.format(
-                    type(err), err.message, sys.exc_traceback.tb_lineno))
-        logger.info("Script completed")
-
-    wrapper()
