@@ -10,8 +10,9 @@ viana@stsci.edu
 # Standard packages
 import argparse
 import glob
-import os
 import logging
+import os
+import sys
 from datetime import datetime
 from getpass import getuser
 from socket import gethostname
@@ -19,12 +20,12 @@ from platform import machine
 from platform import platform
 from platform import architecture
 from stwcs import updatewcs
-import sys
 
 # Custom Packages
 from run_cosmics import run_cosmics
 from run_astrodrizzle import run_astrodrizzle
 from run_trim import run_trim
+from mtpipeline.email_decorator import email_decorator
 
 LOGFOLDER = "/astro/3/mutchler/mt/logs/"
 
@@ -159,12 +160,6 @@ def run_mtpipeline(root_filename, output_path = None, cr_reject_switch=True,
 # For command line execution.
 # ----------------------------------------------------------------------------
 
-def get_logger():
-    '''
-    Set up the logging instance for mtpipeline and any modules it 
-    calls.
-    '''
-
 
 def parse_args():
     '''
@@ -215,39 +210,43 @@ def parse_args():
 
 if __name__ == '__main__':
     
-    args = parse_args()
-    logger = logging.getLogger('mtpipeline')
-    logger.setLevel(logging.DEBUG)
-    log_file = logging.FileHandler(
-        os.path.join(
-            LOGFOLDER, 'mtpipeline', 
-            'mtpipeline-' + datetime.now().strftime('%Y-%m-%d') + '.log'))
-    log_file.setLevel(logging.DEBUG)
-    log_file.setFormatter(
-        logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+    @email_decorator
+    def wrapper():
+        args = parse_args()
+        logger = logging.getLogger('mtpipeline')
+        logger.setLevel(logging.DEBUG)
+        log_file = logging.FileHandler(
+            os.path.join(
+                LOGFOLDER, 'mtpipeline', 
+                'mtpipeline-' + datetime.now().strftime('%Y-%m-%d') + '.log'))
+        log_file.setLevel(logging.DEBUG)
+        log_file.setFormatter(
+            logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
 
-    logger.addHandler(log_file)
-    logger.info('User: {0}'.format(getuser()))
-    logger.info('Host: {0}'.format(gethostname())) 
-    logger.info('Machine: {0}'.format(machine()))
-    logger.info('Platform: {0}'.format(platform()))
-    logger.info("Command-line arguments used:")
-    for arg in args.__dict__:
-        logger.info(arg + ": " + str(args.__dict__[arg]))
-    rootfile_list = glob.glob(args.filelist)
-    rootfile_list = [x for x in rootfile_list if len(os.path.basename(x)) == 18]
-    assert rootfile_list != [], 'empty rootfile_list in mtpipeline.py.'
-    for filename in rootfile_list:
-        logger.info("Current File: " + filename)
-        try:
-            run_mtpipeline(filename, 
-                output_path =  args.output_path,
-                cr_reject_switch = args.cr_reject,
-                astrodrizzle_switch = args.astrodrizzle, 
-                png_switch = args.png,
-                reproc_switch = args.reproc)
-            logger.info("Completed: " + filename)
-        except Exception as err:
-            logger.critical('{0} {1} {2}'.format(
-                type(err), err.message, sys.exc_traceback.tb_lineno))
-    logger.info("Script completed")
+        logger.addHandler(log_file)
+        logger.info('User: {0}'.format(getuser()))
+        logger.info('Host: {0}'.format(gethostname())) 
+        logger.info('Machine: {0}'.format(machine()))
+        logger.info('Platform: {0}'.format(platform()))
+        logger.info("Command-line arguments used:")
+        for arg in args.__dict__:
+            logger.info(arg + ": " + str(args.__dict__[arg]))
+        rootfile_list = glob.glob(args.filelist)
+        rootfile_list = [x for x in rootfile_list if len(os.path.basename(x)) == 18]
+        assert rootfile_list != [], 'empty rootfile_list in mtpipeline.py.'
+        for filename in rootfile_list:
+            logger.info("Current File: " + filename)
+            try:
+                run_mtpipeline(filename, 
+                    output_path =  args.output_path,
+                    cr_reject_switch = args.cr_reject,
+                    astrodrizzle_switch = args.astrodrizzle, 
+                    png_switch = args.png,
+                    reproc_switch = args.reproc)
+                logger.info("Completed: " + filename)
+            except Exception as err:
+                logger.critical('{0} {1} {2}'.format(
+                    type(err), err.message, sys.exc_traceback.tb_lineno))
+        logger.info("Script completed")
+
+    wrapper()

@@ -5,10 +5,9 @@ Creates and returns a sqlalchemy session object using the declaarative
 base.
 '''
 
-import inspect
-import os
 import pyfits
-import yaml
+
+from mtpipeline.get_settings import SETTINGS
 
 from sqlalchemy import create_engine
 from sqlalchemy import DateTime
@@ -18,9 +17,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy import Integer
 from sqlalchemy import MetaData
 from sqlalchemy import String
-
 from sqlalchemy.ext.declarative import declarative_base
-
 from sqlalchemy.orm import backref
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import relationship
@@ -41,13 +38,7 @@ def loadConnection(connection_string, echo=False):
 # Define all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-# Note the os.path.dirname is called twice because the yaml file is 
-# expected to be one level above this module.
-settings_path = os.path.dirname(os.path.dirname(
-    os.path.abspath(inspect.getfile(inspect.currentframe()))))
-
-connection = yaml.load(open(os.path.join(settings_path,'connection.yaml')))
-session, Base = loadConnection(connection['connection'], connection['echo'])
+session, Base = loadConnection(SETTINGS['db_connection'], SETTINGS['db_echo'])
 
 class Foo(Base):
     __tablename__ = 'foo'
