@@ -20,10 +20,9 @@ from PIL import Image
 # Connect the SQLAlchemy ORM declaritive base classes.
 #----------------------------------------------------------------------------
 
-from .database.database_interface import MasterImages
-from .database.database_interface import MasterFinders
-
-from .database.database_interface import session
+from mtpipeline.database.database_interface import MasterImages
+from mtpipeline.database.database_interface import MasterFinders
+from mtpipeline.database.database_interface import session
 
 #----------------------------------------------------------------------------
 # 
@@ -44,8 +43,9 @@ class EphemPlot(object):
         '''
         Get the cr pixel information from the single_sci.fits file.
         '''
-        fitsfile = master_images_query = session.query(MasterImages.fits_file).filter(\
-            MasterImages.name == os.path.basename(self.filename)).one()[0]
+        fitsfile = master_images_query = session.query(MasterImages.fits_file).\
+            filter(MasterImages.name == os.path.basename(self.filename)).\
+            one()[0]
         png_path = os.path.split(self.filename)[0]
         png_path = os.path.split(png_path)[0]
         fitsfile = os.path.join(png_path, fitsfile)
@@ -85,11 +85,11 @@ class EphemPlot(object):
             # ax1.plot(moon.ephem_x, moon.ephem_y, 'o', markersize = 10,    
             #     markerfacecolor = 'none', markeredgecolor = 'white')
             circle = mpatches.Circle((moon.ephem_x, moon.ephem_y),
-                     diam/2, fill = False, ec = "r")
+                     diam/2, fill=False, ec="r")
             ax1.add_patch(circle)
             if args.label == "True":
-                ax1.text(moon.ephem_x + 20, moon.ephem_y + 20, moon.object_name.title(),
-                        color="blue")
+                ax1.text(moon.ephem_x + 20, moon.ephem_y + 20, 
+                         moon.object_name.title(), color="blue")
           # ax1.text(moon.ephem_x, moon.ephem_y, moon.object_name, 
           #   color = 'white')
         #ax1.plot(self.crpix1, self.crpix2, 'o', markersize = 10, 
@@ -126,16 +126,16 @@ def parse_args():
     parse the command line arguemnts.
     '''
     parser = argparse.ArgumentParser(
-        description = 'Plots the ephemeride data from the database.')
+        description='Plots the ephemeride data from the database.')
     parser.add_argument(
         '-file',
-        required = True,
-        help = 'The file to display.')
+        required=True,
+        help='The master PNG file to display.')
     parser.add_argument(
         '-label',
-        required = False,
-        default = False,
-        help = 'Toggle labelling of objects.'
+        required=False,
+        default=False,
+        help='Toggle labelling of objects.'
         )
     args = parser.parse_args()
     return args
