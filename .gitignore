@@ -1,5 +1,5 @@
 *.DS_Store
 *.pyc
-connection.yaml
+settings.yaml
 astrodrizzle.log
 *.egg-info	
