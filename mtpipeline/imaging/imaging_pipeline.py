@@ -22,10 +22,9 @@ from platform import architecture
 from stwcs import updatewcs
 
 # Custom Packages
-from run_cosmics import run_cosmics
-from run_astrodrizzle import run_astrodrizzle
-from run_trim import run_trim
-from mtpipeline.email_decorator import email_decorator
+from mtpipeline.imaging.run_cosmics import run_cosmics
+from mtpipeline.imaging.run_astrodrizzle import run_astrodrizzle
+from mtpipeline.imaging.run_trim import run_trim
 
 LOGFOLDER = "/astro/3/mutchler/mt/logs/"
 
