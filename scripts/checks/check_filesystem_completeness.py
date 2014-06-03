@@ -25,33 +25,9 @@ def check_file_completeness_main():
     
     counter = 0
     for c0m in file_list:
-        
-        file_dict = {}
-        
-        # Create the uncorrected FITS keys.
-        file_dict['c0m'] = c0m
-        file_dict['c1m'] = c0m.replace('_c0m.fits','_c1m.fits')
-        file_dict['c0m_center_single'] = c0m.replace('.fits', '_center_single_sci.fits')
-        file_dict['c0m_wide_single'] = c0m.replace('.fits', '_wide_single_sci.fits')
-        
-        # Create the corrected FITS keys.
-        file_dict['cr_c0m'] = c0m.replace('_c0m.fits', '_cr_c0m.fits')
-        file_dict['cr_c1m'] = file_dict['c1m'].replace('_c0m.fits', '_cr_c0m.fits')
-        file_dict['cr_c0m_center_single'] = file_dict['c0m_center_single'].replace('_c0m.fits', '_cr_c0m.fits')
-        file_dict['cr_c0m_wide_single'] = file_dict['c0m_wide_single'].replace('_c0m.fits', '_cr_c0m.fits')
-        
-        # Checking PNG keys.
-        key_list = ['c0m_center_single', 'c0m_wide_single',
-                    'cr_c0m_center_single', 'cr_c0m_wide_single']
-        for key in key_list:
-            file_dict[key + '_png'] = os.path.join(os.path.dirname(file_dict[key]), 'png',
-                                                               os.path.basename(file_dict[key].replace('.fits','_linear.png')))
-        key_list = ['c0m_wide_single_png', 'cr_c0m_wide_single_png']
-        for key in key_list:
-            for i_image in range(1,13):
-                file_dict[key + '_{}'.format(i_image)] = file_dict[key].replace('_linear', '_linear_{}'.format(i_image))
+        file_dict = make_output_file_dict(c0m)
                     
-        # Check to see if the keys exist
+        # Check to see if the files exist
         for value in file_dict.itervalues():
             check_file(value)
             counter += 1
