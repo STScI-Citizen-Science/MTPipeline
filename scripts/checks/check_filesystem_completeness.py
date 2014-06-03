@@ -13,6 +13,7 @@ def check_filesystem_completeness_main():
     """The main functin for the check_filesystem_completeness module."""
     all_fits_file_list = glob.glob(os.path.join(SETTINGS['wfpc2_output_path'], '*_*/*.fits'))
     c0m_file_list = [filename for filename in all_fits_file_list if filename.split('/')[-1].split('_')[-1] == 'c0m.fits']
+    all_fits_file_list += glob.glob(os.path.join(SETTINGS['wfpc2_output_path'], '*_*/png/*.png'))
     fits_set = set(all_fits_file_list)
     
     logging.info('Checking in: {}'.format(SETTINGS['wfpc2_output_path']))
