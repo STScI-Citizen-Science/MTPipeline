@@ -84,9 +84,12 @@ def make_output_file_dict(filename):
     # PNG outputs.
     for cr in ['_c0m','_cr_c0m']:
         for drz in ['_wide', '_center']:
-            for png in ['_single_sci_log.png', '_single_sci_median.png']:
-                filename = os.path.join(path, basename + cr + drz + png)
-                output_file_dict['png_output'].append(filename)
+            filename = os.path.join(path, 'png', basename + cr + drz + '_single_linear.png')
+            output_file_dict['png_output'].append(filename)
+            if drz == '_wide':
+                for i_image in range(1,13):
+                    filename = filename.replace('_linear', '_linear_{}'.format(i_image))
+                    output_file_dict['png_output'].append(filename)
     
     return output_file_dict
 
