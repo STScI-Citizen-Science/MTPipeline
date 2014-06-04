@@ -88,8 +88,8 @@ def make_output_file_dict(filename):
             output_file_dict['png_output'].append(filename)
             if drz == '_wide':
                 for i_image in range(1,13):
-                    filename = filename.replace('_linear', '_linear_{}'.format(i_image))
-                    output_file_dict['png_output'].append(filename)
+                    new_file = filename.replace('_linear', '_linear_{}'.format(i_image))
+                    output_file_dict['png_output'].append(new_file)
     
     return output_file_dict
 
