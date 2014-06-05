@@ -53,10 +53,13 @@ def check_make_output_file_dict(expected_output):
             The expected output dict that the result will be compared to.
         
     Returns:
+        nothing
+    
+    Output:
         output: string
             "Ok" if test passed.
-            Error message if any test failed.     
-            
+            Error message if any test failed.
+    
     """
     result = make_output_file_dict(expected_output['input_file'])
     err_message = "expected {0} got {1}"
@@ -67,6 +70,15 @@ def test_make_output_file_dict():
     """
         
     Iteratively generating tests.
+    
+    Parameters:
+        nothing
+    
+    Returns:
+        nothing
+    
+    Output:
+        nothing
     
     """
     for expected_output in expected_output_list:

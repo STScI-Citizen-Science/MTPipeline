@@ -22,11 +22,12 @@ from platform import architecture
 from stwcs import updatewcs
 
 # Custom Packages
+from mtpipeline.get_settings import SETTINGS
 from mtpipeline.imaging.run_cosmics import run_cosmics
 from mtpipeline.imaging.run_astrodrizzle import run_astrodrizzle
 from mtpipeline.imaging.run_trim import run_trim
 
-LOGFOLDER = "/astro/3/mutchler/mt/logs/"
+LOGFOLDER = SETTINGS['logging_path']
 
 # ----------------------------------------------------------------------------
 # Functions (alphabetical)
@@ -52,6 +53,18 @@ def make_output_file_dict(filename):
     Generate a dictionary with the list of expected inputs for each 
     step. This allows steps to be omitted if the output files already 
     exist.
+    
+    Parameters:
+        input: filename
+            a path to where the file is located.
+    
+    Returns:
+        output: output_file_dict
+            a dictionary with all the expected created files.
+            
+    Output:
+        nothing
+        
     '''
     # Check the input.
     error = filename + ' does not end in "c0m.fits".'

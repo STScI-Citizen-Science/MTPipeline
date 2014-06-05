@@ -7,7 +7,21 @@ import os
 import time
 
 def setup_logging():
-    """Set up the logging."""
+    """
+        
+    Set up the logging.
+    
+    Parameters:
+        nothing
+            
+    Returns:
+        nothing
+            
+    Output:
+        output: string
+            information about logging.
+                
+    """
     module = 'check_file_completeness'
     log_file = os.path.join(SETTINGS['logging_path'], module,
                             module + '_' + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M') + '.log')

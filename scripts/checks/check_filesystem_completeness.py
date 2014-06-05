@@ -11,7 +11,37 @@ import os
 import time
 
 def check_filesystem_completeness_main():
-    """The main functin for the check_filesystem_completeness module."""
+    """
+        The main function for the check_filesystem_completeness module.
+        
+        Parameters:
+            nothing
+        
+        Returns:
+            nothing
+        
+        Output:
+            output: string
+                information about files that are missing. Logged in log files.
+                Example:
+                'INFO: Checking in: /astro/3/mutchler/mt/drizzled/
+                INFO: Found 10000 root c0m.fits files
+                INFO: Found 500000 files
+                INFO: List of missing files:
+                11990_comet_hartley2 : cr_reject_output : 108
+                11990_comet_hartley2 : drizzle_weight : 432
+                11990_comet_hartley2 : drizzle_output : 432
+                11990_comet_hartley2 : png_output : 3024
+                06497_kbo : png_output : 1960
+                11518_kbo_2003el61 : cr_reject_output : 20
+                11518_kbo_2003el61 : drizzle_weight : 80
+                11518_kbo_2003el61 : drizzle_output : 80
+                11518_kbo_2003el61 : png_output : 560
+                09585_kbo : png_output : 252
+                
+                Total: 6948 missing files'
+        
+    """
     all_files_list = glob.glob(os.path.join(SETTINGS['wfpc2_output_path'], '*_*/*c0m*.fits'))
     c0m_file_list = [filename for filename
                      in all_files_list
@@ -27,7 +57,7 @@ def check_filesystem_completeness_main():
     #  creating a dictionary to store the quantities of files that were found
     check_dict = {}
     for filename in c0m_file_list:
-        proposal_folder = filename.split('/')[6]
+        proposal_folder = filename.split('/')[-2]
         if proposal_folder not in check_dict.keys():
             check_dict[proposal_folder] = defaultdict(int)
         check_dict[proposal_folder]['input_file'] += 1
