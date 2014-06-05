@@ -3,6 +3,7 @@
 from mtpipeline.get_settings import SETTINGS
 from mtpipeline.setup_logging import setup_logging
 from mtpipeline.imaging.imaging_pipeline import make_output_file_dict
+from collections import defaultdict
 import datetime
 import glob
 import logging
@@ -12,32 +13,30 @@ import time
 def check_filesystem_completeness_main():
     """The main functin for the check_filesystem_completeness module."""
     all_files_list = glob.glob(os.path.join(SETTINGS['wfpc2_output_path'], '*_*/*c0m*.fits'))
-    c0m_file_list = [filename for filename in all_files_list if len(filename.split('/')[-1]) == 18 and filename.split('/')[-1].split('_')[-1] == 'c0m.fits']
+    c0m_file_list = [filename for filename
+                     in all_files_list
+                     if len(filename.split('/')[-1]) == 18
+                     and filename.split('/')[-1].split('_')[-1] == 'c0m.fits']
     all_files_list += glob.glob(os.path.join(SETTINGS['wfpc2_output_path'], '*_*/png/*c0m*.png'))
     files_set = set(all_files_list)
     
     logging.info('Checking in: {}'.format(SETTINGS['wfpc2_output_path']))
-    logging.info('Found {} root c0m.fits files'.format(len(all_fits_file_list)))
+    logging.info('Found {} root c0m.fits files'.format(len(c0m_file_list)))
+    logging.info('Found {} files'.format(len(all_files_list)))
 
     #  creating a dictionary to store the quantities of files that were found
     check_dict = {}
     for filename in c0m_file_list:
-        new_key = filename.split('/')[6]
-        if new_key not in check_dict.keys():
-            check_dict[new_key] = {}
-            check_dict[new_key]['input_file'] = 1
-        else:
-            check_dict[new_key]['input_file'] += 1
-
-    file_dict = make_output_file_dict(filename)
-    for key in file_dict.iterkeys():
-        if key != 'input_file':
-            for file in file_dict[key]:
-                if file in files_set:
-                    if key not in check_dict[new_key].keys():
-                        check_dict[new_key][key] = 1
-                    else:
-                        check_dict[new_key][key] += 1
+        proposal_folder = filename.split('/')[6]
+        if proposal_folder not in check_dict.keys():
+            check_dict[proposal_folder] = defaultdict(int)
+        check_dict[proposal_folder]['input_file'] += 1
+        file_dict = make_output_file_dict(filename)
+        for key in file_dict.iterkeys():
+            if key != 'input_file':
+                for file in file_dict[key]:
+                    if file in files_set:
+                        check_dict[proposal_folder][key] += 1
 
     for mis in check_dict.keys():
         if 'drizzle_weight' not in check_dict[mis].keys():
