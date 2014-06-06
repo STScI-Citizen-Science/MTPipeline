@@ -6,29 +6,24 @@ import logging
 import os
 import time
 
-def setup_logging():
+def setup_logging(module_name):
     """
+        Set up the logging for the mtpipeline scripts.
         
-    Set up the logging.
-    
-    Parameters:
-        nothing
-            
-    Returns:
-        nothing
-            
-    Output:
-        output: string
-            information about logging.
-                
+        Parameters:
+            module_name : string
+        
+        Returns:
+            nothing
+        
+        Output:
+            nothing
     """
-    module = 'check_file_completeness'
-    log_file = os.path.join(SETTINGS['logging_path'], module,
-                            module + '_' + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M') + '.log')
+    log_file = (module_name + '_' +
+                datetime.datetime.now().strftime('%Y-%m-%d-%H-%M') +
+                '.log')
+    log_file = os.path.join(SETTINGS['logging_path'], module_name, log_file)
     logging.basicConfig(filename = log_file,
                         format = '%(asctime)s %(levelname)s: %(message)s',
                         datefmt = '%m/%d/%Y %H:%M:%S %p',
                         level = logging.INFO)
-
-if __name__ == "__main__":
-    setup_logging()

@@ -56,6 +56,7 @@ def check_filesystem_completeness_main():
 
     #  creating a dictionary to store the quantities of files that were found
     check_dict = {}
+    found = 0
     for filename in c0m_file_list:
         proposal_folder = filename.split('/')[-2]
         if proposal_folder not in check_dict.keys():
@@ -67,6 +68,7 @@ def check_filesystem_completeness_main():
                 for file in file_dict[key]:
                     if file in files_set:
                         check_dict[proposal_folder][key] += 1
+                        found += 1
 
     for mis in check_dict.keys():
         if 'drizzle_weight' not in check_dict[mis].keys():
@@ -93,18 +95,20 @@ def check_filesystem_completeness_main():
             elif key2 == 'png_output':
                 check_missing[key1][key2] = 28*check_dict[key1]['input_file'] - check_dict[key1][key2]
 
-    counter = 0
+    missing = 0
     missing_list = ''
     for mis in check_missing.keys():
         for key in check_missing[mis].keys():
             if check_missing[mis][key] != 0:
                 missing_list += '{} : {} : {}\n'.format(mis, key, check_missing[mis][key])
-                counter += check_missing[mis][key]
+                missing += check_missing[mis][key]
 
-    logging.info('List of missing files:\n{}\nTotal: {} missing files'.format(missing_list, counter))
+    logging.info('List of missing files:\n{}'.format(missing_list))
+    logging.info('Missing: {} files'.format(missing))
+    logging.info('Found: {} files'.format(found))
 
 if __name__ == '__main__':
-    setup_logging()
+    setup_logging('check_file_completeness')
     t1 = time.time()
     check_filesystem_completeness_main()
     t2 = time.time()

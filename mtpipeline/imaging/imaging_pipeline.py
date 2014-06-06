@@ -22,12 +22,9 @@ from platform import architecture
 from stwcs import updatewcs
 
 # Custom Packages
-from mtpipeline.get_settings import SETTINGS
 from mtpipeline.imaging.run_cosmics import run_cosmics
 from mtpipeline.imaging.run_astrodrizzle import run_astrodrizzle
 from mtpipeline.imaging.run_trim import run_trim
-
-LOGFOLDER = SETTINGS['logging_path']
 
 # ----------------------------------------------------------------------------
 # Functions (alphabetical)
