@@ -22,12 +22,9 @@ from platform import architecture
 from stwcs import updatewcs
 
 # Custom Packages
-from run_cosmics import run_cosmics
-from run_astrodrizzle import run_astrodrizzle
-from run_trim import run_trim
-from mtpipeline.email_decorator import email_decorator
-
-LOGFOLDER = "/astro/3/mutchler/mt/logs/"
+from mtpipeline.imaging.run_cosmics import run_cosmics
+from mtpipeline.imaging.run_astrodrizzle import run_astrodrizzle
+from mtpipeline.imaging.run_trim import run_trim
 
 # ----------------------------------------------------------------------------
 # Functions (alphabetical)
@@ -53,6 +50,18 @@ def make_output_file_dict(filename):
     Generate a dictionary with the list of expected inputs for each 
     step. This allows steps to be omitted if the output files already 
     exist.
+    
+    Parameters:
+        input: filename
+            a path to where the file is located.
+    
+    Returns:
+        output: output_file_dict
+            a dictionary with all the expected created files.
+            
+    Output:
+        nothing
+        
     '''
     # Check the input.
     error = filename + ' does not end in "c0m.fits".'
@@ -84,10 +93,13 @@ def make_output_file_dict(filename):
 
     # PNG outputs.
     for cr in ['_c0m','_cr_c0m']:
-        for drz in ['_wide', '_center']:
-            for png in ['_single_sci_log.png', '_single_sci_median.png']:
-                filename = os.path.join(path, basename + cr + drz + png)
-                output_file_dict['png_output'].append(filename)
+        for drz in ['_wide_single_sci_linear.png', '_center_single_sci_linear.png']:
+            filename = os.path.join(path, 'png', basename + cr + drz)
+            output_file_dict['png_output'].append(filename)
+            if drz == '_wide_single_sci_linear.png':
+                for i_image in range(1,13):
+                    new_file = filename.replace('_linear', '_linear_{}'.format(i_image))
+                    output_file_dict['png_output'].append(new_file)
     
     return output_file_dict
 
