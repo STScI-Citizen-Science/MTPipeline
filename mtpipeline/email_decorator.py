@@ -11,6 +11,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from get_settings import SETTINGS
 
+import sys
 import smtplib
 
 
@@ -42,9 +43,11 @@ def email_decorator(func):
                 func(*a, **kw)
                 msg["Subject"] = "Process Completed"
                 msg.attach(MIMEText("Process Completed"))
-            except * as err:
+            except:
+                error_message = sys.exc_info()[0]
                 msg["Subject"] = "Process Crashed"
-                msg.attach(MIMEText("Process Crashed: {}".format(err.message)))
+                msg.attach(MIMEText("Process Crashed: {}".format(error_message)))
+                raise
             finally:
                 s = smtplib.SMTP("smtp.stsci.edu")
                 s.sendmail(SETTINGS['contact_email'], 

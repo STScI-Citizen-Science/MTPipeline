@@ -97,14 +97,19 @@ def run_astrodrizzle(filename, output_path = None):
     '''
     Executes astrodrizzle.AstroDrizzle.
     '''
-    cfg_path = os.path.dirname(os.path.dirname(
-               os.path.abspath(inspect.getfile(inspect.currentframe()))))
-    configobj_list = ['z3_neptune_centerslice.cfg', 'z3_neptune_wideslice.cfg']
+    cfg_path = os.path.realpath(__file__)
+    if '.pyc' in cfg_path:
+        cfg_path = cfg_path.replace('/mtpipeline/imaging/run_astrodrizzle.pyc',
+                                '/astrodrizzle_cfg/')
+    else:
+        cfg_path = cfg_path.replace('/mtpipeline/imaging/run_astrodrizzle.py',
+                                '/astrodrizzle_cfg/')
+    configobj_list = ['wfpc2_centerslice.cfg', 'wfpc2_wideslice.cfg']
     mode_list = ['center', 'wide']
     for configobj, mode in zip(configobj_list, mode_list):
         astrodrizzle.AstroDrizzle(
             input = filename,
-            configobj = os.path.join(cfg_path, 'astrodrizzle_cfg', configobj))
+            configobj = os.path.join(cfg_path, configobj))
         rename_files(filename, mode, output_path)
             
 # ------------------------------------------------------------------------------

@@ -14,10 +14,6 @@ import logging
 import os
 import sys
 from datetime import datetime
-from getpass import getuser
-from socket import gethostname
-from platform import machine
-from platform import platform
 from platform import architecture
 from stwcs import updatewcs
 
@@ -121,50 +117,50 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
         output_check = check_for_outputs(output_file_dict['cr_reject_output'][1])
         if reproc_switch == False and output_check == True:
             print 'Not reprocessing cr_reject files.'
-            logger.info("Not reprocessing cr_reject files.")
+            logging.info("Not reprocessing cr_reject files.")
         else:
-            logger.info("Running cr_reject")
+            logging.info("Running cr_reject")
             print 'Running cr_reject'
             run_cosmics(root_filename, output_file_dict['cr_reject_output'][1], 7)
             print 'Done running cr_reject'
-            logger.info("Done running cr_reject")
+            logging.info("Done running cr_reject")
     else:
-        logger.info("Skipping cr_reject ")
+        logging.info("Skipping cr_reject ")
         print 'Skipping cr_reject'
     
     # Run astrodrizzle.         
     if astrodrizzle_switch:
         output_check = check_for_outputs(output_file_dict['drizzle_output'])
         if reproc_switch == False and output_check == True:
-            logger.info("Not reprocessing astrodrizzle files.")
+            logging.info("Not reprocessing astrodrizzle files.")
             print 'Not reprocessing astrodrizzle files.'
         else:
-            logger.info("Running Astrodrizzle")
+            logging.info("Running Astrodrizzle")
             print 'Running Astrodrizzle'
             for filename in  output_file_dict['cr_reject_output']:
                 updatewcs.updatewcs(filename)
                 run_astrodrizzle(filename)
             print 'Done running astrodrizzle'
-            logger.info("Done running astrodrizzle")
+            logging.info("Done running astrodrizzle")
     else:
         print 'Skipping astrodrizzle'
-        logger.info("Skipping astrodrizzle")
+        logging.info("Skipping astrodrizzle")
         
     # Run trim.
     if png_switch:
         output_check = check_for_outputs(output_file_dict['png_output'])
         if reproc_switch == False and output_check == True:
             print 'Not reprocessing png files.'
-            logger.info("Not reprocessing png files.")
+            logging.info("Not reprocessing png files.")
         else:
             print 'Running png'
-            logger.info("Running png")
+            logging.info("Running png")
             for filename, weight_file in zip(output_file_dict['drizzle_output'], \
                     output_file_dict['drizzle_weight']):
                 run_trim(filename, weight_file, output_path)
             print 'Done running png'
-            logger.info("Done running png")
+            logging.info("Done running png")
     else:
         print 'Skipping running png'
-        logger.info("Skipping running png")
+        logging.info("Skipping running png")
         
