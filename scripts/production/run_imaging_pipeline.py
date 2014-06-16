@@ -109,6 +109,7 @@ def run_imaging_pipeline():
     rootfile_list = glob.glob(args.filelist)
     rootfile_list = [x for x in rootfile_list if len(os.path.basename(x)) == 18]
     assert rootfile_list != [], 'empty rootfile_list in mtpipeline.py.'
+    logging.info('Processing: {} files'.format(len(rootfile_list)))
     for filename in rootfile_list:
         logging.info("Current File: " + filename)
         try:
