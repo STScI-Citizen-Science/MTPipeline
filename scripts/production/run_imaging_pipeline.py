@@ -12,10 +12,6 @@ Authors:
 from mtpipeline.imaging.imaging_pipeline import imaging_pipeline
 from mtpipeline import email_decorator
 from mtpipeline.setup_logging import setup_logging
-from getpass import getuser
-from socket import gethostname
-from platform import machine
-from platform import platform
 
 import glob
 import argparse
@@ -99,10 +95,6 @@ def run_imaging_pipeline():
         `imaging_pipeline`.
     """
     args = parse_args()
-    logging.info('User: {0}'.format(getuser()))
-    logging.info('Host: {0}'.format(gethostname())) 
-    logging.info('Machine: {0}'.format(machine()))
-    logging.info('Platform: {0}'.format(platform()))
     logging.info("Command-line arguments used:")
     for arg in args.__dict__:
         logging.info(arg + ": " + str(args.__dict__[arg]))
