@@ -9,7 +9,7 @@ import time
 
 from astropy import __version__ as astro_version
 from numpy import __version__ as numpy_version
-from slqalchemy import __version__ as sql_version
+from sqlalchemy import __version__ as sql_version
 from PIL import VERSION as PIL_version
 from getpass import getuser
 from socket import gethostname
