@@ -3,9 +3,10 @@
 """ Wrapper to run lacosmicx.py
 """
 
-import lacosmicx
 import os
+import glob
 
+import lacosmicx
 from astropy.io import fits
 
 
@@ -20,7 +21,7 @@ def get_file_list(search_string):
         search_string: string
             glob-formatted search pattern
 
-    Returns: 
+    Returns:
         file_list: list
             list of files matching pattern
 
@@ -31,7 +32,7 @@ def get_file_list(search_string):
     return file_list
 
 
-def drive_lacosmicx(filename, output, iters):
+def drive_cosmicx(filename, output, iters):
     """ Driver to run lacosmicx on multi-extension WFPC2 FITS files.
 
     An equivalent to the run_cosmics function in run_cosmiscs.py,
@@ -70,12 +71,12 @@ def drive_lacosmicx(filename, output, iters):
     with fits.open(filename, mode='readonly') as HDUlist:
 
         # Leave the first HDU untouched, process the remaining chip
-	    # extensions
-        for ext in range(1,len(HDUlist)):
+        # extensions
+        for ext in range(1, len(HDUlist)):
 
             HDU = HDUlist[ext]
             array = HDU.data
-            
+
             if ext == 1:
                 cleanarray = lacosmicx.run(array,
                         inmask=None,
@@ -105,10 +106,10 @@ def drive_lacosmicx(filename, output, iters):
                         verbose=True,
                         niter=iters)
 
-            HDU.data = cleanarray 
+            HDU.data = cleanarray
 
         HDUlist.writeto(output)
-    
+
     # Create the symbolic link
     make_c1m_link(os.path.abspath(filename))
 
@@ -119,7 +120,7 @@ def make_c1m_link(filename):
     Parameters:
         filename: string
             filename of the file to be cleaned.
-    
+
     Returns: nothing
 
     Outputs:
