@@ -1,5 +1,4 @@
 import glob
-import numpy as np
 logs_list = glob.glob('/astro/mtpipeline/logs/run_imaging_pipeline/*.log')
 import datetime as dt
 
@@ -54,40 +53,43 @@ for log_file in logs_list:
                 check_log_dict[log_file][file_key]['cr_file']['start'] = list_line[-5]
 
             if 'Done running cr_reject' in line:
-                check_log_dict[log_file][file_key]['cr_file']['end'] = list_line[-6]
-                start_dt = dt.datetime.strptime(check_log_dict[log_file][file_key]['cr_file']['start'], '%H:%M:%S')
-                end_dt = dt.datetime.strptime(check_log_dict[log_file][file_key]['cr_file']['end'], '%H:%M:%S')
-                diff = (end_dt - start_dt)
-                check_log_dict[log_file][file_key]['cr_file']['diff'] = diff.seconds
-                check_log_dict[log_file]['cr_master']['sum_sec'] += diff.seconds
-                check_log_dict[log_file]['cr_master']['count'] += 1
-                total_times_dict[check_log_dict[log_file]['host']['hostname']]['info']['count'] += 2
+                if check_log_dict[log_file][file_key]['cr_file']['start'] != '':
+                    check_log_dict[log_file][file_key]['cr_file']['end'] = list_line[-6]
+                    start_dt = dt.datetime.strptime(check_log_dict[log_file][file_key]['cr_file']['start'], '%H:%M:%S')
+                    end_dt = dt.datetime.strptime(check_log_dict[log_file][file_key]['cr_file']['end'], '%H:%M:%S')
+                    diff = (end_dt - start_dt)
+                    check_log_dict[log_file][file_key]['cr_file']['diff'] = diff.seconds
+                    check_log_dict[log_file]['cr_master']['sum_sec'] += diff.seconds
+                    check_log_dict[log_file]['cr_master']['count'] += 1
+                    total_times_dict[check_log_dict[log_file]['host']['hostname']]['info']['count'] += 2
  
             if 'Running Astrodrizzle' in line:
                 check_log_dict[log_file][file_key]['dr_file']['start'] = list_line[-5]
 
-            if 'Done running astrodrizzle ' in line:
-                check_log_dict[log_file][file_key]['dr_file']['end'] = list_line[-6]
-                start_dt = dt.datetime.strptime(check_log_dict[log_file][file_key]['dr_file']['start'], '%H:%M:%S')
-                end_dt = dt.datetime.strptime(check_log_dict[log_file][file_key]['dr_file']['end'], '%H:%M:%S')
-                diff = (end_dt - start_dt)
-                check_log_dict[log_file][file_key]['dr_file']['diff'] = diff.seconds
-                check_log_dict[log_file]['dr_master']['sum_sec'] += diff.seconds
-                check_log_dict[log_file]['dr_master']['count'] += 1
-                total_times_dict[check_log_dict[log_file]['host']['hostname']]['info']['count'] += 8
+            if 'Done running astrodrizzle' in line:
+                if check_log_dict[log_file][file_key]['dr_file']['start'] != '':
+                    check_log_dict[log_file][file_key]['dr_file']['end'] = list_line[-6]
+                    start_dt = dt.datetime.strptime(check_log_dict[log_file][file_key]['dr_file']['start'], '%H:%M:%S')
+                    end_dt = dt.datetime.strptime(check_log_dict[log_file][file_key]['dr_file']['end'], '%H:%M:%S')
+                    diff = (end_dt - start_dt)
+                    check_log_dict[log_file][file_key]['dr_file']['diff'] = diff.seconds
+                    check_log_dict[log_file]['dr_master']['sum_sec'] += diff.seconds
+                    check_log_dict[log_file]['dr_master']['count'] += 1
+                    total_times_dict[check_log_dict[log_file]['host']['hostname']]['info']['count'] += 8
   
             if 'Running png' in line:
                 check_log_dict[log_file][file_key]['png_file']['start'] = list_line[-5]
    
             if 'Done running png' in line:
-                check_log_dict[log_file][file_key]['png_file']['end'] = list_line[-6]
-                start_dt = dt.datetime.strptime(check_log_dict[log_file][file_key]['png_file']['start'], '%H:%M:%S')
-                end_dt = dt.datetime.strptime(check_log_dict[log_file][file_key]['png_file']['end'], '%H:%M:%S')
-                diff = (end_dt - start_dt)
-                check_log_dict[log_file][file_key]['png_file']['diff'] = diff.seconds
-                check_log_dict[log_file]['png_master']['sum_sec'] += diff.seconds
-                check_log_dict[log_file]['png_master']['count'] += 1
-                total_times_dict[check_log_dict[log_file]['host']['hostname']]['info']['count'] += 28
+                if check_log_dict[log_file][file_key]['png_file']['start'] != '':
+                    check_log_dict[log_file][file_key]['png_file']['end'] = list_line[-6]
+                    start_dt = dt.datetime.strptime(check_log_dict[log_file][file_key]['png_file']['start'], '%H:%M:%S')
+                    end_dt = dt.datetime.strptime(check_log_dict[log_file][file_key]['png_file']['end'], '%H:%M:%S')
+                    diff = (end_dt - start_dt)
+                    check_log_dict[log_file][file_key]['png_file']['diff'] = diff.seconds
+                    check_log_dict[log_file]['png_master']['sum_sec'] += diff.seconds
+                    check_log_dict[log_file]['png_master']['count'] += 1
+                    total_times_dict[check_log_dict[log_file]['host']['hostname']]['info']['count'] += 28
 
 
     for key in check_log_dict[log_file].keys():
@@ -116,7 +118,12 @@ for log_file in logs_list:
 for key in total_times_dict.keys():
     print 'Host: {}'.format(key)
     for type_key in total_times_dict[key].keys():
+        avg = 0
+        std = 0
         if type_key != 'info':
-            avg_array = np.array(total_times_dict[key][type_key]['avg'])
-            print '{0}:\nAVG: {1:.2f}\nSTD: {2:.2f}'.format(type_key, avg_array.mean(), avg_array.std())
+            if len(total_times_dict[key][type_key]['avg']) != 0:
+                avg = sum(total_times_dict[key][type_key]['avg']) / float(len(total_times_dict[key][type_key]['avg']))
+            if len(total_times_dict[key][type_key]['std']) != 0:
+                std = sum(total_times_dict[key][type_key]['std']) / float(len(total_times_dict[key][type_key]['std']))
+            print '{0}:\nAVG: {1:.2f}\nSTD: {2:.2f}'.format(type_key, avg, std)
     print 'CPU: {}\nMemory: {}\nFile Count: {}\n'.format(total_times_dict[key]['info']['cpu'], total_times_dict[key]['info']['memory'], total_times_dict[key]['info']['count'])
