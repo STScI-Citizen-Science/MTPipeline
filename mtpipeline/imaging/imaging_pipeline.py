@@ -94,7 +94,7 @@ def make_output_file_dict(filename):
             output_file_dict['png_output'].append(filename)
             if drz == '_wide_single_sci_linear.png':
                 for i_image in range(1,13):
-                    new_file = filename.replace('_linear', '_linear_{}'.format(i_image))
+                    new_file = filename.replace('_linear.png', '_linear_{}.png'.format(i_image))
                     output_file_dict['png_output'].append(new_file)
     
     return output_file_dict
