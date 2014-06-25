@@ -103,7 +103,8 @@ def check_filesystem_completeness_main():
                 missing_list += '{} : {} : {}\n'.format(mis, key, check_missing[mis][key])
                 missing += check_missing[mis][key]
 
-    logging.info('List of missing files:\n{}'.format(missing_list))
+    if len(missing_list) > 0:
+        logging.info('List of missing files:\n{}'.format(missing_list).strip())
     logging.info('Missing: {} files'.format(missing))
     logging.info('Found: {} files'.format(found))
 
