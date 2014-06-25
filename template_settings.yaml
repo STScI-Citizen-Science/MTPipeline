@@ -17,3 +17,6 @@ wfc3_output_path: /absolute/path/to/files
 wfpc2_input_path: /absolute/path/to/files
 wfpc2_output_path: /absolute/path/to/files
 logging_path: /absolute/path/to/files
+
+# Number of Cores
+num_cores: number_of_cores
