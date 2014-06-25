@@ -22,7 +22,7 @@ from platform import architecture
 from stwcs import updatewcs
 
 # Custom Packages
-from mtpipeline.imaging.run_cosmics import run_cosmics
+from mtpipeline.imaging.run_cosmicx import run_cosmicx
 from mtpipeline.imaging.run_astrodrizzle import run_astrodrizzle
 from mtpipeline.imaging.run_trim import run_trim
 
@@ -125,7 +125,7 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
         else:
             logger.info("Running cr_reject")
             print 'Running cr_reject'
-            run_cosmics(root_filename, output_file_dict['cr_reject_output'][1], 7)
+            run_cosmicx(root_filename, output_file_dict['cr_reject_output'][1], 7)
             print 'Done running cr_reject'
             logger.info("Done running cr_reject")
     else:

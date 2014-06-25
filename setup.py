@@ -5,10 +5,10 @@ Edited 2014
 
 Setuptools-style setup.py file for the mtpipeline package.
 
-This setup script will install the mtpipeline package, making it importable by
-python code located in any directory. In the process, it builds cmccully's
-lacosmicx, a python-wrapped c implementation of van Dokkum's laplacian cosmic
-ray identification routine.
+This setup script will install the mtpipeline package, making it
+importable by python code located in any directory. In the process, it
+builds cmccully's lacosmicx, a python-wrapped c implementation of van
+Dokkum's laplacian cosmic ray identification routine.
 
 This script should be able to install the mtpipeline package when run on a
 system with 
@@ -25,13 +25,14 @@ filesystem has changed. If so, you need to edit cfitslib_path to point to
 a directory containing `libcfitsio.a`, and cfitsinc_path to one containing
 `drvrsmem.h', `fitsio.h`, `fitsio2.h`, and `longnam.h`.
 
-We require numpy to be already installed, as its :func:`get_include` should
-yield where numpy's c header files are located. At present, this does not
-appear to be the case. Instead, they are located inside a direcory named
-`numpy` within the path given by :func:'`get_include`. If you are getting an
-error involving not being able to find `arrayobject.h`, then this is no longer
-true, and you will have to find where the numpy header files are relative to
-the path returned by :func:`get_include`, and change numpy_path accordingly.
+We require numpy to be already installed, as its :func:`get_include`
+should yield where numpy's c header files are located. At present, this
+does not appear to be the case. Instead, they are located inside a
+direcory named `numpy` within the path given by :func:'`get_include`. If
+you are getting an error involving not being able to find `arrayobject.h`,
+then this is no longer true, and you will have to find where the numpy
+header files are relative to the path returned by :func:`get_include`, and
+change numpy_path accordingly.
 """
 
 from setuptools import find_packages
@@ -65,7 +66,6 @@ setup(name='MTPipeline',
       url='https://github.com/STScI-Citizen-Science/MTPipeline',
       packages=find_packages(),
       ext_modules=[module1],
-      py_modules=['lacosmicx'],
       install_requires=['matplotlib', 'numpy', 'Pillow', 'pymysql', 
 			'pyyaml', 'sqlalchemy']
      )
