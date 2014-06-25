@@ -24,7 +24,7 @@ for log_file in logs_list:
    
             if 'Host:' in line:
                 check_log_dict[log_file]['host']['hostname'] = list_line[-1].replace('\n', '')
-                if check_log_dict[log_file]['host']['hostname'] not in total_times_dict.keys():
+                if check_log_dict[log_file]['host']['hostname'] not in total_times_dict:
                     total_times_dict[check_log_dict[log_file]['host']['hostname']] = {'cr': {'avg': [], 'std': []},
                                                                                     'dr': {'avg': [], 'std': []},
                                                                                     'png': {'avg': [], 'std': []},
@@ -93,7 +93,7 @@ for log_file in logs_list:
 
 
     for key in check_log_dict[log_file].keys():
-        if key in ['cr_master', 'dr_master', 'png_master'] and 'count' in check_log_dict[log_file][key].keys():
+        if key in ['cr_master', 'dr_master', 'png_master'] and 'count' in check_log_dict[log_file][key]:
             if check_log_dict[log_file][key]['count'] != 0:
                 check_log_dict[log_file][key]['avg'] = check_log_dict[log_file][key]['sum_sec'] / check_log_dict[log_file][key]['count']
                 total_times_dict[check_log_dict[log_file]['host']['hostname']][key.split('_')[0]]['avg'].append(check_log_dict[log_file][key]['avg'])
@@ -109,7 +109,7 @@ for log_file in logs_list:
                     check_log_dict[log_file]['png_master']['sum_var'] += (check_log_dict[log_file][key][file_key]['diff'] - check_log_dict[log_file]['png_master']['avg'])**2
 
     for key in check_log_dict[log_file].keys():
-        if key != 'host' and 'count' in check_log_dict[log_file][key].keys():
+        if key != 'host' and 'count' in check_log_dict[log_file][key]:
             if check_log_dict[log_file][key]['count'] != 0:
                 check_log_dict[log_file][key]['var'] = check_log_dict[log_file][key]['sum_var'] / check_log_dict[log_file][key]['count']
                 check_log_dict[log_file][key]['std'] = (check_log_dict[log_file][key]['var'])**0.5
