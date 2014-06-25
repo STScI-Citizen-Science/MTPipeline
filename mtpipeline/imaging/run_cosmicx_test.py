@@ -5,7 +5,7 @@ Test module for the run_cosmics.py module.
 '''
 
 import os
-from run_cosmic import make_c1m_link  
+from run_cosmics import make_c1m_link  
 
 def setup():
     query = os.path.islink('u2eu0101f_cr_c1m.fits')

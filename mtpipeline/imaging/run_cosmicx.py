@@ -32,7 +32,7 @@ def get_file_list(search_string):
     return file_list
 
 
-def drive_cosmicx(filename, output, iters):
+def run_cosmicx(filename, output, iters):
     """ Driver to run lacosmicx on multi-extension WFPC2 FITS files.
 
     An equivalent to the run_cosmics function in run_cosmiscs.py,

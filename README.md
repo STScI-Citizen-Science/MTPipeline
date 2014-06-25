@@ -16,9 +16,9 @@ MTPipeline is written in pure Python. The processing steps applied to each input
 
 ### Cosmic Ray Rejection
 
-Single-image cosmic ray rejection is performed using cosmics.py, a python implementation of the Laplacian cosmic ray detection algorithm (LA Cosmics). This step produces a new FITS product named `filename_cr_c0m.fits`.  
+Single-image cosmic ray rejection is performed using lacosmicsx, C. Mccully's python-wrapped c implementation of the Laplacian cosmic ray detection algorithm (LA Cosmics). This step produces a new FITS product named `filename_cr_c0m.fits`.  
 
-cosmics.py: http://obswww.unige.ch/~tewes/cosmics_dot_py/  
+lacosmicx: https://github.com/cmccully/lacosmicx
 LA Cosmic: http://www.astro.yale.edu/dokkum/lacosmic/
 
 ### Drizzling
