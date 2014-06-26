@@ -8,3 +8,6 @@ virtualenv:
 
 install:
     - pip install numpy
+
+script:
+    - nosetests tests/unit_tests
