@@ -63,7 +63,7 @@ def check_filesystem_completeness_main():
             check_dict[proposal_folder] = defaultdict(int)
         check_dict[proposal_folder]['input_file'] += 1
         file_dict = make_output_file_dict(filename)
-        for key in file_dict.keys():
+        for key in file_dict.iterkeys():
             if key != 'input_file':
                 for file in file_dict[key]:
                     if file in files_set:
