@@ -53,8 +53,7 @@ def cgi_session(command_list):
     Interact with NASA JPL HORIZONS via a CGI interface.
 
     The command_list list characters are replaced to make them URL 
-    safe. The urllib2 module is used to connect. A 5 sec pause is 
-    enforced to prevent the code from hammering the HORIZONS servers.
+    safe. The urllib2 module is used to connect. 
 
     *** NOTE (FROM HORIZONS) ***
 
@@ -65,7 +64,6 @@ def cgi_session(command_list):
     command_list = [item.replace(' ','%20').replace(':','%3A') for item in command_list]
     url = "http://ssd.jpl.nasa.gov/horizons_batch.cgi?batch=1&COMMAND='{0[0]}'&TABLE_TYPE='{0[2]}'&CENTER='{0[3]}'&START_TIME='{0[4]}'&STOP_TIME='{0[5]}'&STEP_SIZE='{0[6]}'&QUANTITIES='{0[8]}'&CSV_FORMAT='YES'".format(command_list)
     html = urlopen(url).read()
-    time.sleep(5.0)
     return html
 
 # ----------------------------------------------------------------------------
