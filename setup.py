@@ -65,8 +65,6 @@ setup(name='MTPipeline',
       author='Space Telescope Science Institute',
       url='https://github.com/STScI-Citizen-Science/MTPipeline',
       packages=find_packages(),
-      install_requires=['matplotlib', 'numpy', 'Pillow', 'pymysql', 'pyyaml', 
-                        'sqlalchemy', 'psutil'],
       ext_modules=[module1],
       install_requires=['matplotlib', 'numpy', 'Pillow', 'pymysql', 
 			'pyyaml', 'sqlalchemy', 'psutil']
