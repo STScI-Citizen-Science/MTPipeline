@@ -59,7 +59,7 @@ def check_filesystem_completeness_main():
     found = 0
     for filename in c0m_file_list:
         proposal_folder = filename.split('/')[-2]
-        if proposal_folder not in check_dict.keys():
+        if proposal_folder not in check_dict:
             check_dict[proposal_folder] = defaultdict(int)
         check_dict[proposal_folder]['input_file'] += 1
         file_dict = make_output_file_dict(filename)
@@ -71,13 +71,13 @@ def check_filesystem_completeness_main():
                         found += 1
 
     for mis in check_dict.keys():
-        if 'drizzle_weight' not in check_dict[mis].keys():
+        if 'drizzle_weight' not in check_dict[mis]:
             check_dict[mis]['drizzle_weight'] = 0
-        if 'drizzle_output' not in check_dict[mis].keys():
+        if 'drizzle_output' not in check_dict[mis]:
             check_dict[mis]['drizzle_output'] = 0
-        if 'cr_reject_output' not in check_dict[mis].keys():
+        if 'cr_reject_output' not in check_dict[mis]:
             check_dict[mis]['cr_reject_output'] = 0
-        if 'png_output' not in check_dict[mis].keys():
+        if 'png_output' not in check_dict[mis]:
             check_dict[mis]['png_output'] = 0
 
     # creating a dictionary to store the quantities of missing files
@@ -103,7 +103,8 @@ def check_filesystem_completeness_main():
                 missing_list += '{} : {} : {}\n'.format(mis, key, check_missing[mis][key])
                 missing += check_missing[mis][key]
 
-    logging.info('List of missing files:\n{}'.format(missing_list))
+    if len(missing_list) > 0:
+        logging.info('List of missing files:\n{}'.format(missing_list).strip())
     logging.info('Missing: {} files'.format(missing))
     logging.info('Found: {} files'.format(found))
 

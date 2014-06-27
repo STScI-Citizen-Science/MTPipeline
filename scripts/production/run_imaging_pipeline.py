@@ -9,7 +9,15 @@ Authors:
     Alex Viana, April 2014
 """
 
-from mtpipeline.imaging_pipeline import imaging_pipeline
+from mtpipeline.imaging.imaging_pipeline import imaging_pipeline
+from mtpipeline import email_decorator
+from mtpipeline.setup_logging import setup_logging
+
+import glob
+import argparse
+import logging
+import os
+import sys
 
 
 def parse_args():
@@ -67,7 +75,7 @@ def parse_args():
     return args
 
 
-@email_decorator
+@email_decorator.email_decorator
 def run_imaging_pipeline():
     """The script for executing the imaging_pipeline function.
 
@@ -87,29 +95,18 @@ def run_imaging_pipeline():
         `imaging_pipeline`.
     """
     args = parse_args()
-    logger = logging.getLogger('mtpipeline')
-    logger.setLevel(logging.DEBUG)
-    log_file = logging.FileHandler(
-        os.path.join(
-            LOGFOLDER, 'mtpipeline', 
-            'mtpipeline-' + datetime.now().strftime('%Y-%m-%d') + '.log'))
-    log_file.setLevel(logging.DEBUG)
-    log_file.setFormatter(
-        logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-
-    logger.addHandler(log_file)
-    logger.info('User: {0}'.format(getuser()))
-    logger.info('Host: {0}'.format(gethostname())) 
-    logger.info('Machine: {0}'.format(machine()))
-    logger.info('Platform: {0}'.format(platform()))
-    logger.info("Command-line arguments used:")
+    logging.info("Command-line arguments used:")
     for arg in args.__dict__:
-        logger.info(arg + ": " + str(args.__dict__[arg]))
+        logging.info(arg + ": " + str(args.__dict__[arg]))
     rootfile_list = glob.glob(args.filelist)
-    rootfile_list = [x for x in rootfile_list if len(os.path.basename(x)) == 18]
+    rootfile_list = [filename for filename
+                     in rootfile_list
+                     if len(filename.split('/')[-1]) == 18
+                     and filename.split('/')[-1].split('_')[-1] == 'c0m.fits']
     assert rootfile_list != [], 'empty rootfile_list in mtpipeline.py.'
+    logging.info('Processing: {} files'.format(len(rootfile_list)))
     for filename in rootfile_list:
-        logger.info("Current File: " + filename)
+        logging.info("Current File: " + filename)
         try:
             imaging_pipeline(filename, 
                 output_path =  args.output_path,
@@ -117,12 +114,13 @@ def run_imaging_pipeline():
                 astrodrizzle_switch = args.astrodrizzle, 
                 png_switch = args.png,
                 reproc_switch = args.reproc)
-            logger.info("Completed: " + filename)
+            logging.info("Completed: " + filename)
         except Exception as err:
-            logger.critical('{0} {1} {2}'.format(
+            logging.critical('{0} {1} {2}'.format(
                 type(err), err.message, sys.exc_traceback.tb_lineno))
-    logger.info("Script completed")
+    logging.info("Script completed")
 
 
 if __name__ == '__main__':
+    setup_logging('run_imaging_pipeline')
     run_imaging_pipeline()
