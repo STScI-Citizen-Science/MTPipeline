@@ -7,7 +7,8 @@ virtualenv:
     system_site_packages: true
 
 install:
-    - pip install numpy
+    - pip install stwcs
 
 script:
     - nosetests tests/unit_tests
+
