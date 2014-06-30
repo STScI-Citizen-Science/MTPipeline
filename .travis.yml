@@ -8,6 +8,7 @@ virtualenv:
 
 install:
     - pip install stwcs
+    - python setup.py develop
 
 script:
     - nosetests tests/unit_tests
