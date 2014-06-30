@@ -67,5 +67,5 @@ setup(name='MTPipeline',
       packages=find_packages(),
       ext_modules=[module1],
       install_requires=['matplotlib', 'numpy', 'Pillow', 'pymysql', 
-			'pyyaml', 'sqlalchemy', 'psutil']
+			'pyyaml', 'sqlalchemy', 'psutil','stwcs']
      )
