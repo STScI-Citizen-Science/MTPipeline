@@ -19,11 +19,13 @@ install:
     - sudo make install
     - cd ..
     - C_INCLUDE_PATH=/sw/include
-    - LIBRARY_PATH=/sw/include
+    - LIBRARY_PATH=/sw/lib
     - export C_INCLUDE_PATH
-    - EXPORT LIBRARY_PATH
+    - export LIBRARY_PATH
     - echo $C_INCLUDE_PATH
     - echo $LIBRARY_PATH
+    - ls ~/sw/inlcude
+    - ls ~/sw/lib
     - pip install stwcs
     - python setup.py install
 
