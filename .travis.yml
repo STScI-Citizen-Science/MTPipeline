@@ -7,14 +7,16 @@ virtualenv:
     system_site_packages: true
 
 install:
-    - sudo mkdir /sw
-    - sudo chmod -v 775 /sw
+    #- sudo mkdir /sw
+    #- sudo mkdir /sw/include
+    #- sudo mkdir /sw/
+    #- sudo chmod -vR 775 /sw
     - wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3370.tar.gz
     - tar -zxvf cfitsio3370.tar.gz
     - cd cfitsio
     - ./configure -prefix=/sw
     - make
-    - make install
+    - sudo make install
     - cd ..
     - pip install stwcs
     - python setup.py develop
