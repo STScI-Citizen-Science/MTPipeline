@@ -19,7 +19,7 @@ install:
     - sudo make install
     - cd ..
     - pip install stwcs
-    - python setup.py develop
+    - python setup.py install
 
 script:
     - nosetests tests/unit_tests
