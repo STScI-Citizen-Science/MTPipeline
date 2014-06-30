@@ -18,16 +18,10 @@ install:
     - make
     - sudo make install
     - cd ..
-    - C_INCLUDE_PATH=/sw/include
+    - CPLUS_INCLUDE_PATH=/sw/include
     - LIBRARY_PATH=/sw/lib
-    - export C_INCLUDE_PATH
+    - export CPLUS_INCLUDE_PATH
     - export LIBRARY_PATH
-    - echo $C_INCLUDE_PATH
-    - echo $LIBRARY_PATH
-    - ls /
-    - ls /sw/
-    - ls /sw/include
-    - ls /sw/lib
     - pip install stwcs
     - python setup.py install
 
