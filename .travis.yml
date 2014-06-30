@@ -7,7 +7,7 @@ virtualenv:
     system_site_packages: true
 
 install:
-    - mkdir /sw
+    - sudo mkdir /sw
     - wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3370.tar.gz
     - tar -zxvf cfitsio3370.tar.gz
     - cd cfitsio
