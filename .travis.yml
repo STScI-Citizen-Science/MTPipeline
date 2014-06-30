@@ -7,13 +7,13 @@ virtualenv:
     system_site_packages: true
 
 install:
-	- wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3370.tar.gz
-	- tar -zxvf cfitsio3370.tar.gz
-	- cd cfitsio
-	- ./configure
-	- make
-	- make install
-	- cd ..
+    - wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3370.tar.gz
+    - tar -zxvf cfitsio3370.tar.gz
+    - cd cfitsio
+    - ./configure
+    - make
+    - make install
+    - cd ..
     - pip install stwcs
     - python setup.py develop
 
