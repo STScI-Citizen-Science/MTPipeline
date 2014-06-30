@@ -11,7 +11,7 @@
 
 from mtpipeline.imaging.imaging_pipeline import imaging_pipeline
 from mtpipeline import email_decorator
-from mtpipeline.setup_logging import setup_logging
+from mtpipeline.setup_logging import setup_logging, organize_logfiles
 
 import multiprocessing as mp
 import glob
@@ -130,7 +130,7 @@ def run():
     logging.info("Script completed")
 
 if __name__ == '__main__':
-    setup_logging('run_imaging_pipeline')
+    log_file = setup_logging('run_imaging_pipeline')
     args_list = parse_args()
     run()
     organize_logfiles(log_file, num_cores)
