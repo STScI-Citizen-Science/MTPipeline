@@ -1,11 +1,10 @@
-#! /usr/bin/env python
-
 from mtpipeline.get_settings import SETTINGS
 
 import datetime
 import logging
 import os
 import time
+import subprocess
 
 from astropy import __version__ as astro_version
 from numpy import __version__ as numpy_version
@@ -24,20 +23,20 @@ def setup_logging(module_name):
         Set up the logging for the mtpipeline scripts.
         
         Parameters:
-            module_name : string
+        module_name : string
         
         Returns:
-            nothing
+        nothing
         
         Output:
-            nothing
+        nothing
     """
     log_file = (module_name + '_' +
                 datetime.datetime.now().strftime('%Y-%m-%d-%H-%M') +
                 '.log')
     log_file = os.path.join(SETTINGS['logging_path'], module_name, log_file)
     logging.basicConfig(filename = log_file,
-                        format = '%(asctime)s %(levelname)s: %(message)s',
+                        format = '%(asctime)s %(processName)s %(levelname)s: %(message)s',
                         datefmt = '%m/%d/%Y %H:%M:%S %p',
                         level = logging.INFO)
     logging.info('User: {0}'.format(getuser()))
@@ -50,3 +49,15 @@ def setup_logging(module_name):
     logging.info('Astropy Version: {0}'.format(astro_version))
     logging.info('SQLAlchemy Version: {0}'.format(sql_version))
     logging.info('PIL Version: {0}'.format(PIL_version))
+
+def organize_logfiles(log_file, num_core):
+    for process_num in range(1, num_core+1):
+        new_log = subprocess.check_output("grep 'PoolWorker-{}' {}".format(process_num, log_file), shell=True)
+        new_file = file.open(log_file.replace('.log', '_PoolWorker-{}.log'.format(process_num)), 'w')
+        new_file.write(new_log)
+        new_file.close()
+    new_log = subprocess.check_output("grep 'MainProcess' {}".format(log_file), shell=True)
+    new_file = file.open(log_file.replace('.log', '_MainProcess.log'), 'w')
+    new_file.write(new_log)
+    new_file.close()
+    os.remove(log_file)
