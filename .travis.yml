@@ -8,7 +8,7 @@ virtualenv:
 
 install:
     - sudo mkdir /sw
-    - chmod -v 775 /sw
+    - sudo chmod -v 775 /sw
     - wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3370.tar.gz
     - tar -zxvf cfitsio3370.tar.gz
     - cd cfitsio
