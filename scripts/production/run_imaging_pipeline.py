@@ -11,7 +11,7 @@
 
 from mtpipeline.imaging.imaging_pipeline import imaging_pipeline
 from mtpipeline import email_decorator
-from mtpipeline.setup_logging import setup_logging, organize_logfiles
+from mtpipeline.setup_logging import setup_logging
 
 import multiprocessing as mp
 import glob
@@ -37,7 +37,7 @@ def parse_args():
         nothing
     """
     parser = argparse.ArgumentParser(
-    description = 'Run the moving target pipeline.' )
+        description = 'Run the moving target pipeline.' )
     parser.add_argument(
         '-filelist',
         required = True,
@@ -74,7 +74,9 @@ def parse_args():
         default = False,
         dest = 'reproc',
         help = 'Reprocess all files, even if outputs already exist.')
+
     args = parser.parse_args()
+
     return args
 
 
@@ -107,8 +109,7 @@ def run_imaging_pipeline(filename):
                          reproc_switch = args_list.reproc)
         logging.info("Completed: " + filename)
     except Exception as err:
-        logging.critical('{0} {1} {2}'.format(
-                                              type(err), err.message, sys.exc_traceback.tb_lineno))
+        logging.critical("{0} {1} {2}".format(type(err), err.message, sys.exc_traceback.tb_lineno))
 
 @email_decorator.email_decorator
 def run():
@@ -130,7 +131,6 @@ def run():
     logging.info("Script completed")
 
 if __name__ == '__main__':
-    log_file = setup_logging('run_imaging_pipeline')
+    setup_logging('run_imaging_pipeline')
     args_list = parse_args()
     run()
-    organize_logfiles(log_file, num_cores)

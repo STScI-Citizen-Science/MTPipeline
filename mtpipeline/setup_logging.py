@@ -49,17 +49,3 @@ def setup_logging(module_name):
     logging.info('Astropy Version: {0}'.format(astro_version))
     logging.info('SQLAlchemy Version: {0}'.format(sql_version))
     logging.info('PIL Version: {0}'.format(PIL_version))
-
-    return log_file
-
-def organize_logfiles(log_file, num_core):
-    for process_num in range(1, num_core+1):
-        new_log = subprocess.check_output("grep 'PoolWorker-{}' {}".format(process_num, log_file), shell=True)
-        new_file = open(log_file.replace('.log', '_PoolWorker-{}.log'.format(process_num)), 'w')
-        new_file.write(new_log)
-        new_file.close()
-    new_log = subprocess.check_output("grep 'MainProcess' {}".format(log_file), shell=True)
-    new_file = open(log_file.replace('.log', '_MainProcess.log'), 'w')
-    new_file.write(new_log)
-    new_file.close()
-    os.remove(log_file)
