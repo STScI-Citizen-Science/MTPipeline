@@ -13,48 +13,34 @@ import os
 import pyfits
 
 from astropy.io.fits import getheader
-from database_interface import counter
-from database_interface import check_type
-from database_interface import insert_record
-from database_interface import update_record
-from mt_logging import setup_logging
-from sqlalchemy.sql import func
+from mtpipeline.database.database_tools import counter
+from mtpipeline.database.database_tools import check_type
+from mtpipeline.database.database_tools import insert_record
+from mtpipeline.database.database_tools import update_record
+from mtpipeline.setup_logging import setup_logging
 from sqlalchemy import desc
 from sqlalchemy import distinct
+from sqlalchemy.sql import func
 
 #----------------------------------------------------------------------------
 # Load all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-from database_interface import loadConnection
-from database_interface import MasterImages
-from database_interface import session
+from mtpipeline.database.database_interface import MasterImages
+from mtpipeline.database.database_interface import session
 
 # ----------------------------------------------------------------------------
 #
 # ----------------------------------------------------------------------------
 
 def get_fits_file(png_file):
-    '''
-    Returns the absolute path to the fits file corresponding to a png 
-    file. Assumes the at png file is one level below the fits file in 
-    directory tree. Checks to ensure the input file is .png and that 
-    the output is .fits.
-    '''    
-    assert os.path.splitext(png_file)[1] == '.png', 'png file required'
-    
-    # png_path, png_name = os.path.split(os.path.abspath(png_file))
-    # fits_path = os.path.split(png_path)[0]
-    # fits_name = os.path.splitext(png_name)[0]
-    # if fits_name[-4:] == '_log':
-    #     fits_name = fits_name[:-4] + '.fits'
-    # elif fits_name[-7:] in ['_median', '_linear']:
-    #     fits_name = fits_name[:-7] + '.fits'
-    # fits_file = os.path.join(fits_path, fits_name)
-
-    fits_file = png_file.replace('png/','').replace('.png','.fits')
-    assert os.path.splitext(fits_file)[1] == '.fits', \
-        'expected .fits got {}'.format(os.path.splitext(fits_file)[1])
+    """Returns the absolute path to the fits file corresponding to a 
+    png file. Assumes the at png file is one level below the fits file 
+    in directory tree. Checks to ensure the input file is .png and 
+    that the output is .fits.
+    """  
+    assert os.path.splitext(png_file)[-1] == '.png', 'png file required'
+    fits_file = png_file.replace('png/','').replace('_linear.png','.fits')
     return fits_file
 
 
@@ -183,15 +169,12 @@ def build_master_images_table_main(file_list, reproc, reproc_sets):
         logging.info('Update complete')
 
 
-    if isinstance(file_list, str):
-        file_list = glob.glob(file_list)
-    assert isinstance(file_list, list), \
-        'Expected a list for file_list, got {}'.format(type(file_list))
+    file_list = glob.glob(file_list)
     logging.info('Processing {} files'.format(len(file_list)))
     count = 0
     for png_file in file_list:
         fits_file = get_fits_file(png_file)
-        png_path, png_name = os.path. os.path.split(os.path.abspath(png_file))
+        png_path, png_name = os.path.split(os.path.abspath(png_file))
         master_images_query = session.query(MasterImages).filter(\
             MasterImages.name == png_name)
         assert master_images_query.count() in [0, 1], \
