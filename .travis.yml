@@ -17,11 +17,13 @@ install:
     - ./configure -prefix=/sw
     - make
     - sudo make install
-    - cd ..
     - CFITS_INC=/sw/include
     - CFITS_LIB=/sw/lib
-    - export CPLUS_INCLUDE_PATH=CFITS_INC:${CPLUS_INCLUDE_PATH}
-    - export LIBRARY_PATH=CFITS_LIB:${LIBRARY_PATH}
+    - CPLUS_INCLUDE_PATH=CFITS_INC:$CPLUS_INCLUDE_PATH
+    - LIBRARY_PATH=CFITS_LIB:$LIBRARY_PATH
+    - export LIBRARY_PATH
+    - export CPLUS_INCLUDE_PATH
+    - cd ..
     - pip install stwcs
     - python setup.py install
 
