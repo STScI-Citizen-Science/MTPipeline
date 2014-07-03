@@ -66,7 +66,7 @@ setup(name='MTPipeline',
       url='https://github.com/STScI-Citizen-Science/MTPipeline',
       packages=find_packages(),
       ext_modules=[module1],
-      install_requires=['matplotlib', 'numpy', 'Pillow', 'pymysql', 
+      install_requires=['matplotlib', 'numpy', 'Pillow==2.4.0', 'pymysql', 
 			'pyyaml', 'sqlalchemy', 'psutil','stwcs',
 			'astropy','drizzlepac']
      )
