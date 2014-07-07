@@ -2,7 +2,7 @@
 Nosetest testing suite for the jpl2db module.
 '''
 
-from database_interface import check_type
+from .database.database_interface import check_type
 
 from jpl2db import telnet_session
 from jpl2db import cgi_session

@@ -1,5 +1,5 @@
-from build_finders_table import get_ephem_region
-from build_finders_table import get_region_list
+from ephem.build_finders_table import get_ephem_region
+from ephem.build_finders_table import get_region_list
 
 def test_get_ephem_region():
     '''
