@@ -6,17 +6,15 @@ db_connection: mysql+pymysql://root:user@localhost/mtpipeline
 db_echo: False
 
 # Email Settings
-email_switch: True
-contact_email: user@institute.edu
-
+email_switch: False
+contact_email: youremail@domain.com
 # File System Settings
-acs_input_path: /absolute/path/to/files
-acs_output_path: /absolute/path/to/files
-wfc3_input_path: /absolute/path/to/files
-wfc3_output_path: /absolute/path/to/files
+#acs_input_path: /absolute/path/to/files
+#acs_output_path: /absolute/path/to/files
+#wfc3_input_path: /absolute/path/to/files
+#wfc3_output_path: /absolute/path/to/files
 wfpc2_input_path: /absolute/path/to/files
 wfpc2_output_path: /absolute/path/to/files
 logging_path: /absolute/path/to/files
-
 # Number of Cores
-num_cores: number_of_cores
+#num_cores: 

@@ -37,7 +37,15 @@ def get_settings():
     # expected to be one level above this module.
     settings_path = os.path.dirname(os.path.dirname(
         os.path.abspath(inspect.getfile(inspect.currentframe()))))
-    settings = yaml.load(open(os.path.join(settings_path,'settings.yaml')))
+    
+    try:
+        settings = yaml.load(open(os.path.join(settings_path,'settings.yaml')))
+    except IOError:
+        try:
+            settings = yaml.load(open(os.path.join(settings_path,'template_settings.yaml')))
+        except IOError:
+            raise IOError("Looked for a setting.yaml and then a template_settings.yaml file at the package root level and found neither.")
+
     return settings
 
 SETTINGS = get_settings()

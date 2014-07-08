@@ -2,9 +2,9 @@
 Nose tests for the run_trim.py module.
 '''
 
-from run_trim import get_value_by_pixel_count
-from run_trim import clip
-from run_trim import positive 
+from mtpipeline.imaging.run_trim import get_value_by_pixel_count
+from mtpipeline.imaging.run_trim import clip
+from mtpipeline.imaging.run_trim import positive 
 import numpy as N 
 
 class test_get_value_by_pixel_count(object):

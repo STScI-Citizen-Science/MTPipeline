@@ -9,20 +9,20 @@ import argparse
 import os
 import string
 
-from .database.database_interface import counter
-from .database.database_interface import check_type
-#from .database.database_interface import insert_record
-from .database.database_interface import update_record
+from mtpipeline.database.database_interface import counter
+from mtpipeline.database.database_interface import check_type
+#from mtpipeline.database.database_interface import insert_record
+from mtpipeline.database.database_interface import update_record
 
 #----------------------------------------------------------------------------
 # Load all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-from .database.database_interface import session
-from .database.database_interface import Finders
-from .database.database_interface import MasterFinders
-from .database.database_interface import MasterImages
-from .database.database_interface import SubImages
+from mtpipeline.database.database_interface import session
+from mtpipeline.database.database_interface import Finders
+from mtpipeline.database.database_interface import MasterFinders
+from mtpipeline.database.database_interface import MasterImages
+from mtpipeline.database.database_interface import SubImages
 
 #----------------------------------------------------------------------------
 
