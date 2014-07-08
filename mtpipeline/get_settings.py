@@ -41,8 +41,10 @@ def get_settings():
     try:
         settings = yaml.load(open(os.path.join(settings_path,'settings.yaml')))
     except IOError:
-        settings = yaml.load(open(os.path.join(settings_path,'template_settings.yaml')))
-
+        try:
+            settings = yaml.load(open(os.path.join(settings_path,'template_settings.yaml')))
+        except IOError:
+            raise IOError("Looked for a setting.yaml and then a template_settings.yaml file at the package root level and found neither.")
 
     return settings
 
