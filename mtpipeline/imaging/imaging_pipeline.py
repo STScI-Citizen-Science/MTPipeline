@@ -57,7 +57,6 @@ def make_output_file_dict(filename):
         
         Output:
         nothing
-        
     '''
     # Check the input.
     error = filename + ' does not end in "c0m.fits" or "flt.fits".'

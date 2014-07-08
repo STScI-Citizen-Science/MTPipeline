@@ -135,7 +135,8 @@ def check_output_keys(output_keys,expected_keys):
     assert output_keys == expected_keys, err_message
 
 def test_make_output_file_dict():
-    """ Iteratively generating tests.
+    """ 
+    Iteratively generating tests.
     
     Six tests are generated per dictionary in expected_entry_list.
     Each dictionary represents a particular case, each corresponding
