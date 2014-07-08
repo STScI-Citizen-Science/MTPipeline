@@ -38,11 +38,12 @@ def get_settings():
     settings_path = os.path.dirname(os.path.dirname(
         os.path.abspath(inspect.getfile(inspect.currentframe()))))
     
-
     try:
         settings = yaml.load(open(os.path.join(settings_path,'settings.yaml')))
     except IOError:
         settings = yaml.load(open(os.path.join(settings_path,'template_settings.yaml')))
+
+
     return settings
 
 SETTINGS = get_settings()
