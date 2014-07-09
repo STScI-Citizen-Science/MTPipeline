@@ -62,7 +62,7 @@ def make_output_file_dict(filename):
     error = filename + ' does not end in "c0m.fits" or "flt.fits".'
     assert (filename[-8:] == 'c0m.fits' or filename[-8:] == 'flt.fits'), error
     
-    fits_type = filename[-8:][:3]
+    fits_type = filename[-8:-5]
     
     # Build the dictionary.
     output_file_dict = {}
@@ -75,23 +75,23 @@ def make_output_file_dict(filename):
     basename = basename.split('_')[0]
     
     # CR Rejection outputs.
-    for cr in ['_{}.fits'.format(fits_type),'_cr_{}.fits'.format(fits_type)]:
-        filename = os.path.join(path, basename + cr)
+    for cr in ['_','_cr_']:
+        filename = os.path.join(path, basename + cr + fits_type + '.fits')
         output_file_dict['cr_reject_output'].append(filename)
     
     # Drizzled outputs.
-    for cr in ['_{}'.format(fits_type),'_cr_{}'.format(fits_type)]:
+    for cr in ['_','_cr_']:
         for drz in ['_wide_single_sci.fits', '_center_single_sci.fits']:
-            filename = os.path.join(path, basename + cr + drz)
+            filename = os.path.join(path, basename + cr + fits_type + drz)
             output_file_dict['drizzle_output'].append(filename)
         for drz in ['_wide_single_wht.fits', '_center_single_wht.fits']:
-            filename = os.path.join(path, basename + cr + drz)
+            filename = os.path.join(path, basename + cr + fits_type + drz)
             output_file_dict['drizzle_weight'].append(filename)
     
     # PNG outputs.
-    for cr in ['_{}'.format(fits_type),'_cr_{}'.format(fits_type)]:
+    for cr in ['_','_cr_']:
         for drz in ['_wide_single_sci_linear.png', '_center_single_sci_linear.png']:
-            filename = os.path.join(path, 'png', basename + cr + drz)
+            filename = os.path.join(path, 'png', basename + cr + fits_type + drz)
             output_file_dict['png_output'].append(filename)
             if drz == '_wide_single_sci_linear.png':
                 for i_image in range(1,13):
