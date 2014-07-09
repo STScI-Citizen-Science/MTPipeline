@@ -3,12 +3,12 @@
 from mtpipeline.imaging.imaging_pipeline import make_output_file_dict
 
 expected_output_list = [
-                {'input_file': 'u2eu0101t_c0m.fits',
-                 'cr_reject_output': ['u2eu0101t_c0m.fits', 'u2eu0101t_cr_c0m.fits'],
-                 'drizzle_output': ['u2eu0101t_c0m_wide_single_sci.fits',
-                                    'u2eu0101t_c0m_center_single_sci.fits',
-                                    'u2eu0101t_cr_c0m_wide_single_sci.fits',
-                                    'u2eu0101t_cr_c0m_center_single_sci.fits'],
+                        {'input_file': 'u2eu0101t_c0m.fits',
+                        'cr_reject_output': ['u2eu0101t_c0m.fits', 'u2eu0101t_cr_c0m.fits'],
+                        'drizzle_output': ['u2eu0101t_c0m_wide_single_sci.fits',
+                                           'u2eu0101t_c0m_center_single_sci.fits',
+                                           'u2eu0101t_cr_c0m_wide_single_sci.fits',
+                                           'u2eu0101t_cr_c0m_center_single_sci.fits'],
                         'png_output': ['png/u2eu0101t_c0m_wide_single_sci_linear.png',
                                        'png/u2eu0101t_c0m_wide_single_sci_linear_1.png',
                                        'png/u2eu0101t_c0m_wide_single_sci_linear_2.png',
@@ -37,10 +37,48 @@ expected_output_list = [
                                        'png/u2eu0101t_cr_c0m_wide_single_sci_linear_11.png',
                                        'png/u2eu0101t_cr_c0m_wide_single_sci_linear_12.png',
                                        'png/u2eu0101t_cr_c0m_center_single_sci_linear.png'],
-                 'drizzle_weight': ['u2eu0101t_c0m_wide_single_wht.fits',
-                                    'u2eu0101t_c0m_center_single_wht.fits',
-                                    'u2eu0101t_cr_c0m_wide_single_wht.fits',
-                                    'u2eu0101t_cr_c0m_center_single_wht.fits']}
+                        'drizzle_weight': ['u2eu0101t_c0m_wide_single_wht.fits',
+                                           'u2eu0101t_c0m_center_single_wht.fits',
+                                           'u2eu0101t_cr_c0m_wide_single_wht.fits',
+                                           'u2eu0101t_cr_c0m_center_single_wht.fits']},
+                        {'input_file': 'u2eu0101t_flt.fits',
+                        'cr_reject_output': ['u2eu0101t_flt.fits', 'u2eu0101t_cr_flt.fits'],
+                        'drizzle_output': ['u2eu0101t_flt_wide_single_sci.fits',
+                                           'u2eu0101t_flt_center_single_sci.fits',
+                                           'u2eu0101t_cr_flt_wide_single_sci.fits',
+                                           'u2eu0101t_cr_flt_center_single_sci.fits'],
+                        'png_output': ['png/u2eu0101t_flt_wide_single_sci_linear.png',
+                                       'png/u2eu0101t_flt_wide_single_sci_linear_1.png',
+                                       'png/u2eu0101t_flt_wide_single_sci_linear_2.png',
+                                       'png/u2eu0101t_flt_wide_single_sci_linear_3.png',
+                                       'png/u2eu0101t_flt_wide_single_sci_linear_4.png',
+                                       'png/u2eu0101t_flt_wide_single_sci_linear_5.png',
+                                       'png/u2eu0101t_flt_wide_single_sci_linear_6.png',
+                                       'png/u2eu0101t_flt_wide_single_sci_linear_7.png',
+                                       'png/u2eu0101t_flt_wide_single_sci_linear_8.png',
+                                       'png/u2eu0101t_flt_wide_single_sci_linear_9.png',
+                                       'png/u2eu0101t_flt_wide_single_sci_linear_10.png',
+                                       'png/u2eu0101t_flt_wide_single_sci_linear_11.png',
+                                       'png/u2eu0101t_flt_wide_single_sci_linear_12.png',
+                                       'png/u2eu0101t_flt_center_single_sci_linear.png',
+                                       'png/u2eu0101t_cr_flt_wide_single_sci_linear.png',
+                                       'png/u2eu0101t_cr_flt_wide_single_sci_linear_1.png',
+                                       'png/u2eu0101t_cr_flt_wide_single_sci_linear_2.png',
+                                       'png/u2eu0101t_cr_flt_wide_single_sci_linear_3.png',
+                                       'png/u2eu0101t_cr_flt_wide_single_sci_linear_4.png',
+                                       'png/u2eu0101t_cr_flt_wide_single_sci_linear_5.png',
+                                       'png/u2eu0101t_cr_flt_wide_single_sci_linear_6.png',
+                                       'png/u2eu0101t_cr_flt_wide_single_sci_linear_7.png',
+                                       'png/u2eu0101t_cr_flt_wide_single_sci_linear_8.png',
+                                       'png/u2eu0101t_cr_flt_wide_single_sci_linear_9.png',
+                                       'png/u2eu0101t_cr_flt_wide_single_sci_linear_10.png',
+                                       'png/u2eu0101t_cr_flt_wide_single_sci_linear_11.png',
+                                       'png/u2eu0101t_cr_flt_wide_single_sci_linear_12.png',
+                                       'png/u2eu0101t_cr_flt_center_single_sci_linear.png'],
+                        'drizzle_weight': ['u2eu0101t_flt_wide_single_wht.fits',
+                                           'u2eu0101t_flt_center_single_wht.fits',
+                                           'u2eu0101t_cr_flt_wide_single_wht.fits',
+                                           'u2eu0101t_cr_flt_center_single_wht.fits']}
                         ]
 
 def check_output_entry(output_entry,expected_entry):
@@ -97,7 +135,8 @@ def check_output_keys(output_keys,expected_keys):
     assert output_keys == expected_keys, err_message
 
 def test_make_output_file_dict():
-    """ Iteratively generating tests.
+    """ 
+    Iteratively generating tests.
     
     Six tests are generated per dictionary in expected_entry_list.
     Each dictionary represents a particular case, each corresponding
