@@ -16,6 +16,7 @@ import sys
 from datetime import datetime
 from platform import architecture
 from stwcs import updatewcs
+from astropy.io import fits
 
 # Custom Packages
 from mtpipeline.imaging.run_cosmicx import run_cosmicx
@@ -38,6 +39,41 @@ def check_for_outputs(outputs):
         if not os.path.exists(item):
             return False
     return True
+
+# ----------------------------------------------------------------------------
+
+def get_metadata(filename):
+    """Retrieves the instrument and detector info from a FITS image's header.
+
+    Parameters:
+        filename: str
+            The path to and the filename of a FITS image.
+        
+    Returns:
+        (instrument, detector): tuple of either two strings or a string and 
+                                None
+            Possible instruments: 'WFPC2', 'WFC3', 'ACS' 
+            Possible detectors: 
+                None for WFPC2, 
+                'UVIS', 'IR' for WFC3
+                'SBC', 'HRC', 'WFC' for ACS
+
+    Outputs: nothing 
+
+    """
+
+    with fits.open(filename, mode='readonly') as HDUlist:
+
+        mainHDU = HDUlist[0]
+        instrument = mainHDU.header['instrume']
+        
+        #WFPC2 has no 'detector' keyword.
+        try:
+            detector = mainHDU.header['detector']
+        except:
+            detector = None
+
+    return instrument, detector
 
 # ----------------------------------------------------------------------------
 
