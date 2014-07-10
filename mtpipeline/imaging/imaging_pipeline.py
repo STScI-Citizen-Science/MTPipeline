@@ -50,10 +50,10 @@ def get_metadata(filename):
             The path to and the filename of a FITS image.
         
     Returns:
-        (instrument, detector): tuple of either two strings or a string and 
-                                None
-            Possible instruments: 'WFPC2', 'WFC3', 'ACS' 
-            Possible detectors: 
+        instrument_detector: dictionary 
+            Has keys 'instrument' and 'detector' 
+            Possible 'instrument' values: 'WFPC2', 'WFC3', 'ACS' 
+            Possible 'detectors' values: 
                 None for WFPC2, 
                 'UVIS', 'IR' for WFC3
                 'SBC', 'HRC', 'WFC' for ACS
@@ -73,7 +73,10 @@ def get_metadata(filename):
         except:
             detector = None
 
-    return instrument, detector
+    instrument_detector = {'instrument' : instrument,
+                           'detector' : detector}
+
+    return instrument_detector
 
 # ----------------------------------------------------------------------------
 
