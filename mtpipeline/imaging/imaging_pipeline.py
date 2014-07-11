@@ -20,6 +20,7 @@ from astropy.io import fits
 
 # Custom Packages
 from mtpipeline.imaging.run_cosmicx import run_cosmicx
+from mtpipeline.imaging.run_cosmicx import get_cosmicx_params
 from mtpipeline.imaging.run_astrodrizzle import run_astrodrizzle
 from mtpipeline.imaging.run_trim import run_trim
 
@@ -43,18 +44,22 @@ def check_for_outputs(outputs):
 # ----------------------------------------------------------------------------
 
 def get_metadata(filename):
-    """Retrieves the instrument and detector info from a FITS image's header.
+    """Retrieves the image's detector, as well as the gain and 
+       readnoise, from a FITS image's header.
+    
+    NOTE: DOES NOT CURRENTLY RETRIEVE GAIN OR READNOISE. WILL BE IMPLEMENTED.
 
     Parameters:
         filename: str
             The path to and the filename of a FITS image.
         
     Returns:
-        instrument_detector: dictionary 
-            Has keys 'instrument' and 'detector' 
+        header_data: dict 
+            Has keys , 'detector','readnoise', and 'gain'
             Possible 'instrument' values: 'WFPC2', 'WFC3', 'ACS' 
             Possible 'detectors' values: 
-                None for WFPC2, 
+                'WFPC2' for WFPC2 (not technically correct, as WFPC2 FITS
+                images have no detector keyword, but accurate enough).
                 'UVIS', 'IR' for WFC3
                 'SBC', 'HRC', 'WFC' for ACS
 
@@ -71,12 +76,11 @@ def get_metadata(filename):
         try:
             detector = mainHDU.header['detector']
         except:
-            detector = None
+            detector = instrument
 
-    instrument_detector = {'instrument' : instrument,
-                           'detector' : detector}
+    header_data = {'detector' : detector}
 
-    return instrument_detector
+    return header_data
 
 # ----------------------------------------------------------------------------
 
@@ -161,7 +165,14 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
         else:
             logging.info("Running cr_reject")
             print 'Running cr_reject'
-            run_cosmicx(root_filename, output_file_dict['cr_reject_output'][1], 7)
+
+            header_data = get_metadata(root_filename)
+            detector = header_data['detector']
+            cosmicx_params = get_cosmicx_params(detector) 
+            logging.info(cosmicx_params)
+
+            output_filname = output_file_dict['cr_reject_output'][1]
+            run_cosmicx(root_filename, outputfilename,cosmicx_params)
             print 'Done running cr_reject'
             logging.info("Done running cr_reject")
     else:
