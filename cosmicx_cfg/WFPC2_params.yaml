@@ -1,0 +1,56 @@
+1 :
+    'inmask' : null
+    'outmaskfile' : ""
+    'pssl' : 0.0
+    'gain' : 1.0
+    'readnoise' : 1.0
+    'sigclip' : 5.0
+    'sigfrac' : 0.01
+    'objlim' : 4.0
+    'satlevel' : 4095.0
+    'robust' : False
+    'verbose' : True
+    'niter' : 4
+
+2 : 
+    'inmask' : null
+    'outmaskfile' : ""
+    'pssl' : 0.0
+    'gain' : 1.0
+    'readnoise' : 1.0
+    'sigclip' : 5.0
+    'sigfrac' : 0.001
+    'objlim' : 5.0
+    'satlevel' : 4095.0
+    'robust' : False
+    'verbose' : True
+    'niter' : 4
+
+3 : 
+    'inmask' : null
+    'outmaskfile' : ""
+    'pssl' : 0.0
+    'gain' : 1.0
+    'readnoise' : 1.0
+    'sigclip' : 5.0
+    'sigfrac' : 0.001
+    'objlim' : 5.0
+    'satlevel' : 4095.0
+    'robust' : False
+    'verbose' : True
+    'niter' : 4
+
+4 : 
+    'inmask' : null
+    'outmaskfile' : ""
+    'pssl' : 0.0
+    'gain' : 1.0
+    'readnoise' : 1.0
+    'sigclip' : 5.0
+    'sigfrac' : 0.001
+    'objlim' : 5.0
+    'satlevel' : 4095.0
+    'robust' : False
+    'verbose' : True
+    'niter' : 4
+

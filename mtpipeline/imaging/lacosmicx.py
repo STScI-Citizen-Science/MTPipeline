@@ -10,11 +10,11 @@ def run(inmat,inmask=None,outmaskfile="",sigclip=3.0,objlim=5.0,sigfrac=0.1,satl
     test=numpy.zeros((2,2)) # create a NumPy matrix as a test object to check matin
     typetest= type(test) # get its type  
     if type(inmat) != typetest:
-        raise 'In inmat, matrix argument is not *NumPy* array'
+        raise TypeError('In inmat, matrix argument is not *NumPy* array')
     if inmask is None:
         inmask=numpy.zeros(inmat.shape)
     if type(inmask) != typetest:
-        raise 'In inmask, matrix argument is not *NumPy* array'
+        raise TypeError('In inmask, matrix argument is not *NumPy* array')
     this_shape=inmat.shape
     nx=this_shape[1]
     ny=this_shape[0]

@@ -1,20 +1,22 @@
 ## This is a template settings.yaml file. Rename a copy of this file to settings.yaml. 
 ## Uncomment anything with a single # and modify the values for you setup.
 
-# Database Settings
+## Database Settings
 db_connection: mysql+pymysql://root:user@localhost/mtpipeline
 db_echo: False
 
-# Email Settings
-email_switch: False
-contact_email: youremail@domain.com
+## Email Settings
+#email_switch: False
+#contact_email: youremail@domain.com
+
 # File System Settings
 #acs_input_path: /absolute/path/to/files
 #acs_output_path: /absolute/path/to/files
 #wfc3_input_path: /absolute/path/to/files
 #wfc3_output_path: /absolute/path/to/files
-wfpc2_input_path: /absolute/path/to/files
-wfpc2_output_path: /absolute/path/to/files
-logging_path: /absolute/path/to/files
-# Number of Cores
+#wfpc2_input_path: /absolute/path/to/files
+#wfpc2_output_path: /absolute/path/to/files
+#logging_path: /absolute/path/to/files
+
+## Number of Cores
 #num_cores: 
