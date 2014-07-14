@@ -1,5 +1,5 @@
 1 :
-    'inmask' : None
+    'inmask' : null
     'outmaskfile' : ""
     'pssl' : 0.0
     'gain' : 1.0
@@ -13,7 +13,7 @@
     'niter' : 4
 
 2 : 
-    'inmask' : None
+    'inmask' : null
     'outmaskfile' : ""
     'pssl' : 0.0
     'gain' : 1.0
@@ -27,7 +27,7 @@
     'niter' : 4
 
 3 : 
-    'inmask' : None
+    'inmask' : null
     'outmaskfile' : ""
     'pssl' : 0.0
     'gain' : 1.0
@@ -41,7 +41,7 @@
     'niter' : 4
 
 4 : 
-    'inmask' : None
+    'inmask' : null
     'outmaskfile' : ""
     'pssl' : 0.0
     'gain' : 1.0

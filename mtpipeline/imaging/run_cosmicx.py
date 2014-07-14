@@ -120,14 +120,15 @@ def run_cosmicx(filename, output, cosmicx_params):
         
         for key in cosmicx_params:
             
-            extension_params = cosmicx_params[key]
+            params = cosmicx_params[key]
             HDU = HDUlist[key]
 
             # It's possible some of the SCI extensions might not have data,
-            # as subsets of the CCD are sometimes used.
-            try:
+            # as subsets of the CCD are sometimes used, and these extensions
+            # are empty.
+            try: 
                 array = HDU.data
-            except:
+            except AttributeError: 
                 continue
 
             cleanarray = lacosmicx.run(array,

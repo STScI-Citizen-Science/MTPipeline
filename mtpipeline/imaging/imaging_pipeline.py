@@ -72,10 +72,10 @@ def get_metadata(filename):
         mainHDU = HDUlist[0]
         instrument = mainHDU.header['instrume']
         
-        #WFPC2 has no 'detector' keyword.
+        # Because WFPC2 has no 'detector' keyword:
         try:
             detector = mainHDU.header['detector']
-        except:
+        except KeyError:
             detector = instrument
 
     header_data = {'detector' : detector}
@@ -171,8 +171,8 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
             cosmicx_params = get_cosmicx_params(detector) 
             logging.info(cosmicx_params)
 
-            output_filname = output_file_dict['cr_reject_output'][1]
-            run_cosmicx(root_filename, outputfilename,cosmicx_params)
+            output_filename = output_file_dict['cr_reject_output'][1]
+            run_cosmicx(root_filename, output_filename,cosmicx_params)
             print 'Done running cr_reject'
             logging.info("Done running cr_reject")
     else:

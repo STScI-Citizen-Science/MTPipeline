@@ -1,5 +1,5 @@
 1 : 
-    inmask : None
+    inmask : null
     outmaskfile : ""
     pssl : 0.0
     gain : 1.0
