@@ -9,10 +9,10 @@ import argparse
 import os
 import string
 
-from mtpipeline.database.database_interface import counter
-from mtpipeline.database.database_interface import check_type
-#from mtpipeline.database.database_interface import insert_record
-from mtpipeline.database.database_interface import update_record
+from mtpipeline.database.database_tools import counter
+from mtpipeline.database.database_tools import check_type
+from mtpipeline.database.database_tools import insert_record
+from mtpipeline.database.database_tools import update_record
 
 #----------------------------------------------------------------------------
 # Load all the SQLAlchemy ORM bindings
