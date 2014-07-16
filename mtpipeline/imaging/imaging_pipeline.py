@@ -78,7 +78,28 @@ def get_metadata(filename):
         except KeyError:
             detector = instrument
 
-    header_data = {'detector' : detector}
+        # For WFPC2, there is no readnoise information in the header.
+        # For ACS / SBC, there is no readnoise or gain information.
+        gain = None
+        readnoise = None
+
+        # Find the gain.
+        if instrument == 'WFPC2':
+            gain = mainHDU.header['atodgain']
+        else:
+            gain = mainHDU.header['ccdgain']
+        
+        # Find the readnoise. 
+        if instrument != 'WFPC2' and instrument != 'SBC':
+            readnoise_a = mainHDU.header['readnsea']
+            readnoise_b = mainHDU.header['readnseb']
+            readnoise_c = mainHDU.header['readnsec']
+            readnoise_d = mainHDU.header['readnsed']
+            readnoise = max(readnoise_a, readnoise_b,readnoise_c,readnoise_d)
+
+    header_data = {'detector' : detector,
+                   'readnoise' : readnoise,
+                   'gain' : gain }
 
     return header_data
 
