@@ -80,6 +80,7 @@ def get_metadata(filename):
 
         # For WFPC2, there is no readnoise information in the header.
         # For ACS / SBC, there is no readnoise or gain information.
+	# If None, we'll provide the settings manually in the cfg files.
         gain = None
         readnoise = None
 
@@ -188,8 +189,7 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
             print 'Running cr_reject'
 
             header_data = get_metadata(root_filename)
-            detector = header_data['detector']
-            cosmicx_params = get_cosmicx_params(detector) 
+            cosmicx_params = get_cosmicx_params(header_data) 
             logging.info(cosmicx_params)
 
             output_filename = output_file_dict['cr_reject_output'][1]

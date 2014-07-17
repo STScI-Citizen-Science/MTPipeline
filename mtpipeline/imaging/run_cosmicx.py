@@ -35,17 +35,14 @@ def get_file_list(search_string):
 
 # -----------------------------------------------------------------------------
 
-def get_cosmicx_params(detector):
+def get_cosmicx_params(header_data):
     """ Accesses the cosmicx configure file and returns the parameters.
     
     Parameters:
         instrument: string
             The intrument for the image. Can be 'WFPC2', 'WFC3', 'ACS'
-        detector: string
-            The detector aboard the instrument. Can be:
-                None for WFPC2, 
-                'UVIS', 'IR' for WFC3
-                'SBC', 'HRC', 'WFC' for ACS
+        header_data: dictionary
+                Dictionary containing information from FITS header
 
     Returns:
         cosmicx_params: dict
@@ -57,7 +54,6 @@ def get_cosmicx_params(detector):
     """
 
 
-
     detector_config = { 'WFPC2' : "WFPC2_params.yaml",
                         'HRC' : "HRC_params.yaml",
                         'SBC' : "SBC_params.yaml",
@@ -65,16 +61,29 @@ def get_cosmicx_params(detector):
                         'UVIS' : "UVIS_params.yaml",
                         'IR' : "IR_params.yaml" }
 
+    detector = header_data["detector"]
+    readnoise = header_data["readnoise"]
+    gain = header_data["gain"]
+
+    # Load the configuration file for the proper detector:
+    config_file = detector_config[detector]
 
     # os.path.dirname is called three times to move up three directories
     # from this file, to reach to where the cosmicx_cfg directory is located.
     param_path = os.path.dirname(os.path.dirname(os.path.dirname(
                  os.path.abspath(inspect.getfile(inspect.currentframe())))))
-
     param_path = os.path.join(param_path,'cosmicx_cfg')
-    param_path = os.path.join(param_path,detector_config[detector])
+    param_path = os.path.join(param_path, config_file)
 
     cosmicx_params = yaml.load(open(param_path))
+
+    # If we have readnoise and gain from the FITS header, override the 
+    # manually specified values from the cfg file:
+    if readnoise:
+        cosmicx_params["readnoise"] = readnoise
+    if gain:
+        cosmicx_params["gain"] = gain
+
     return cosmicx_params 
 
 # -----------------------------------------------------------------------------
