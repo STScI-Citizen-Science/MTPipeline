@@ -80,9 +80,11 @@ def get_cosmicx_params(header_data):
     # If we have readnoise and gain from the FITS header, override the 
     # manually specified values from the cfg file:
     if readnoise:
-        cosmicx_params["readnoise"] = readnoise
+        for extension_key in cosmicx_params:
+            cosmicx_params[extension_key]["readnoise"] = readnoise
     if gain:
-        cosmicx_params["gain"] = gain
+        for extension_key in cosmicx_params:
+            cosmicx_params[extension_key]["gain"] = gain
 
     return cosmicx_params 
 
