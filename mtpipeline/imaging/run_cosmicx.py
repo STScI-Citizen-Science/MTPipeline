@@ -107,7 +107,7 @@ def run_cosmicx(filename, output, cosmicx_params):
     """
 
     # Assert the input file exists
-    error = filename + ' input for run_cosmics in '
+    error = filename + ' input for run_cosmicx in '
     error += 'run_cosmics.py does not exist.'
     assert os.access(filename, os.F_OK), error
 
@@ -156,7 +156,7 @@ def run_cosmicx(filename, output, cosmicx_params):
 
 def make_c1m_link(filename):
     """ Create a link to a c1m.fits that matches the cosmic ray rejected
-    naming scheme.
+    naming scheme. This is only done for WFPC2 data (which ends in _c0m.fits)
 
     Parameters:
         filename: string
@@ -168,11 +168,11 @@ def make_c1m_link(filename):
         A symbolic link to 'filename'
     """
 
-    error = filename + ' does not end in "c0m.fits".'
-    assert filename[-8:] == 'c0m.fits', error
-    src = filename.replace('_c0m.fits', '_c1m.fits')
-    dst = src.replace('_c1m.fits', '_cr_c1m.fits')
-    query = os.path.islink(dst)
-    if query == True:
-        os.remove(dst)
-    os.symlink(src, dst)
+    if filename[-8:] == 'c0m.fits'
+        src = filename.replace('_c0m.fits', '_c1m.fits')
+        dst = src.replace('_c1m.fits', '_cr_c1m.fits')
+        query = os.path.islink(dst)
+
+        if query == True:
+            os.remove(dst)
+        os.symlink(src, dst)
