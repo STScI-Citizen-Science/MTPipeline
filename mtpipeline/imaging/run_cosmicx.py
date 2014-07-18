@@ -132,11 +132,17 @@ def run_cosmicx(filename, output, cosmicx_params):
         for key in cosmicx_params:
             
             params = cosmicx_params[key]
-            HDU = HDUlist[key]
+
+            # It's possible there may not be the same number of SCI extensions
+            # in the image as we specify in the cfg files (WFC)
+            try: 
+                HDU = HDUlist[key]
+            except IndexError:
+                continue
 
             # It's possible some of the SCI extensions might not have data,
             # as subsets of the CCD are sometimes used, and these extensions
-            # are empty.
+            # are empty (UVIS)
             try: 
                 array = HDU.data
             except AttributeError: 
