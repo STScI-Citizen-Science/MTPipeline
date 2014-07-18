@@ -120,7 +120,7 @@ def run():
         logging.info(arg + ": " + str(args_list.__dict__[arg]))
     rootfile_list = glob.glob(args_list.filelist)
     rootfile_list = [filename for filename
-                     in filelist
+                     in rootfile_list
                      if '_cr_' not in filename
                      and ('_flt.fits' in filename or '_c0m.fits' in filename)]
     assert rootfile_list != [], 'empty rootfile_list in mtpipeline.py.'
