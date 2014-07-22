@@ -148,6 +148,11 @@ def run_cosmicx(filename, output, cosmicx_params):
             except AttributeError: 
                 continue
 
+            # For a cleaner cr rejection, set all very negative pixels
+            # to 0. No significant science data should be lost, as these
+            # are already bad pixels.
+            array[array < -10.0] = 0.0
+
             cleanarray = lacosmicx.run(array,
                        inmask=params['inmask'],
                        outmaskfile=params['outmaskfile'],
