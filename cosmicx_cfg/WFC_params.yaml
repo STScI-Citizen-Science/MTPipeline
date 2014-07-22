@@ -7,10 +7,10 @@
     sigclip : 5.0
     sigfrac : 0.01
     objlim : 4.0
-    satlevel : 4095.0
+    satlevel : 12000.0
     robust : False
     verbose : True
-    niter : 4
+    niter : 2
 
 4 : 
     inmask : null
@@ -21,7 +21,7 @@
     sigclip : 5.0
     sigfrac : 0.01
     objlim : 4.0
-    satlevel : 4095.0
+    satlevel : 12000.0
     robust : False
     verbose : True
-    niter : 4
+    niter : 2

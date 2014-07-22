@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+
 
 '''
 This is the main module for the Moving Target Pipeline.
@@ -82,11 +82,9 @@ def get_metadata(filename):
         readnoise = None
 
         # For WFPC2, there is no readnoise information in the header.
+	# There is gain information, but it leads to bad CR rejection.
         # For ACS / SBC, there is no readnoise or gain information.
 	    # If None, we use the settings provided in the cfg files.
-
-        if instrument == 'WFPC2':
-            gain = mainHDU.header['atodgain']
         
         if detector != 'SBC' and instrument != 'WFPC2':
       	    gain = mainHDU.header['ccdgain']
