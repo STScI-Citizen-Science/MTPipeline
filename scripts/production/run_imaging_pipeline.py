@@ -20,7 +20,8 @@ import logging
 import os
 import sys
 
-num_cores = mp.cpu_count() - 1
+# Setting this just to get the pipeline rolling.
+num_cores = 4
 
 def parse_args():
     """
