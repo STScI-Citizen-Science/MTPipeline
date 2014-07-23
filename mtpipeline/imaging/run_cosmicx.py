@@ -4,6 +4,7 @@
 """
 
 import os
+import shutil
 import inspect
 import glob
 import yaml
@@ -86,17 +87,21 @@ def get_cosmicx_params(header_data):
         for extension_key in cosmicx_params:
             cosmicx_params[extension_key]["gain"] = gain
 
+    # Add the instrument into the params. Not needed for cosmicx, but needed
+    # for run_cosmicx to decide whether to run CR rejection at all.
+    cosmicx_params['detector'] = detector
+
     return cosmicx_params 
 
 # -----------------------------------------------------------------------------
 
 
 def run_cosmicx(filename, output, cosmicx_params):
-    """ Driver to run lacosmicx on multi-extension WFPC2 FITS files.
+    """ Driver to run lacosmicx on multi-extension FITS files.
 
     An equivalent to the run_cosmics function in run_cosmiscs.py,
     borrowing much of its code. Performs cosmic-ray rejection on each
-    chip of a FITS file from WFPC2.
+    chip of a FITS file.
 
     Parameters:
         filename: string
@@ -113,7 +118,7 @@ def run_cosmicx(filename, output, cosmicx_params):
         A cosmic ray rejected FITS file with the filename given by
         'output'
         A symbolic link to the original c1m files that matches the
-        output filename, for astrodrizzle.
+        output filename, for Astrodrizzle.
 
     """
 
@@ -122,7 +127,14 @@ def run_cosmicx(filename, output, cosmicx_params):
     error += 'run_cosmics.py does not exist.'
     assert os.access(filename, os.F_OK), error
 
-    # Define the output name and delete if exists.
+    # If the file is taken by SBC or IR, do not cr reject, copy
+    # the file with the output name, and return
+    detector = cosmicx_params['detector']
+    if detector == 'SBC' or detector == 'IR':
+        shutil.copyfile(filename,output)
+        return
+
+    # Define the output name and delete if exists
     query = os.access(output, os.F_OK)
     if query == True:
         os.remove(output)
@@ -150,7 +162,7 @@ def run_cosmicx(filename, output, cosmicx_params):
 
             # For a cleaner cr rejection, set all very negative pixels
             # to 0. No significant science data should be lost, as these
-            # are already bad pixels.
+            # are already bad pixels
             array[array < -10.0] = 0.0
 
             cleanarray = lacosmicx.run(array,
