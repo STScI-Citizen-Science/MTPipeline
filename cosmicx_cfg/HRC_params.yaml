@@ -2,12 +2,12 @@
     inmask : null
     outmaskfile : ""
     pssl : 0.0
-    gain : 1.0
-    readnoise : 1.0
-    sigclip : 5.0
+    gain : 4.7
+    readnoise : 2.0
+    sigclip : 15.0
     sigfrac : 0.01
     objlim : 4.0
-    satlevel : 4095.0
+    satlevel : 50000.0 
     robust : False
     verbose : True
     niter : 4

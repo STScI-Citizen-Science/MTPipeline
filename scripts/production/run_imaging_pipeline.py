@@ -20,7 +20,8 @@ import logging
 import os
 import sys
 
-num_cores = mp.cpu_count() - 1
+# Setting this just to get the pipeline rolling.
+num_cores = 4
 
 def parse_args():
     """
@@ -121,8 +122,8 @@ def run():
     rootfile_list = glob.glob(args_list.filelist)
     rootfile_list = [filename for filename
                      in rootfile_list
-                     if len(filename.split('/')[-1]) == 18
-                     and filename.split('/')[-1].split('_')[-1] == 'c0m.fits']
+                     if '_cr_' not in filename
+                     and ('_flt.fits' in filename or '_c0m.fits' in filename)]
     assert rootfile_list != [], 'empty rootfile_list in mtpipeline.py.'
     logging.info("Processing: {} files".format(len(rootfile_list)))
     logging.info("Number of Processes: {}".format(num_cores))

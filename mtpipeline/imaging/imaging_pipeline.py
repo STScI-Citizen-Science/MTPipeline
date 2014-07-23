@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+
 
 '''
 This is the main module for the Moving Target Pipeline.
@@ -78,7 +78,25 @@ def get_metadata(filename):
         except KeyError:
             detector = instrument
 
-    header_data = {'detector' : detector}
+        gain = None
+        readnoise = None
+
+        # For WFPC2, there is no readnoise information in the header.
+	# There is gain information, but it leads to bad CR rejection.
+        # For ACS / SBC, there is no readnoise or gain information.
+	    # If None, we use the settings provided in the cfg files.
+        
+        if detector != 'SBC' and instrument != 'WFPC2':
+      	    gain = mainHDU.header['ccdgain']
+            readnoise_a = mainHDU.header['readnsea']
+            readnoise_b = mainHDU.header['readnseb']
+            readnoise_c = mainHDU.header['readnsec']
+            readnoise_d = mainHDU.header['readnsed']
+            readnoise = max(readnoise_a, readnoise_b,readnoise_c,readnoise_d)
+
+    header_data = {'detector' : detector,
+                   'readnoise' : readnoise,
+                   'gain' : gain }
 
     return header_data
 
@@ -168,11 +186,11 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
 
             header_data = get_metadata(root_filename)
             detector = header_data['detector']
-            cosmicx_params = get_cosmicx_params(detector) 
+            cosmicx_params = get_cosmicx_params(header_data) 
             logging.info(cosmicx_params)
 
             output_filename = output_file_dict['cr_reject_output'][1]
-            run_cosmicx(root_filename, output_filename,cosmicx_params)
+            run_cosmicx(root_filename, output_filename,cosmicx_params,detector)
             print 'Done running cr_reject'
             logging.info("Done running cr_reject")
     else:

@@ -4,11 +4,11 @@
     pssl : 0.0
     gain : 1.0
     readnoise : 1.0
-    sigclip : 5.0
+    sigclip : 9.0
     sigfrac : 0.01
     objlim : 4.0
-    satlevel : 4095.0
+    satlevel : 10000.0
     robust : False
     verbose : True
-    niter : 4
+    niter : 5
 
