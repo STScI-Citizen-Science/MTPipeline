@@ -87,16 +87,12 @@ def get_cosmicx_params(header_data):
         for extension_key in cosmicx_params:
             cosmicx_params[extension_key]["gain"] = gain
 
-    # Add the instrument into the params. Not needed for cosmicx, but needed
-    # for run_cosmicx to decide whether to run CR rejection at all.
-    cosmicx_params['detector'] = detector
-
     return cosmicx_params 
 
 # -----------------------------------------------------------------------------
 
 
-def run_cosmicx(filename, output, cosmicx_params):
+def run_cosmicx(filename, output, cosmicx_params, detector):
     """ Driver to run lacosmicx on multi-extension FITS files.
 
     An equivalent to the run_cosmics function in run_cosmiscs.py,
@@ -108,9 +104,13 @@ def run_cosmicx(filename, output, cosmicx_params):
             filename of input FITS file
         output: string
             desired filename of output, a cosmic ray rejected FITS file.
-        iters: int
-            number of iterations of the LACosmics algorithm to be
-            performed.
+        cosmicx_params: dictionary
+            a dictionary of dictionaries, with each entry dictionary
+            containing the cosmicx settings appropriate for a
+            particular FITS science extension.
+        detector: string
+            the detector used to take the FITS image. If SBC or IR,
+            cr rejection is not run.
 
     Returns: nothing
 
@@ -129,7 +129,6 @@ def run_cosmicx(filename, output, cosmicx_params):
 
     # If the file is taken by SBC or IR, do not cr reject, copy
     # the file with the output name, and return
-    detector = cosmicx_params['detector']
     if detector == 'SBC' or detector == 'IR':
         shutil.copyfile(filename,output)
         return
