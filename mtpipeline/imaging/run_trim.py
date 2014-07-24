@@ -91,36 +91,6 @@ def get_value_by_pixel_count(input_array, pixel_number ,top_or_bottom):
 
 # -----------------------------------------------------------------------------
 
-def log_scale(array, output=False):
-    '''
-    Returns the log of the input array.
-    '''
-    assert isinstance(array, N.ndarray), 'array must be numpy array'
-    array_log = N.log(array)
-    if output != False:
-        before_after(before_array = array, 
-            after_array = array_log, 
-            before_array_name = 'Input Data',
-            after_array_name = 'Log',
-            output = output) 
-    return array_log
-        
-# -----------------------------------------------------------------------------
-
-def make_png(data, filename):
-    '''
-    Use the Python image library (PIL) to write out the png file. The 
-    data is flipped in the "up-down" direction and converted to 8bit
-    encoding before writing.
-    '''
-    assert isinstance(data, N.ndarray), 'array must be numpy array'
-    data = N.uint8(data)
-    image = Image.new('L', (data.shape[1], data.shape[0]))
-    image.putdata(data.ravel())
-    image.save(filename)
-
-# -----------------------------------------------------------------------------
-
 def make_png_name(path, filename, ext):
     '''
     Return the name of the png output_array file.
@@ -129,109 +99,6 @@ def make_png_name(path, filename, ext):
     png_name = os.path.splitext(png_name)[0] + '_' + ext + '.png'
     png_name = os.path.join(path, png_name)
     return png_name
-    
-# -----------------------------------------------------------------------------
-                    
-def median_scale(array, box, output=False):
-    '''
-    Perform a local-median subtraction (box smoothing). The box size 
-    must be odd and is set by the box parameter.
-    '''
-    assert box % 2 == 1, 'Box size must be odd.'
-    assert isinstance(array, N.ndarray), 'array must be numpy array'
-    output_array = N.zeros((array.shape[0], array.shape[1]))        
-    for x in xrange(array.shape[0]):
-        xmin = max(0, x - (box / 2)) 
-        xmax = min(x + (box / 2) + 1, array.shape[0])
-        for y in xrange(array.shape[1]):
-            ymin = max(0, y - (box / 2)) 
-            ymax = min(y + (box / 2) + 1, array.shape[1])
-            local_region = array[xmin:xmax, ymin:ymax]
-            local_median = N.median(local_region)
-            output_array[x, y] = copy.copy(array[x, y] - local_median)
-    print 'Done with the median scale.'
-    if output != False:
-        before_after(
-            before_array = array, 
-            after_array = output_array, 
-            before_array_name = 'Input Data',
-            after_array_name = 'Median with ' + str(box) + ' box',
-            output = output,
-            pause = False) 
-    return output_array
-    
-# -----------------------------------------------------------------------------
-
-def positive(input_array, output=False):
-    '''
-    Shift all the pixels so there are no negative or 0 pixels. Needed 
-    to prevent taken the log of negative values.
-    '''
-    assert isinstance(input_array, N.ndarray), 'array must be numpy array'
-    min_val = N.min(input_array)
-    if min_val <= 0:
-        output_array = input_array + ((min_val * -1.0) + 0.0001)
-    else:
-        output_array = input_array 
-    if output != False:
-        before_after(before_array = input_array, 
-            after_array = output_array, 
-            before_array_name = 'Input Data',
-            after_array_name = 'Positive Corrected',
-            output = output,
-            pause = False)   
-    return output_array
-
-# -----------------------------------------------------------------------------
-
-def replace_by_weight(input_array, weight_array, output=False):
-    '''
-    Replace all the pixels that have a weight value of 0 with the local
-    3x3 median. A copy of the image is created so that the values of
-    the replaced pixels don't affect the medians of other pixels as 
-    they are replaced. The subarray function is used to generate the 
-    subarrays to prevent error at the array edge.
-
-    The indices are set keeping in mind that a[0:2,0:2] returns a 2x2 
-    array while a[0:3,0:3] returns a 3x3 array. Both arrays are 
-    centered on (1,1).
-    '''
-    assert isinstance(input_array, N.ndarray), 'array must be numpy array'
-    assert isinstance(weight_array, N.ndarray), 'array must be numpy array'
-    output_array = copy.copy(input_array)
-    saturated_indices = N.where(weight_array == 0)
-    for index in zip(saturated_indices[0], saturated_indices[1]):
-         output_array[index] = N.median(subarray(input_array, index[0] - 1, \
-            index[0] + 2, index[1] - 1, index[1] + 2))
-    if output != False:
-        before_after(before_array = input_array, 
-            after_array = output_array, 
-            before_array_name = 'Input Data',
-            after_array_name = '0-Weight Corrected',
-            output = output,
-            pause = False)
-    return output_array
-
-# -----------------------------------------------------------------------------
-
-def subarray(array, xmin, xmax, ymin, ymax):
-    '''
-    Returns a subarray.
-    '''
-    assert isinstance(array, N.ndarray), 'array must be numpy array'
-    assert isinstance(xmin, int), 'xmin in subarray must be an int.'
-    assert isinstance(xmax, int), 'xmax in subarray must be an int.'
-    assert isinstance(ymin, int), 'ymin in subarray must be an int.'
-    assert isinstance(ymax, int), 'ymax in subarray must be an int.'    
-    assert xmin < xmax, 'xmin must be stictly less than xmax.'
-    assert ymin < ymax, 'ymin must be stictly less than ymax.'
-    output_array = array[max(xmin,0):min(xmax,array.shape[0]), \
-        max(ymin,0):min(ymax,array.shape[1])]
-    assert output_array.shape[0] == min(xmax,array.shape[0]) - max(xmin,0), \
-        'Output shape is unexpected: ' + str(min(xmax,array.shape[0]) - max(xmin,0))
-    assert output_array.shape[1] == min(ymax,array.shape[1]) - max(ymin,0), \
-        'Output shape is unexpected: ' + str(min(ymax,array.shape[1]) - max(ymin,0))
-    return output_array
 
 # -----------------------------------------------------------------------------
 
@@ -293,42 +160,133 @@ class PNGCreator(object):
     
     def log(self, output=False):
         '''
-        Take the log of self.data.
+        Take the log of self.data, in-place.
         '''
-        self.data = log_scale(self.data, output = output)
+        array_log = N.log(self.data)
+
+        if output != False:
+            before_after(before_array = self.data, 
+                after_array = array_log, 
+                before_array_name = 'Input Data',
+                after_array_name = 'Log',
+                output = output) 
+        self.data = array_log
     
     def median(self, output=False):
-        '''
-        Take a 25x25 median box smoothing of the self.data attribute.
-        '''
-        self.data = median_scale(self.data, 25, output = output)
 
+        '''
+        Perform a local-median subtraction (box smoothing) with a 25x25
+        box on self.data. This code can be modified to use other sizes, 
+        but the box size must be odd
+        '''
+        box = 25
+        assert box % 2 == 1, 'Box size must be odd.'
+        output_array = N.zeros((array.shape[0], array.shape[1]))        
+        for x in xrange(array.shape[0]):
+            xmin = max(0, x - (box / 2)) 
+            xmax = min(x + (box / 2) + 1, array.shape[0])
+            for y in xrange(array.shape[1]):
+                ymin = max(0, y - (box / 2)) 
+                ymax = min(y + (box / 2) + 1, array.shape[1])
+                local_region = array[xmin:xmax, ymin:ymax]
+                local_median = N.median(local_region)
+                output_array[x, y] = copy.copy(array[x, y] - local_median)
+
+        print 'Done with the median scale.'
+
+        if output != False:
+            before_after(
+                before_array = array, 
+                after_array = output_array, 
+                before_array_name = 'Input Data',
+                after_array_name = 'Median with ' + str(box) + ' box',
+                output = output,
+                pause = False) 
+
+        self.data = output_array 
+        
     def positive(self, output=False):
         '''
-        Transform all the data in the self.data attribute to a positive
-        value.
+        Shift all the values in self.data so there are no negative or 0 pixels. 
+        Needed to prevent taking the log of negative values.
         '''
-        self.data = positive(self.data, output = output)
+        min_val = N.min(input_array)
+        if min_val <= 0:
+            output_array = self.data + ((min_val * -1.0) + 0.0001)
+        else:
+            output_array = self.data 
+
+        if output != False:
+            before_after(before_array = self.data, 
+                after_array = output_array, 
+                before_array_name = 'Input Data',
+                after_array_name = 'Positive Corrected',
+                output = output,
+                pause = False)   
+
+        self.data = output_array
+        
+    def replace_by_weight(self, weight_array, output=False):
+        '''
+        Replace all the pixels that have a weight value of 0 with the local
+        3x3 median. A copy of the image is created so that the values of
+        the replaced pixels don't affect the medians of other pixels as 
+        they are replaced. The subarray function is used to generate the 
+        subarrays to prevent error at the array edge.
     
-    def saturated_clip(self, weight_data, output=False):
+        The indices are set keeping in mind that a[0:2,0:2] returns a 2x2 
+        array while a[0:3,0:3] returns a 3x3 array. Both arrays are 
+        centered on (1,1).
         '''
-        Replace any pixels with a weight of 0 with the local 3x3 
-        median.
-        '''
-        self.data = replace_by_weight(self.data, weight_data, 
-            output = output)
+        assert isinstance(weight_array, N.ndarray), 'array must be numpy array'
+        output_array = copy.copy(self.data)
+        saturated_indices = N.where(weight_array == 0)
+        for index in zip(saturated_indices[0], saturated_indices[1]):
+             output_array[index] = N.median(subarray(self.data, index[0] - 1, \
+                index[0] + 2, index[1] - 1, index[1] + 2))
+
+        if output != False:
+            before_after(before_array = self.data, 
+                after_array = output_array, 
+                before_array_name = 'Input Data',
+                after_array_name = '0-Weight Corrected',
+                output = output,
+                pause = False)
+
+        self.data = output_array 
 
     def save_png(self, png_name):
         '''
-        Save the self.data attribute to a png.
-        '''                          
-        make_png(self.data, png_name)
+        Use the Python image library (PIL) to write self.data as a png file. 
+        self.data is flipped in the "up-down" direction and converted to 8bit
+        encoding before writing.
+        '''
+        self.data = N.uint8(self.data)
+        image = Image.new('L', (self.data.shape[1], self.data.shape[0]))
+        image.putdata(self.data.ravel())
+        image.save(filename)
 
     def trim(self, xmin, xmax, ymin, ymax):
         '''
-        Trim the self.data attribute.
+        Trims self.data down to a subarray specified by its corners.
         '''
-        self.data = subarray(self.data, xmin, xmax, ymin, ymax)
+        assert isinstance(xmin, int), 'xmin in subarray must be an int.'
+        assert isinstance(xmax, int), 'xmax in subarray must be an int.'
+        assert isinstance(ymin, int), 'ymin in subarray must be an int.'
+        assert isinstance(ymax, int), 'ymax in subarray must be an int.'    
+        assert xmin < xmax, 'xmin must be stictly less than xmax.'
+        assert ymin < ymax, 'ymin must be stictly less than ymax.'
+
+        orig_dimens = self.data.shape
+        output_array = self.data[max(xmin,0):min(xmax,orig_dimens[0]), \
+
+            max(ymin,0):min(ymax,orig_dimens[1])]
+        assert output_array.shape[0] == min(xmax,orig_dimens[0]) - max(xmin,0), \
+            'Output shape is unexpected: ' + str(min(xmax,orig_dimens[0]) \
+             - max(xmin,0))
+        assert output_array.shape[1] == min(ymax,orig_dimens[1]) - max(ymin,0), \
+            'Output shape is unexpected: ' + str(min(ymax,orig_dimens[1]) - max(ymin,0))
+        self.data = output_array
 
 # -----------------------------------------------------------------------------
 # Control Functions
