@@ -102,6 +102,27 @@ def make_png_name(path, filename, ext):
 
 # -----------------------------------------------------------------------------
 
+def subarray(array, xmin, xmax, ymin, ymax):
+    '''
+    Returns a subarray.
+    '''
+    assert isinstance(array, N.ndarray), 'array must be numpy array'
+    assert isinstance(xmin, int), 'xmin in subarray must be an int.'
+    assert isinstance(xmax, int), 'xmax in subarray must be an int.'
+    assert isinstance(ymin, int), 'ymin in subarray must be an int.'
+    assert isinstance(ymax, int), 'ymax in subarray must be an int.'    
+    assert xmin < xmax, 'xmin must be stictly less than xmax.'
+    assert ymin < ymax, 'ymin must be stictly less than ymax.'
+    output_array = array[max(xmin,0):min(xmax,array.shape[0]), \
+        max(ymin,0):min(ymax,array.shape[1])]
+    assert output_array.shape[0] == min(xmax,array.shape[0]) - max(xmin,0), \
+        'Output shape is unexpected: ' + str(min(xmax,array.shape[0]) - max(xmin,0))
+    assert output_array.shape[1] == min(ymax,array.shape[1]) - max(ymin,0), \
+        'Output shape is unexpected: ' + str(min(ymax,array.shape[1]) - max(ymin,0))
+    return output_array
+
+# -----------------------------------------------------------------------------
+
 def top_bottom_clip(array):
     '''
     Clip the top and bottom 1% of pixels.
@@ -268,25 +289,9 @@ class PNGCreator(object):
 
     def trim(self, xmin, xmax, ymin, ymax):
         '''
-        Trims self.data down to a subarray specified by its corners.
+        Trim the self.data attribute using the subarray function.
         '''
-        assert isinstance(xmin, int), 'xmin in subarray must be an int.'
-        assert isinstance(xmax, int), 'xmax in subarray must be an int.'
-        assert isinstance(ymin, int), 'ymin in subarray must be an int.'
-        assert isinstance(ymax, int), 'ymax in subarray must be an int.'    
-        assert xmin < xmax, 'xmin must be stictly less than xmax.'
-        assert ymin < ymax, 'ymin must be stictly less than ymax.'
-
-        orig_dimens = self.data.shape
-        output_array = self.data[max(xmin,0):min(xmax,orig_dimens[0]), \
-
-            max(ymin,0):min(ymax,orig_dimens[1])]
-        assert output_array.shape[0] == min(xmax,orig_dimens[0]) - max(xmin,0), \
-            'Output shape is unexpected: ' + str(min(xmax,orig_dimens[0]) \
-             - max(xmin,0))
-        assert output_array.shape[1] == min(ymax,orig_dimens[1]) - max(ymin,0), \
-            'Output shape is unexpected: ' + str(min(ymax,orig_dimens[1]) - max(ymin,0))
-        self.data = output_array
+        self.data = subarray(self.data, xmin, xmax, ymin, ymax)
 
 # -----------------------------------------------------------------------------
 # Control Functions
