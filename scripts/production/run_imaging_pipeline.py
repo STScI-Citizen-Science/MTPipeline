@@ -12,6 +12,7 @@
 from mtpipeline.imaging.imaging_pipeline import imaging_pipeline
 from mtpipeline import email_decorator
 from mtpipeline.setup_logging import setup_logging
+from mtpipeline.get_settings import SETTINGS
 
 import multiprocessing as mp
 import glob
@@ -20,8 +21,6 @@ import logging
 import os
 import sys
 
-# Setting this just to get the pipeline rolling.
-num_cores = 4
 
 def parse_args():
     """
@@ -126,6 +125,7 @@ def run():
                      and ('_flt.fits' in filename or '_c0m.fits' in filename)]
     assert rootfile_list != [], 'empty rootfile_list in mtpipeline.py.'
     logging.info("Processing: {} files".format(len(rootfile_list)))
+    num_cores = SETTINGS['num_cores']
     logging.info("Number of Processes: {}".format(num_cores))
     pool = mp.Pool(processes=num_cores)
     pool.map(run_imaging_pipeline, rootfile_list)

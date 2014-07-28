@@ -34,7 +34,7 @@ def setup_logging(module_name):
     log_file = (module_name + '_' +
                 datetime.datetime.now().strftime('%Y-%m-%d-%H-%M') +
                 '.log')
-    log_file = os.path.join(SETTINGS['logging_path'], module_name, log_file)
+    log_file = os.path.join(SETTINGS['logging_path'], log_file)
     logging.basicConfig(filename = log_file,
                         format = '%(asctime)s %(processName)s %(levelname)s: %(message)s',
                         datefmt = '%m/%d/%Y %H:%M:%S %p',
