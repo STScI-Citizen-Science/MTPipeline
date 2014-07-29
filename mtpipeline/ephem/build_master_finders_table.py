@@ -18,10 +18,10 @@ from socket import gethostname
 # Load all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-from database_interface import MasterImages
-from database_interface import MasterFinders
-from database_interface import session
-from database_interface import counter
+from mtpipeline.database.database_interface import MasterImages
+from mtpipeline.database.database_interface import MasterFinders
+from mtpipeline.database.database_interface import session
+from mtpipeline.database.database_tools import counter
 
 from sqlalchemy import or_
 from sqlalchemy.orm import subqueryload

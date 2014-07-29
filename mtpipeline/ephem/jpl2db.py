@@ -26,10 +26,10 @@ from platform import machine
 from platform import platform
 from platform import architecture
 
-from database_interface import counter
-from database_interface import check_type
+from mtpipeline.database.database_tools import counter
+from mtpipeline.database.database_tools import check_type
 
-from mt_logging import setup_logging
+from mtpipeline.setup_logging import setup_logging
 
 from urllib2 import urlopen
 
@@ -37,12 +37,10 @@ from urllib2 import urlopen
 # Load all the SQLAlchemy ORM bindings
 #----------------------------------------------------------------------------
 
-from database_interface import loadConnection
-from database_interface import MasterImages
-from database_interface import MasterFinders
-from database_interface import session
-
-LOGFOLDER = "/astro/3/mutchler/mt/logs/jpl2db"
+from mtpipeline.database.database_interface import loadConnection
+from mtpipeline.database.database_interface import MasterImages
+from mtpipeline.database.database_interface import MasterFinders
+from mtpipeline.database.database_interface import session
 
 #----------------------------------------------------------------------------
 # Low-Level Functions
@@ -81,6 +79,17 @@ def convert_datetime(header_dict):
     header_dict['horizons_end_time'] = header_dict['horizons_end_time'].strftime('%Y-%b-%d %H:%M')
     return header_dict
 
+#----------------------------------------------------------------------------
+
+def get_planets_moons():
+    planets_moons_list = ['jup-', 'gany-', 'sat-', 'copernicus', 'gan-', 'io-']
+    pm_file = open('mtpipeline/ephem/planets_and_moons.txt', 'r')
+    for pm in pm_file:
+        obj = pm.split(' ')
+        if len(obj) > 3:
+            planets_moons_list.append(obj[1])
+    return planets_moons_list
+
 # ----------------------------------------------------------------------------
 
 def get_header_info(filename):
@@ -94,8 +103,11 @@ def get_header_info(filename):
     output['targname'] = pyfits.getval(filename, 'targname').lower().split('-')[0]
     output['date_obs'] = pyfits.getval(filename, 'date-obs')
     output['time_obs'] = pyfits.getval(filename, 'time-obs')
-    planet_list = ['mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto']
-    assert output['targname'] in planet_list, \
+    status = False
+    for pm in planet_list:
+        if pm in output['targname']:
+            status = True
+    assert status, \
         'Header TARGNAME not in planet_list'
     return output
 
@@ -371,6 +383,8 @@ def parse_args():
 #----------------------------------------------------------------------------
     
 if __name__ == '__main__':
+    
+    planet_list = get_planets_moons()
     
     # Set up the inputs and logging.
     args = parse_args()
