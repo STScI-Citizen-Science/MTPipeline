@@ -310,7 +310,7 @@ def jpl2db_main(filename, reproc=False):
     The main controller. 
     '''
     # Get the unique record from the master_images table.
-    assert os.path.splitext(filename)[1] == '.fits', \
+    assert filename[-5:] == '.fits', \
         'Expected .fits got ' + filename
     master_images_query = session.query(MasterImages).filter(\
         MasterImages.fits_file == os.path.basename(filename)).one()
@@ -319,7 +319,7 @@ def jpl2db_main(filename, reproc=False):
     file_dict = get_header_info(os.path.abspath(filename))
     file_dict = convert_datetime(file_dict)
     all_moon_dict = make_all_moon_dict('planets_and_moons.txt', file_dict)
-    for moon in all_moon_dict.keys():
+    for moon in all_moon_dict:
         logging.info('Processing {} for {}'.format(moon, filename))
         moon_dict = all_moon_dict[moon]
         moon_dict.update(file_dict)
@@ -398,7 +398,7 @@ if __name__ == '__main__':
     # Create the filelist.
     if args.filelist != None:
         filelist = glob.glob(args.filelist)
-        filelist = [x for x in filelist if ('c0m_center_single_sci.fits' in os.path.basename(x) or 'c0m_wide_single_sci.fits' in os.path.basename(x))]
+        filelist = [x for x in filelist if ('c0m_center_single_sci.fits' in x or 'c0m_wide_single_sci.fits' in x)]
         assert isinstance(filelist, list), \
             'Expected list for filelist, got ' + str(type(filelist))
         assert filelist != [], 'No files found.'
