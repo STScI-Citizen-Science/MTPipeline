@@ -93,7 +93,7 @@ def rename_files(rootfile, mode, output_path):
 
 # ------------------------------------------------------------------------------
 
-def run_astrodrizzle(filename, output_path = None):
+def run_astrodrizzle(filename, detector, output_path = None):
     '''
     Executes astrodrizzle.AstroDrizzle.
     '''
@@ -104,7 +104,16 @@ def run_astrodrizzle(filename, output_path = None):
     else:
         cfg_path = cfg_path.replace('/mtpipeline/imaging/run_astrodrizzle.py',
                                 '/astrodrizzle_cfg/')
-    configobj_list = ['wfpc2_centerslice.cfg', 'wfpc2_wideslice.cfg']
+
+    config_sets = {'WFPC2' : ['wfpc2_centerslice.cfg', 'wfpc2_wideslice.cfg'],
+                   'WFC' : ['acs_center.cfg','acs_wide.cfg'],
+                   'HRC' : ['acs_center.cfg','acs_hrc_wide.cfg'],
+                   'SBC' : ['acs_center.cfg','acs_wide.cfg'],
+                   'UVIs':['wfc3_center.cfg','wfc3_wide.cfg'],
+                   'IR': ['wfc3_center.cfg','wfc3_wide.cfg']
+                  }
+
+    configobj_list = config_sets[detector]
     mode_list = ['center', 'wide']
     for configobj, mode in zip(configobj_list, mode_list):
         astrodrizzle.AstroDrizzle(
