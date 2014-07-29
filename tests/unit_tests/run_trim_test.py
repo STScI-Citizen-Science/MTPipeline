@@ -4,7 +4,8 @@ Nose tests for the run_trim.py module.
 
 from mtpipeline.imaging.run_trim import get_value_by_pixel_count
 from mtpipeline.imaging.run_trim import clip
-from mtpipeline.imaging.run_trim import positive 
+from mtpipeline.imaging.run_trim import PNGCreator 
+
 import numpy as N 
 
 class test_get_value_by_pixel_count(object):
@@ -63,9 +64,11 @@ class test_positive(object):
     def __init__(self):
         #self.input_array = N.resize(range(-99,1),(10,10))
         self.input_array = N.array([-1,0])
+	self.PNGCreator = PNGCreator(self.input_array)
 
     def positive_test(self):
-        result = positive(self.input_array)
+        self.PNGCreator.positive()
+	result = self.PNGCreator.data
         expected = N.array([0,1]) + 0.0001
         difference = round(abs(N.sum(result - expected)))
         assert difference == 0, 'positive is not working.'
