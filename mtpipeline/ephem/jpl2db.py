@@ -391,10 +391,6 @@ if __name__ == '__main__':
     setup_logging('jpl2db')
    
     # Log the system and user information.
-    logging.info('User: {0}'.format(getuser()))
-    logging.info('Host: {0}'.format(gethostname())) 
-    logging.info('Machine: {0}'.format(machine()))
-    logging.info('Platform: {0}'.format(platform()))
     logging.info("Command-line arguments used:")
     for arg in args.__dict__:
         logging.info(arg + ": " + str(args.__dict__[arg]))
@@ -402,7 +398,7 @@ if __name__ == '__main__':
     # Create the filelist.
     if args.filelist != None:
         filelist = glob.glob(args.filelist)
-        filelist = [x for x in filelist if len(os.path.basename(x)) == 18]
+        filelist = [x for x in filelist if ('c0m_center_single_sci.fits' in os.path.basename(x) or 'c0m_wide_single_sci.fits' in os.path.basename(x))]
         assert isinstance(filelist, list), \
             'Expected list for filelist, got ' + str(type(filelist))
         assert filelist != [], 'No files found.'
@@ -422,6 +418,7 @@ if __name__ == '__main__':
         try:
             jpl2db_main(filename, args.reproc)
             logging.info ("Completed for  : " + filename)
+            print 'Completed for: ' + filename
         except Exception as err:
             logging.critical('{0} {1} {2}'.format(
                 type(err), err.message, sys.exc_traceback.tb_lineno))
