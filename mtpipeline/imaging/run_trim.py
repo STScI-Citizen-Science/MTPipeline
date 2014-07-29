@@ -259,6 +259,7 @@ class PNGCreator(object):
         array while a[0:3,0:3] returns a 3x3 array. Both arrays are 
         centered on (1,1).
         '''
+
         assert isinstance(weight_array, N.ndarray), 'array must be numpy array'
         output_array = copy.copy(self.data)
         saturated_indices = N.where(weight_array == 0)
