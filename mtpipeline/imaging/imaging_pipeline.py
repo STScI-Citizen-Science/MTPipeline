@@ -47,8 +47,6 @@ def get_metadata(filename):
     """Retrieves the image's detector, as well as the gain and 
        readnoise, from a FITS image's header.
     
-    NOTE: DOES NOT CURRENTLY RETRIEVE GAIN OR READNOISE. WILL BE IMPLEMENTED.
-
     Parameters:
         filename: str
             The path to and the filename of a FITS image.
@@ -82,7 +80,7 @@ def get_metadata(filename):
         readnoise = None
 
         # For WFPC2, there is no readnoise information in the header.
-	# There is gain information, but it leads to bad CR rejection.
+	    # There is gain information, but it leads to bad CR rejection.
         # For ACS / SBC, there is no readnoise or gain information.
 	    # If None, we use the settings provided in the cfg files.
         
@@ -174,6 +172,9 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
     filename = os.path.abspath(root_filename) 
     output_file_dict = make_output_file_dict(root_filename)
 
+    # Get the detector, readnoise, and gain from the header
+    header_data = get_metadata(root_filename)
+
     # Run CR reject
     if cr_reject_switch:
         output_check = check_for_outputs(output_file_dict['cr_reject_output'][1])
@@ -184,7 +185,6 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
             logging.info("Running cr_reject")
             print 'Running cr_reject'
 
-            header_data = get_metadata(root_filename)
             detector = header_data['detector']
             cosmicx_params = get_cosmicx_params(header_data) 
             logging.info(cosmicx_params)
@@ -208,7 +208,7 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
             print 'Running Astrodrizzle'
             for filename in  output_file_dict['cr_reject_output']:
                 updatewcs.updatewcs(filename)
-                run_astrodrizzle(filename)
+                run_astrodrizzle(filename, detector)
             print 'Done running astrodrizzle'
             logging.info("Done running astrodrizzle")
     else:
