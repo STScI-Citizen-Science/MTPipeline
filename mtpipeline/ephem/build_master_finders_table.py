@@ -94,6 +94,17 @@ def convert_coords(moon_dict):
 
 #----------------------------------------------------------------------------
 
+def get_planets_moons():
+    planets_moons_list = ['jup-', 'gany-', 'sat-', 'copernicus', 'gan-', 'io-']
+    pm_file = open('mtpipeline/ephem/planets_and_moons.txt', 'r')
+    for pm in pm_file:
+        obj = pm.split(' ')
+        if len(obj) > 3:
+            planets_moons_list.append(obj[1])
+    return planets_moons_list
+
+#----------------------------------------------------------------------------
+
 def get_header_info(filename):
     '''
     Gets the header info from the FITS file. Checks to ensure that the 
@@ -110,8 +121,11 @@ def get_header_info(filename):
     output['CRVAL2']   = header['CRVAL2']
     output['CRPIX1']   = header['CRPIX1']
     output['CRPIX2']   = header['CRPIX2']
-    planet_list = ['mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto']
-    assert output['targname'] in planet_list, \
+    status = False
+    for pm in planet_list:
+        if pm in output['targname']:
+            status = True
+    assert status, \
         'Header TARGNAME not in planet_list'
     return output
 
@@ -188,5 +202,6 @@ def parse_args():
 if __name__ == '__main__':
     args = parse_args()
     setup_logging('build_master_finders_table')
-    logging.info('Host: {0}'.format(gethostname())) 
+    logging.info('Host: {0}'.format(gethostname()))
+    planet_list = get_planets_moons()
     run_ephem_main(args.reproc)
