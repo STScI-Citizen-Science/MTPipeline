@@ -34,7 +34,17 @@ def setup_logging(module_name):
     log_file = (module_name + '_' +
                 datetime.datetime.now().strftime('%Y-%m-%d-%H-%M') +
                 '.log')
-    log_file = os.path.join(SETTINGS['logging_path'], module_name, log_file)
+
+    log_path = SETTINGS['logging_path']
+    if not os.path.exists(log_path):
+        os.makedirs(log_path)
+        os.chmod(log_path,0775)
+
+    log_dir = os.path.join(log_path,module_name)
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+        os.chmod(log_dir,0775)
+    log_file = os.path.join(log_dir, log_file)
     logging.basicConfig(filename = log_file,
                         format = '%(asctime)s %(processName)s %(levelname)s: %(message)s',
                         datefmt = '%m/%d/%Y %H:%M:%S %p',
