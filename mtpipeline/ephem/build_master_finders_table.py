@@ -9,7 +9,7 @@ import coords
 import glob
 import logging
 import os
-import pyfits
+from astropy.io import fits
 
 from mt_logging import setup_logging
 from socket import gethostname
@@ -112,7 +112,7 @@ def get_header_info(filename):
     '''
     assert os.path.splitext(filename)[1] == '.fits', \
         'Expected .fits got ' + filename
-    header = pyfits.getheader(filename)
+    header = fits.getheader(filename)
     output = {}
     output['targname'] = header['targname'].lower().split('-')[0]
     output['ra_targ']  = header['ra_targ']

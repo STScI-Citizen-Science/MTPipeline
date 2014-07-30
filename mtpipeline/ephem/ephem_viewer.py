@@ -11,7 +11,7 @@ import matplotlib.cbook as cbook
 import matplotlib.cm as cm
 import matplotlib.patches as mpatches 
 import os
-import pyfits
+from astropy.io import fits
 
 
 from PIL import Image
@@ -49,8 +49,8 @@ class EphemPlot(object):
         png_path = os.path.split(self.filename)[0]
         png_path = os.path.split(png_path)[0]
         fitsfile = os.path.join(png_path, fitsfile)
-        self.crpix1 = pyfits.getval(fitsfile, 'CRPIX1', 0)
-        self.crpix2 = pyfits.getval(fitsfile, 'CRPIX2', 0)
+        self.crpix1 = fits.getval(fitsfile, 'CRPIX1', 0)
+        self.crpix2 = fits.getval(fitsfile, 'CRPIX2', 0)
 
     def getEphem(self):
         '''

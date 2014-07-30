@@ -14,7 +14,7 @@ import coords
 import datetime
 import glob
 import os
-import pyfits
+from astropy.io import fits
 import telnetlib
 import time
 import logging
@@ -100,9 +100,9 @@ def get_header_info(filename):
     assert os.path.splitext(filename)[1] == '.fits', \
         'Expected .fits got ' + filename
     output = {}
-    output['targname'] = pyfits.getval(filename, 'targname').lower().split('-')[0]
-    output['date_obs'] = pyfits.getval(filename, 'date-obs')
-    output['time_obs'] = pyfits.getval(filename, 'time-obs')
+    output['targname'] = fits.getval(filename, 'targname').lower().split('-')[0]
+    output['date_obs'] = fits.getval(filename, 'date-obs')
+    output['time_obs'] = fits.getval(filename, 'time-obs')
     status = False
     for pm in planet_list:
         if pm in output['targname']:
