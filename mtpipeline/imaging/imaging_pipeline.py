@@ -174,6 +174,7 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
 
     # Get the detector, readnoise, and gain from the header
     header_data = get_metadata(root_filename)
+    detector = header_data['detector']
 
     # Run CR reject
     if cr_reject_switch:
@@ -185,7 +186,6 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
             logging.info("Running cr_reject")
             print 'Running cr_reject'
 
-            detector = header_data['detector']
             cosmicx_params = get_cosmicx_params(header_data) 
             logging.info(cosmicx_params)
 

@@ -109,7 +109,7 @@ def run_astrodrizzle(filename, detector, output_path = None):
                    'WFC' : ['acs_center.cfg','acs_wide.cfg'],
                    'HRC' : ['acs_center.cfg','acs_hrc_wide.cfg'],
                    'SBC' : ['acs_center.cfg','acs_wide.cfg'],
-                   'UVIs':['wfc3_center.cfg','wfc3_wide.cfg'],
+                   'UVIS':['wfc3_center.cfg','wfc3_wide.cfg'],
                    'IR': ['wfc3_center.cfg','wfc3_wide.cfg']
                   }
 
