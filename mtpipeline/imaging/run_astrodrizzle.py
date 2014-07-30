@@ -74,11 +74,14 @@ def rename_files(rootfile, mode, output_path):
     # Build the file list.
     rootfile = os.path.abspath(rootfile)
     basename = os.path.splitext(rootfile)[0]
+    if '_flt' in basename:
+        basename = basename.replace('_flt','')
     search = basename + '_sci*'
     file_list_1 = glob.glob(search)
     search = basename + '_single*'
     file_list_2 = glob.glob(search)
     file_list = file_list_1 + file_list_2
+    print basename
     
     # Loop over the files and rename.
     for filename in file_list:
