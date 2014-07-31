@@ -66,24 +66,31 @@ def cgi_session(command_list):
 
 # ----------------------------------------------------------------------------
 
-def calc_delta(crval1, crval2, record):
+def calc_delta(hdulist, record):
     '''
         Find the difference between the JPL coordinates at the HST
         reference pixel coordinates. Perform the difference in degrees and
         return the result in pixels.
-        '''
+    '''
     assert isinstance(record, dict), \
         'Expected dict got ' + str(type(record))
-    
+
+    crval1 = hdulist[0].header['CRVAL1']
+    crval2 = hdulist[0].header['CRVAL2']
+
     # Convert the coordinates to coords instances in degrees.
     record = convert_coords(record)
     refpic_coords = coords.Degrees((crval1, crval2))
     crval1, crval2 = refpic_coords.a1, refpic_coords.a2
+
+    #fits.update(filename, refpic_coords.a1, 'CRVAL1')
+    #fits.update(filename, refpic_coords.a2, 'CRVAL2')
     
     # Take the difference and convert to pixels.
     # RA increases to the East (left) so we switch the sign on the delta.
     delta_x = -1 * (record['jpl_ra'] - crval1) * (3600. / 0.05)
     delta_y = (record['jpl_dec'] - crval2) * (3600. / 0.05)
+
     assert isinstance(delta_x, float), \
         'Expected float got ' + str(type(delta_x))
     assert isinstance(delta_y, float), \
@@ -92,29 +99,32 @@ def calc_delta(crval1, crval2, record):
 
 # ----------------------------------------------------------------------------
 
-def calc_pixel_position(crpix1, crpix2, delta_x, delta_y):
+def calc_pixel_position(hdulist, delta_x, delta_y):
     '''
         Calculate the x and y position of the ephemeris in detector
         coordinates.
-        '''
+    '''
     assert isinstance(delta_x, float), \
         'Expected float type got ' + str(type(delta_x))
     assert isinstance(delta_y, float), \
         'Expected float type got ' + str(type(delta_y))
-    ephem_x = crpix1 + delta_x
-    ephem_y = crpix2 + delta_y
+
+    ephem_x = hdulist[0].header['CRPIX1'] + delta_x
+    ephem_y = hdulist[0].header['CRPIX2'] + delta_y
+
     assert isinstance(ephem_x, float), \
         'Expected float type got ' + str(type(ephem_x))
     assert isinstance(ephem_y, float), \
         'Expected float type got ' + str(type(ephem_y))
+   
     return ephem_x, ephem_y
 
 #----------------------------------------------------------------------------
 
 def convert_datetime(header_dict):
     '''
-    Builds a datetime object from header keywords and returns a 
-    datetime object in the JPL Horizons format.
+        Builds a datetime object from header keywords and returns a
+        datetime object in the JPL Horizons format.
     '''
     header_dict['header_time'] = datetime.datetime.strptime(
         header_dict['date_obs'] + ' ' + header_dict['time_obs'],
@@ -129,7 +139,7 @@ def convert_datetime(header_dict):
 def convert_coords(moon_dict):
     '''
         Convert the JPL coordinates to coords instances in degrees.
-        '''
+    '''
     assert isinstance(moon_dict, dict), \
         'Expected dict for moon_dict, got ' + str(type(moon_dict))
     jpl_pos = coords.Hmsdms(moon_dict['jpl_ra'] + ' ' + moon_dict['jpl_dec'])
@@ -138,30 +148,31 @@ def convert_coords(moon_dict):
 
 #----------------------------------------------------------------------------
 
-def get_planets_moons():
-    planets_moons_list = ['jup-', 'gany-', 'sat-', 'copernicus', 'gan-', 'io-']
+def planets_moons_list():
+    '''
+       Returns list of planets and moons.
+    '''
+    pm_list = ['jup-', 'gany-', 'sat-', 'copernicus', 'gan-', 'io-']
     pm_file = open('mtpipeline/ephem/planets_and_moons.txt', 'r')
     for pm in pm_file:
         obj = pm.split(' ')
         if len(obj) > 3:
-            planets_moons_list.append(obj[1])
-    return planets_moons_list
+            pm_list.append(obj[1])
+    return pm_list
 
 # ----------------------------------------------------------------------------
 
-def get_header_info(filename):
+def get_header_info(hdulist):
     '''
-    Gets the header info from the FITS file. Checks to ensure that the 
-    target name, after string parsing, matches a known planet name.
+        Gets the header info from the FITS file. Checks to ensure that the
+        target name, after string parsing, matches a known planet name.
     '''
-    assert os.path.splitext(filename)[1] == '.fits', \
-        'Expected .fits got ' + filename
     output = {}
-    output['targname'] = fits.getval(filename, 'targname').lower().split('-')[0]
-    output['date_obs'] = fits.getval(filename, 'date-obs')
-    output['time_obs'] = fits.getval(filename, 'time-obs')
+    output['targname'] = hdulist[0].header['targname'].lower().split('-')[0]
+    output['date_obs'] = hdulist[0].header['date-obs']
+    output['time_obs'] = hdulist[0].header['time-obs']
     status = False
-    for pm in planet_list:
+    for pm in PLANETS_MOONS:
         if pm in output['targname']:
             status = True
     assert status, \
@@ -193,7 +204,7 @@ def get_jpl_data(moon_dict, connection_type='cgi'):
 
 # ----------------------------------------------------------------------------
 
-def make_all_moon_dict(filename, file_dict):
+def make_all_moon_dict(file_dict):
     '''
     Parses the text file for id numbers of the moons and the planet. 
     Returns a dict.
@@ -218,7 +229,7 @@ def make_all_moon_dict(filename, file_dict):
 
 # ----------------------------------------------------------------------------
 
-def insert_record(filename, moon_dict,  master_images_id):
+def insert_record(hdulist, moon_dict,  master_images_id):
     '''
     Make a new record to be in the master_finders table.
     '''
@@ -226,12 +237,8 @@ def insert_record(filename, moon_dict,  master_images_id):
     record.object_name = moon_dict['object']
     record.jpl_ra = moon_dict['jpl_ra']
     record.jpl_dec = moon_dict['jpl_dec']
-    crval1 = fits.getval(filename, 'CRVAL1')
-    crval2 = fits.getval(filename, 'CRVAL2')
-    crpix1 = fits.getval(filename, 'CRPIX1')
-    crpix2 = fits.getval(filename, 'CRPIX2')
-    delta_x, delta_y = calc_delta(crval1, crval2, moon_dict)
-    ephem_x, ephem_y = calc_pixel_position(crpix1, crpix2, delta_x, delta_y)
+    delta_x, delta_y = calc_delta(hdulist, moon_dict)
+    ephem_x, ephem_y = calc_pixel_position(hdulist, delta_x, delta_y)
     record.ephem_x = int(ephem_x)
     record.ephem_y = int(ephem_y)
     try:
@@ -425,11 +432,12 @@ def ephem_main(filename, reproc=False):
         'Expected .fits got ' + filename
     master_images_query = session.query(MasterImages).filter(\
         MasterImages.fits_file == os.path.basename(filename)).one()
+    hdulist = fits.open(filename)
 
     # Gather some file information and iterate over the moons
-    file_dict = get_header_info(os.path.abspath(filename))
+    file_dict = get_header_info(hdulist)
     file_dict = convert_datetime(file_dict)
-    all_moon_dict = make_all_moon_dict('planets_and_moons.txt', file_dict)
+    all_moon_dict = make_all_moon_dict(file_dict)
     for moon in all_moon_dict:
         logging.info('Processing {} for {}'.format(moon, filename))
         moon_dict = all_moon_dict[moon]
@@ -442,7 +450,7 @@ def ephem_main(filename, reproc=False):
         if master_finders_count == 0:
             jpl_dict = get_jpl_data(moon_dict)
             moon_dict.update(jpl_dict)
-            insert_record(filename, moon_dict, master_images_query.id)
+            insert_record(hdulist, moon_dict, master_images_query.id)
 
         # When a record exists, check if it has jpl_ra info. If it 
         # doesn't then update.        
@@ -495,11 +503,11 @@ def parse_args():
     
 if __name__ == '__main__':
     
-    planet_list = get_planets_moons()
+    PLANETS_MOONS = planets_moons_list()
     
     # Set up the inputs and logging.
     args = parse_args()
-    setup_logging('jpl2db')
+    setup_logging('build_master_finders_table')
    
     # Log the system and user information.
     logging.info("Command-line arguments used:")
