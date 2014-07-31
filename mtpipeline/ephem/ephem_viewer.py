@@ -88,6 +88,7 @@ class EphemPlot(object):
                      diam/2, fill=False, ec="r")
             ax1.add_patch(circle)
             if args.label == "True":
+                print moon.object_name, moon.ephem_y, moon.ephem_x
                 if moon.ephem_x != None and moon.ephem_y != None:
                     ax1.text(moon.ephem_x + 20, moon.ephem_y + 20,
                          moon.object_name.title(), color="blue")
