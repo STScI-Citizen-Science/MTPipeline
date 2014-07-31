@@ -81,7 +81,6 @@ def rename_files(rootfile, mode, output_path):
     search = basename + '_single*'
     file_list_2 = glob.glob(search)
     file_list = file_list_1 + file_list_2
-    print basename
     
     # Loop over the files and rename.
     for filename in file_list:
@@ -113,7 +112,7 @@ def run_astrodrizzle(filename, detector, output_path = None):
                    'HRC' : ['acs_center.cfg','acs_hrc_wide.cfg'],
                    'SBC' : ['acs_center.cfg','acs_wide.cfg'],
                    'UVIS':['wfc3_center.cfg','wfc3_wide.cfg'],
-                   'IR': ['wfc3_center.cfg','wfc3_wide.cfg']
+                   'IR': ['wfc3_ir_center.cfg','wfc3_ir_wide.cfg']
                   }
 
     configobj_list = config_sets[detector]
