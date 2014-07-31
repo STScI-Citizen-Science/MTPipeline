@@ -29,7 +29,7 @@ logger = logging.getLogger('mtpipeline.run_trim')
 
 def clip(input_array, clip_val, top_or_bottom, output=False):
     '''
-    Clip an input numpy array and set the clipped pixels to the 
+    Clip an input numpy array and set the clipped pixels to the
     clipping value. Bottom clip scales pixels below the clip_val.
     Top does the same for pixels above.
     '''
@@ -41,7 +41,7 @@ def clip(input_array, clip_val, top_or_bottom, output=False):
     error = 'top_or_bottom for clip must be "top" or "bottom".'
     assert top_or_bottom in ['top', 'bottom'], error
 
-    if top_or_bottom == 'bottom':   
+    if top_or_bottom == 'bottom':
         index = N.where(input_array < clip_val)
     elif top_or_bottom == 'top':
         index = N.where(input_array > clip_val)
@@ -49,8 +49,8 @@ def clip(input_array, clip_val, top_or_bottom, output=False):
     output_array[index] = clip_val
     if output != False:
         before_after(
-            before_array = input_array, 
-            after_array = output_array, 
+            before_array = input_array,
+            after_array = output_array,
             before_array_name = 'Input Data',
             after_array_name = 'Clip ' + top_or_bottom + ' at ' + str(clip_val),
             output = output)
@@ -64,7 +64,7 @@ def get_fits_data(filename, ext=0):
     '''
     assert os.path.splitext(filename)[1] == '.fits', 'Inputs must be FITS file.'
     data = pyfits.getdata(filename)
-    data = N.flipud(data) 
+    data = N.flipud(data)
     return data
 
 # -----------------------------------------------------------------------------
@@ -110,7 +110,7 @@ def subarray(array, xmin, xmax, ymin, ymax):
     assert isinstance(xmin, int), 'xmin in subarray must be an int.'
     assert isinstance(xmax, int), 'xmax in subarray must be an int.'
     assert isinstance(ymin, int), 'ymin in subarray must be an int.'
-    assert isinstance(ymax, int), 'ymax in subarray must be an int.'    
+    assert isinstance(ymax, int), 'ymax in subarray must be an int.'
     assert xmin < xmax, 'xmin must be stictly less than xmax.'
     assert ymin < ymax, 'ymin must be stictly less than ymax.'
     output_array = array[max(xmin,0):min(xmax,array.shape[0]), \
@@ -135,7 +135,7 @@ def top_bottom_clip(array):
     bottom = sorted_array[int(len(sorted_array) * 0.01)]
     top_index = N.where(array > top)
     array[top_index] = top
-    bottom_index = N.where(array < bottom)               
+    bottom_index = N.where(array < bottom)
     array[bottom_index] = bottom
     return array
 
@@ -146,12 +146,12 @@ def top_bottom_clip(array):
 class PNGCreator(object):
     '''
     The PNGCreator class incorperates all the functions in the run_trim
-    module to create a smoother interface for passing the numpy array 
-    around and for saving the result. All manipulations are done in 
-    place. The __init__ method creates a new copy of the array, not a 
+    module to create a smoother interface for passing the numpy array
+    around and for saving the result. All manipulations are done in
+    place. The __init__ method creates a new copy of the array, not a
     pointer, by using the deepcopy fucntion. In this way you can create
-    a new instance of the PNGCreator class on the self.data attribute 
-    of another class to make changes that will not affect the other 
+    a new instance of the PNGCreator class on the self.data attribute
+    of another class to make changes that will not affect the other
     class instance.
     '''
     def __init__(self, data):
@@ -172,13 +172,13 @@ class PNGCreator(object):
         '''
         Compress the range of the array to be between 0 and 256. This
         is the range expected for the PIL call in the save_png method.
-        This method should be called on the whole image before the 
+        This method should be called on the whole image before the
         trimming to ensure that the trimmed images all have the same
-        stretch. 
+        stretch.
         '''
-        self.data = self.data - self.data.min()            
+        self.data = self.data - self.data.min()
         self.data = (self.data / self.data.max()) * 255.
-    
+
     def log(self, output=False):
         '''
         Take the log of self.data, in-place.
@@ -186,28 +186,28 @@ class PNGCreator(object):
         array_log = N.log(self.data)
 
         if output != False:
-            before_after(before_array = self.data, 
-                after_array = array_log, 
+            before_after(before_array = self.data,
+                after_array = array_log,
                 before_array_name = 'Input Data',
                 after_array_name = 'Log',
-                output = output) 
+                output = output)
         self.data = array_log
-    
+
     def median(self, output=False):
 
         '''
         Perform a local-median subtraction (box smoothing) with a 25x25
-        box on self.data. This code can be modified to use other sizes, 
+        box on self.data. This code can be modified to use other sizes,
         but the box size must be odd
         '''
         box = 25
         assert box % 2 == 1, 'Box size must be odd.'
-        output_array = N.zeros((array.shape[0], array.shape[1]))        
+        output_array = N.zeros((array.shape[0], array.shape[1]))
         for x in xrange(array.shape[0]):
-            xmin = max(0, x - (box / 2)) 
+            xmin = max(0, x - (box / 2))
             xmax = min(x + (box / 2) + 1, array.shape[0])
             for y in xrange(array.shape[1]):
-                ymin = max(0, y - (box / 2)) 
+                ymin = max(0, y - (box / 2))
                 ymax = min(y + (box / 2) + 1, array.shape[1])
                 local_region = array[xmin:xmax, ymin:ymax]
                 local_median = N.median(local_region)
@@ -217,46 +217,46 @@ class PNGCreator(object):
 
         if output != False:
             before_after(
-                before_array = array, 
-                after_array = output_array, 
+                before_array = array,
+                after_array = output_array,
                 before_array_name = 'Input Data',
                 after_array_name = 'Median with ' + str(box) + ' box',
                 output = output,
-                pause = False) 
+                pause = False)
 
-        self.data = output_array 
-        
+        self.data = output_array
+
     def positive(self, output=False):
         '''
-        Shift all the values in self.data so there are no negative or 0 pixels. 
+        Shift all the values in self.data so there are no negative or 0 pixels.
         Needed to prevent taking the log of negative values.
         '''
         min_val = N.min(self.data)
         if min_val <= 0:
             output_array = self.data + ((min_val * -1.0) + 0.0001)
         else:
-            output_array = self.data 
+            output_array = self.data
 
         if output != False:
-            before_after(before_array = self.data, 
-                after_array = output_array, 
+            before_after(before_array = self.data,
+                after_array = output_array,
                 before_array_name = 'Input Data',
                 after_array_name = 'Positive Corrected',
                 output = output,
-                pause = False)   
+                pause = False)
 
         self.data = output_array
-        
+
     def saturated_clip(self, weight_array, output=False):
         '''
         Replace all the pixels that have a weight value of 0 with the local
         3x3 median. A copy of the image is created so that the values of
-        the replaced pixels don't affect the medians of other pixels as 
-        they are replaced. The subarray function is used to generate the 
+        the replaced pixels don't affect the medians of other pixels as
+        they are replaced. The subarray function is used to generate the
         subarrays to prevent error at the array edge.
-    
-        The indices are set keeping in mind that a[0:2,0:2] returns a 2x2 
-        array while a[0:3,0:3] returns a 3x3 array. Both arrays are 
+
+        The indices are set keeping in mind that a[0:2,0:2] returns a 2x2
+        array while a[0:3,0:3] returns a 3x3 array. Both arrays are
         centered on (1,1).
         '''
 
@@ -268,18 +268,18 @@ class PNGCreator(object):
                 index[0] + 2, index[1] - 1, index[1] + 2))
 
         if output != False:
-            before_after(before_array = self.data, 
-                after_array = output_array, 
+            before_after(before_array = self.data,
+                after_array = output_array,
                 before_array_name = 'Input Data',
                 after_array_name = '0-Weight Corrected',
                 output = output,
                 pause = False)
 
-        self.data = output_array 
+        self.data = output_array
 
     def save_png(self, png_name):
         '''
-        Use the Python image library (PIL) to write self.data as a png file. 
+        Use the Python image library (PIL) to write self.data as a png file.
         self.data is flipped in the "up-down" direction and converted to 8bit
         encoding before writing.
         '''
@@ -300,7 +300,7 @@ class PNGCreator(object):
 
 def make_subimage_pngs(input_pngc_instance, output_path, filename, suffix):
     '''
-    Wrapper function to make trimmed png outputs for the astrodrizzle 
+    Wrapper function to make trimmed png outputs for the astrodrizzle
     'wide' outputs.
     '''
     assert isinstance(output_path, str), 'Expected str got ' + str(type(output_path))
@@ -318,11 +318,11 @@ def make_subimage_pngs(input_pngc_instance, output_path, filename, suffix):
 
 # -----------------------------------------------------------------------------
 
-def run_trim(filename, weight_file, output_path, log_switch=False, 
+def run_trim(filename, weight_file, output_path, log_switch=False,
         median_switch=False):
     '''
     The main controller for the png creation. Checks for and creates an
-    output folder. Opens the data header extention. Uses a PNGCreator 
+    output folder. Opens the data header extention. Uses a PNGCreator
     instance to create trimmed and scaled pngs.
     '''
     #import pdb; pdb.set_trace()
@@ -340,8 +340,8 @@ def run_trim(filename, weight_file, output_path, log_switch=False,
 
     # Get the data.
     data = get_fits_data(filename)
-    weight_data = get_fits_data(weight_file) 
-    
+    weight_data = get_fits_data(weight_file)
+
     # Create Linear full image
     logger.info('Creating linear PNGs')
     pngc_linear = PNGCreator(data)
@@ -363,7 +363,7 @@ def run_trim(filename, weight_file, output_path, log_switch=False,
         pngc_log.log(output = make_png_name(output_path, filename, 'log_stat'))
         pngc_log.bottom_clip(output = make_png_name(output_path, filename, 'bottom_clip_stat'))
         pngc_median = PNGCreator(pngc_log.data)
-        pngc_log.compress() 
+        pngc_log.compress()
         pngc_log.save_png(make_png_name(output_path, filename, 'log'))
 
         # Create and save the trimmed log images.
@@ -383,7 +383,7 @@ def run_trim(filename, weight_file, output_path, log_switch=False,
         if astrodrizzle_mode == 'wide':
             make_subimage_pngs(pngc_log, output_path, filename, 'median_')
     else:
-        logger.info('Skipping median PNGs.')     
+        logger.info('Skipping median PNGs.')
 # -----------------------------------------------------------------------------
 # For command line execution.
 # -----------------------------------------------------------------------------
@@ -395,18 +395,18 @@ def parse_args():
     parser = argparse.ArgumentParser(
         description = 'A script to scale and trim the images.' )
     parser.add_argument(
-        '-filelist', 
+        '-filelist',
         required = True,
         help = 'Search string for files to used. Wild cards accepted')
     parser.add_argument(
         '-output_path',
         required = False,
         help = 'Set the path for the output. Default is the input directory.')
-    args = parser.parse_args()        
+    args = parser.parse_args()
     return args
-    
+
 # -----------------------------------------------------------------------------
-    
+
 if __name__ == '__main__':
     args = parse_args()
     file_list = glob.glob(args.filelist)
