@@ -47,8 +47,6 @@ def get_metadata(filename):
     """Retrieves the image's detector, as well as the gain and 
        readnoise, from a FITS image's header.
     
-    NOTE: DOES NOT CURRENTLY RETRIEVE GAIN OR READNOISE. WILL BE IMPLEMENTED.
-
     Parameters:
         filename: str
             The path to and the filename of a FITS image.
@@ -82,7 +80,7 @@ def get_metadata(filename):
         readnoise = None
 
         # For WFPC2, there is no readnoise information in the header.
-	# There is gain information, but it leads to bad CR rejection.
+	    # There is gain information, but it leads to bad CR rejection.
         # For ACS / SBC, there is no readnoise or gain information.
 	    # If None, we use the settings provided in the cfg files.
         
@@ -141,20 +139,27 @@ def make_output_file_dict(filename):
         output_file_dict['cr_reject_output'].append(filename)
     
     # Drizzled outputs.
+    # AstroDrizzle strips _flt from the filename when writing outputs,
+    # but keeps _c0m. 
+    if fits_type == 'flt':
+        fits_type = ''
+    else:
+        fits_type = 'c0m_'
+
     for cr in ['_','_cr_']:
-        for drz in ['_wide_single_sci.fits', '_center_single_sci.fits']:
+        for drz in ['wide_single_sci.fits', 'center_single_sci.fits']:
             filename = os.path.join(path, basename + cr + fits_type + drz)
             output_file_dict['drizzle_output'].append(filename)
-        for drz in ['_wide_single_wht.fits', '_center_single_wht.fits']:
+        for drz in ['wide_single_wht.fits', 'center_single_wht.fits']:
             filename = os.path.join(path, basename + cr + fits_type + drz)
             output_file_dict['drizzle_weight'].append(filename)
     
     # PNG outputs.
     for cr in ['_','_cr_']:
-        for drz in ['_wide_single_sci_linear.png', '_center_single_sci_linear.png']:
+        for drz in ['wide_single_sci_linear.png', 'center_single_sci_linear.png']:
             filename = os.path.join(path, 'png', basename + cr + fits_type + drz)
             output_file_dict['png_output'].append(filename)
-            if drz == '_wide_single_sci_linear.png':
+            if drz == 'wide_single_sci_linear.png':
                 for i_image in range(1,13):
                     new_file = filename.replace('_linear.png', '_linear_{}.png'.format(i_image))
                     output_file_dict['png_output'].append(new_file)
@@ -174,6 +179,10 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
     filename = os.path.abspath(root_filename) 
     output_file_dict = make_output_file_dict(root_filename)
 
+    # Get the detector, readnoise, and gain from the header
+    header_data = get_metadata(root_filename)
+    detector = header_data['detector']
+
     # Run CR reject
     if cr_reject_switch:
         output_check = check_for_outputs(output_file_dict['cr_reject_output'][1])
@@ -184,8 +193,6 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
             logging.info("Running cr_reject")
             print 'Running cr_reject'
 
-            header_data = get_metadata(root_filename)
-            detector = header_data['detector']
             cosmicx_params = get_cosmicx_params(header_data) 
             logging.info(cosmicx_params)
 
@@ -208,7 +215,7 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
             print 'Running Astrodrizzle'
             for filename in  output_file_dict['cr_reject_output']:
                 updatewcs.updatewcs(filename)
-                run_astrodrizzle(filename)
+                run_astrodrizzle(filename, detector)
             print 'Done running astrodrizzle'
             logging.info("Done running astrodrizzle")
     else:
