@@ -345,16 +345,9 @@ def run_trim(filename, weight_file, output_path, log_switch=False,
     # Create Linear full image
     logger.info('Creating linear PNGs')
     pngc_linear = PNGCreator(data)
-    pngc_linear.saturated_clip(weight_data, \
-        output = make_png_name(output_path, filename, 'saturated_clip_stat'))
     pngc_log = PNGCreator(pngc_linear.data)
     pngc_linear.compress()
     pngc_linear.save_png(make_png_name(output_path, filename, 'linear'))
-
-    # Create and save the trimmed linear images.
-    if astrodrizzle_mode == 'wide':
-        logger.info('Creating linear subimages')
-        make_subimage_pngs(pngc_linear, output_path, filename, 'linear_')
 
     # Create Log full Image
     if log_switch:
@@ -366,9 +359,6 @@ def run_trim(filename, weight_file, output_path, log_switch=False,
         pngc_log.compress()
         pngc_log.save_png(make_png_name(output_path, filename, 'log'))
 
-        # Create and save the trimmed log images.
-        if astrodrizzle_mode == 'wide':
-            make_subimage_pngs(pngc_log, output_path, filename, 'log_')
     else:
         logger.info('Skipping log pngs.')
 
@@ -379,9 +369,6 @@ def run_trim(filename, weight_file, output_path, log_switch=False,
         pngc_median.compress()
         pngc_median.save_png(make_png_name(output_path, filename, 'median'))
 
-        # Create and save the trimmed median images. Remeber to switch x and y.
-        if astrodrizzle_mode == 'wide':
-            make_subimage_pngs(pngc_log, output_path, filename, 'median_')
     else:
         logger.info('Skipping median PNGs.')
 # -----------------------------------------------------------------------------
