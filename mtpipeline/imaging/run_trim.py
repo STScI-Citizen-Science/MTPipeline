@@ -181,7 +181,7 @@ class PNGCreator(object):
 
     def log(self, output=False):
         '''
-        Take the log of self.data, in-place.
+        Take the log of self.data.
         '''
         array_log = N.log(self.data)
 
@@ -191,40 +191,8 @@ class PNGCreator(object):
                 before_array_name = 'Input Data',
                 after_array_name = 'Log',
                 output = output)
+
         self.data = array_log
-
-    def median(self, output=False):
-
-        '''
-        Perform a local-median subtraction (box smoothing) with a 25x25
-        box on self.data. This code can be modified to use other sizes,
-        but the box size must be odd
-        '''
-        box = 25
-        assert box % 2 == 1, 'Box size must be odd.'
-        output_array = N.zeros((array.shape[0], array.shape[1]))
-        for x in xrange(array.shape[0]):
-            xmin = max(0, x - (box / 2))
-            xmax = min(x + (box / 2) + 1, array.shape[0])
-            for y in xrange(array.shape[1]):
-                ymin = max(0, y - (box / 2))
-                ymax = min(y + (box / 2) + 1, array.shape[1])
-                local_region = array[xmin:xmax, ymin:ymax]
-                local_median = N.median(local_region)
-                output_array[x, y] = copy.copy(array[x, y] - local_median)
-
-        print 'Done with the median scale.'
-
-        if output != False:
-            before_after(
-                before_array = array,
-                after_array = output_array,
-                before_array_name = 'Input Data',
-                after_array_name = 'Median with ' + str(box) + ' box',
-                output = output,
-                pause = False)
-
-        self.data = output_array
 
     def positive(self, output=False):
         '''
@@ -246,6 +214,9 @@ class PNGCreator(object):
                 pause = False)
 
         self.data = output_array
+
+        print 'MINIMUM VALUE:'
+        print N.min(self.data)
 
     def saturated_clip(self, weight_array, output=False):
         '''
@@ -288,6 +259,25 @@ class PNGCreator(object):
         image.putdata(self.data.ravel())
         image.save(png_name)
 
+    def threshold_clip(self, minimum, maximum, output=False):
+        '''
+        Set all values below minum and above maximum to the
+        minimum and maximum, respectively 
+        '''
+        output_array = copy.deepcopy(self.data)
+        output_array[output_array > maximum] = maximum
+        output_array[output_array < minimum] = minimum
+
+        if output != False:
+            before_after(before_array = self.data,
+                after_array = output_array,
+                before_array_name = 'Input Data',
+                after_array_name = 'Threshold Clipped',
+                output = output,
+                pause = False)
+
+        self.data = output_array
+
     def trim(self, xmin, xmax, ymin, ymax):
         '''
         Trim the self.data attribute using the subarray function.
@@ -319,10 +309,10 @@ def make_subimage_pngs(input_pngc_instance, output_path, filename, suffix):
 # -----------------------------------------------------------------------------
 
 def run_trim(filename, weight_file, output_path, log_switch=False,
-        median_switch=False):
+        stat_switch=True):
     '''
     The main controller for the png creation. Checks for and creates an
-    output folder. Opens the data header extention. Uses a PNGCreator
+    output folder. Opens the data header extention. Uses a pngcreator
     instance to create trimmed and scaled pngs.
     '''
     #import pdb; pdb.set_trace()
@@ -338,6 +328,19 @@ def run_trim(filename, weight_file, output_path, log_switch=False,
     if test == False:
         os.mkdir(output_path)
 
+    # If we want to output before-after histograms for the image
+    # manipulations we make, stat_switch will be True.
+    if stat_switch:
+        positive_stat = make_png_name(output_path, filename, 'positive_stat')
+        log_stat = make_png_name(output_path, filename, 'log_stat')
+        threshold_clip_stat = make_png_name(output_path, filename, 'threshold_clip_stat')
+
+    # Otherwise, setting it to false prevents computing the histograms.
+    else:
+        positive_stat = False
+        log_stat = False
+        threshold_clip_stat = False
+
     # Get the data.
     data = get_fits_data(filename)
     weight_data = get_fits_data(weight_file)
@@ -345,32 +348,27 @@ def run_trim(filename, weight_file, output_path, log_switch=False,
     # Create Linear full image
     logger.info('Creating linear PNGs')
     pngc_linear = PNGCreator(data)
-    pngc_log = PNGCreator(pngc_linear.data)
+    pngc_linear.threshold_clip(minimum = 0.0001, maximum = 2e5, 
+                               output = threshold_clip_stat)
+
+    if log_switch:
+        pngc_log = PNGCreator(pngc_linear.data)
+
     pngc_linear.compress()
     pngc_linear.save_png(make_png_name(output_path, filename, 'linear'))
 
     # Create Log full Image
     if log_switch:
         logger.info('Creating log PNGs')
-        pngc_log.positive(output = make_png_name(output_path, filename, 'positive_stat'))
-        pngc_log.log(output = make_png_name(output_path, filename, 'log_stat'))
-        pngc_log.bottom_clip(output = make_png_name(output_path, filename, 'bottom_clip_stat'))
-        pngc_median = PNGCreator(pngc_log.data)
+
+        #pngc_log.positive(output = positive_stat)
+        pngc_log.log(output = log_stat)
         pngc_log.compress()
         pngc_log.save_png(make_png_name(output_path, filename, 'log'))
 
     else:
         logger.info('Skipping log pngs.')
 
-    # Create and save a full median image.
-    if median_switch:
-        logger.info('Creating median PNGs')
-        pngc_median.median(output = make_png_name(output_path, filename, 'median_stat'))
-        pngc_median.compress()
-        pngc_median.save_png(make_png_name(output_path, filename, 'median'))
-
-    else:
-        logger.info('Skipping median PNGs.')
 # -----------------------------------------------------------------------------
 # For command line execution.
 # -----------------------------------------------------------------------------
