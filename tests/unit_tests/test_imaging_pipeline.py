@@ -6,18 +6,18 @@ expected_output_list = [
                         {'input_file': 'u2eu0101t_c0m.fits',
                         'cr_reject_output': ['u2eu0101t_c0m.fits', 'u2eu0101t_cr_c0m.fits'],
                         'drizzle_output': ['u2eu0101t_c0m_wide_single_sci.fits',
-                                           'u2eu0101t_cr_c0m_wide_single_sci.fits']
+                                           'u2eu0101t_cr_c0m_wide_single_sci.fits'],
                         'png_output': ['png/u2eu0101t_c0m_wide_single_sci_linear.png',
-                                       'png/u2eu0101t_cr_c0m_wide_single_sci_linear.png']
+                                       'png/u2eu0101t_cr_c0m_wide_single_sci_linear.png'],
                         'drizzle_weight': ['u2eu0101t_c0m_wide_single_wht.fits',
                                            'u2eu0101t_cr_c0m_wide_single_wht.fits']
                         },
                         {'input_file': 'u2eu0101t_flt.fits',
                         'cr_reject_output': ['u2eu0101t_flt.fits', 'u2eu0101t_cr_flt.fits'],
                         'drizzle_output': ['u2eu0101t_wide_single_sci.fits',
-                                           'u2eu0101t_cr_wide_single_sci.fits']
+                                           'u2eu0101t_cr_wide_single_sci.fits'],
                         'png_output': ['png/u2eu0101t_wide_single_sci_linear.png',
-                                       'png/u2eu0101t_cr_wide_single_sci_linear.png']
+                                       'png/u2eu0101t_cr_wide_single_sci_linear.png'],
                         'drizzle_weight': ['u2eu0101t_wide_single_wht.fits',
                                            'u2eu0101t_cr_wide_single_wht.fits']
 			            }
