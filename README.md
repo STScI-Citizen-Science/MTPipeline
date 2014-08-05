@@ -1,3 +1,9 @@
+_This is pre-release alpha version of the software. In order to provide a maintainable production-ready pipeline for the MAST group at STScI by the release deadline, the decision was made to remove the CosmoQuest-specific products from the the pipeline. The features needed to develop the CQ-specific products were for the most part in a stable beta version for the WFPC2 camera with most of remaining work focusing on performance and organization improvements. The code to produce the CQ products for the ACS and WFC3 instruments was non-existent beyond anything that could use the existing WFPC2 code without modification._
+
+_The CQ products were removed from the pipeline with the understanding that they could be generated later (and probably more easily) by building another pipeline that takes the outputs of the MAST-specific pipeline this code will become as inputs._ 
+
+_The **only** purpose of this release is to document the implementation of the existing CosmoQuest specific features so they can be recreated for a future pipeline to produce the CQ products. Additionally, at that time, the developers are encouraged to consult the GitHub wiki and issues for additional background information._
+
 MTPipeline
 ==========
 
@@ -31,21 +37,9 @@ DrizzlePac: http://www.stsci.edu/hst/HST_overview/drizzlepac
 
 The images are optimally scaled for the CosmoQuest web tool and then written to a PNG file. The scaling algorithm is still being refined. The PNG is produced using the Python Image Library (PIL).
 
-Future Updates
---------------
-
-* Software license
-* Scaling algorithm description
-* User's Guide
 
 Contacts
---------
-
-**Alex C. Viana**  
-Space Telescope Science Institute (STScI)  
-http://acviana.github.com/  
-viana [at] stsci [dot] edu  
-alex [dot] costa [dot] viana [at] gmail [dot] com  
+-------- 
   
 **Space Telescope Science Institute (STScI)**  
 http://www.stsci.edu  
@@ -56,7 +50,7 @@ http://cosmoquest.org/
 License
 =======
 
-Fast Cosmics is licensed under a 3-clause BSD style license:
+The HST Moving Target Pipeline is licensed under a 3-clause BSD style license:
 
 Copyright (c) 2013, Space Telescope Science Institute.
 
