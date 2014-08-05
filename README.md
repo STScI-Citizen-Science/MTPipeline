@@ -1,6 +1,6 @@
 _This is pre-release alpha version of the software. In order to provide a maintainable production-ready pipeline for the MAST group at STScI by the release deadline, the decision was made to remove the CosmoQuest-specific products from the the pipeline. The features needed to develop the CQ-specific products were for the most part in a stable beta version for the WFPC2 camera with most of remaining work focusing on performance and organization improvements. The code to produce the CQ products for the ACS and WFC3 instruments was non-existent beyond anything that could use the existing WFPC2 code without modification._
 
-_The CQ products were removed from the pipeline with the understanding that they could be generated later (and probably more easily) by building another pipeline that takes the outputs of the MAST-specific pipeline this code will become as inputs._ 
+_The CQ products were removed from the pipeline with the understanding that they could be generated later (and probably more easily) by building another pipeline that takes as inputs the MAST-specific outputs later versions of this pipeline will produce._ 
 
 _The **only** purpose of this release is to document the implementation of the existing CosmoQuest specific features so they can be recreated for a future pipeline to produce the CQ products. Additionally, at that time, the developers are encouraged to consult the GitHub wiki and issues for additional background information._
 
