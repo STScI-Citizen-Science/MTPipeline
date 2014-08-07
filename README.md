@@ -86,14 +86,114 @@ Installation
 
 ### At STScI
 
+STScI provides many of the pipeline's external dependencies at various
+locations in its filesystem. However, the accessibility of some of these
+dependencies varies between the filesystem seen by the Institute's Macs and
+that seen by the RedHat science cluster. Two different installation procedures are thus provided. 
+
+
+#### On Macs:
+
+The ssbx development distribution of Ureka is required. Install it following the
+instructions [here](http://ssb.stsci.edu/ssb_software.shtml).
+
+The AstroDrizzle step in the pipeline requires defining three variables in your pipeline. If you use bash,
+
+    export uref=/grp/hst/cdbs/uref/
+    export iref=/grp/hst/cdbs/iref/
+    export jref=/grp/hst/cdbs/jref/
+
+These can be added to your `.bashrc`, along with the `ur_setup` command above. 
+
+If you use tcsh, add these to your `.cshrc`. 
+
+    setenv uref /grp/hst/cdbs/uref/
+    setenv iref /grp/hst/cdbs/iref/
+    setenv jref /grp/hst/cdbs/jref/
+
+Don't forget to start a new terminal session if you are adding these to your terminal profile files. Now, cd to `MTPipeline/`, and run
+
+`python setup.py develop`
+
+This takes advantage of Python's `setuptools` to install or locate the
+remaining external dependencies. If everything goes well, it will do two things:
+
+1. Build the C components of `lacosmicx`, for which it needs the `cfitsio`
+   library. The path to this library on the institute's filesystem is
+   hard-coded in `setup.py`. If you are seeing errors involving '.h` files, then the
+   location of the `cfitsio` library has changed, and you should see `setup.py`
+   for more information.
+
+2. Install any remaning python modules, such as Pillow, pymysql, psuitl.
+
+This should suffice to install the pipeline in-place on Macs.
+
+#### On the RedHat Science Cluster
+
+The ssbx development version of Ureka is already installed on science3 and science4. Use it by adding the following to your `.setenv`:
+
+    # If a local Ureka installation is active (i.e. ur_setup has been executed)
+    # do nothing. Otherwise load SSB's build in /usr/stsci
+    if ( ! $?UR_DIR ) then
+        if ( -f /usr/stsci/envconfig.mac/cshrc ) then
+            source /usr/stsci/envconfig.mac/cshrc
+            ssbx
+        endif
+    endif
+
+Also in `.setenv`, define the variables
+
+    setenv uref /grp/hst/cdbs/uref/
+    setenv iref /grp/hst/cdbs/iref/
+    setenv jref /grp/hst/cdbs/jref/
+
+Make sure to restart your terminal session after making these changes.
+
+As this version of Ureka is read-only, however, it is necessary to create a
+python virtual environment into which the external modules required the
+pipeline can install. Following the instructions
+[here](http://ssb.stsci.edu/customize_python_environment.shtml), set up and
+activate a virtual environment.
+
+`setup.py` is currently configured to install on a Mac connected to the institute filesystem. The science cluster sees a slightly different filesyste. Edit `setup.py` to change the paths
+
+    cfitslib_path = '/sw/include'
+    cfitsinc_path = '/sw/lib' 
+
+to
+
+    cfitslib_path = '/usr/include'
+    cfitsinc_path = '/usr/lib' 
+
+Having done this, run
+
+    python setup.py develop
+
+The pipeline should be ready to run.
+
 ### External Users
 
-Installing the MT Pipeline outside of STScI has never been attempted. 
+While installing the pipeline outside the institute filesystem is entirely
+possible, successfully running it faces hurdles. 
+
+The main hinderance to running the pipeline outside of the the STScI filesystem
+is the AstroDrizzle step. AstroDrizzle requires reference files, the path to
+which is defined by the uref, iref, and jref environment variables. There are
+more than a terabyte of reference files in total, and different referrences
+will be required for different input images.
+
+The cosmic ray rejection and png creation should both be functional, however
+(although the latter expects AstroDrizzle outputs). At minimum, the pipeline
+requires a built cfitsio library and Python installation with NumPy. 
+
+The pipeline has been successfully installed on Ubuntu virtual environments provided by Travis CI. The automated script for doing so can be found in `MTPipeline/.travis.yml`. Note that, at the moment, that script sets the `CPLUS_INCLUDE_PATH` and `LIBRARY_PATH`, and so it is not wisely used outside of a fresh virtual environment.
 
 Use
 ---
 
---- add ---
+The preferred interface for running the pipeline is through the terminal. From the top level directory `MTPipeline/`, the pipelin can be run by
+
+    python scripts/production/run_imaging_pipeline.py -filelist "path/to/
 
 Contacts
 --------
