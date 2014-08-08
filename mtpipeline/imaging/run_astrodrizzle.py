@@ -107,16 +107,18 @@ def run_astrodrizzle(filename, detector, output_path = None):
         cfg_path = cfg_path.replace('/mtpipeline/imaging/run_astrodrizzle.py',
                                 '/astrodrizzle_cfg/')
 
-    config_sets = {'WFPC2' : ['wfpc2_centerslice.cfg', 'wfpc2_wideslice.cfg'],
-                   'WFC' : ['acs_center.cfg','acs_wide.cfg'],
-                   'HRC' : ['acs_center.cfg','acs_hrc_wide.cfg'],
-                   'SBC' : ['acs_center.cfg','acs_wide.cfg'],
-                   'UVIS':['wfc3_center.cfg','wfc3_wide.cfg'],
-                   'IR': ['wfc3_ir_center.cfg','wfc3_ir_wide.cfg']
+    # If other AstroDrizzle outputs are desired, add a cfg file for each
+    # instrument in the lists below, and add the name of the mode to mode_list.
+    mode_list = ['wide']
+    config_sets = {'WFPC2' : ['wfpc2_wideslice.cfg'],
+                   'WFC' : ['acs_wide.cfg'],
+                   'HRC' : ['acs_hrc_wide.cfg'],
+                   'SBC' : ['acs_wide.cfg'],
+                   'UVIS':['wfc3_wide.cfg'],
+                   'IR': ['wfc3_ir_wide.cfg']
                   }
 
     configobj_list = config_sets[detector]
-    mode_list = ['center', 'wide']
     for configobj, mode in zip(configobj_list, mode_list):
         astrodrizzle.AstroDrizzle(
             input = filename,
