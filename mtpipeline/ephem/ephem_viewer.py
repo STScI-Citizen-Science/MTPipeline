@@ -14,7 +14,7 @@ import os
 from astropy.io import fits
 
 
-from PIL import Image
+from PIL import Image, ImageOps
 
 #----------------------------------------------------------------------------
 # Connect the SQLAlchemy ORM declaritive base classes.
@@ -70,7 +70,7 @@ class EphemPlot(object):
         '''
         Perform the actual plotting
         '''
-        data = Image.open(self.filename)
+        data = ImageOps.mirror(Image.open(self.filename).rotate(180))
         fig = plt.figure()
         ax1 = plt.subplot(111)
         im = ax1.imshow(data, cmap=cm.gray)
@@ -84,7 +84,7 @@ class EphemPlot(object):
             # old way of marking objects using markersize and not mpatches    
             # ax1.plot(moon.ephem_x, moon.ephem_y, 'o', markersize = 10,    
             #     markerfacecolor = 'none', markeredgecolor = 'white')
-            circle = mpatches.Circle((moon.ephem_x, moon.ephem_y),
+            circle = mpatches.Circle((moon.ephem_x + 25, moon.ephem_y + 15)),
                      diam/2, fill=False, ec="r")
             ax1.add_patch(circle)
             if args.label == "True":

@@ -542,7 +542,7 @@ def parse_jpl_cgi(data):
             soe_switch = True
 
 
-def update_record(moon_dict, master_images_id):
+def update_record(hdulist, moon_dict, master_images_id):
     '''
     Update a record in the master_finders table.
     '''
@@ -550,6 +550,10 @@ def update_record(moon_dict, master_images_id):
     update_dict['object_name'] = moon_dict['object']
     update_dict['jpl_ra'] = moon_dict['jpl_ra']
     update_dict['jpl_dec'] = moon_dict['jpl_dec']
+    delta_x, delta_y = calc_delta(hdulist, moon_dict)
+    ephem_x, ephem_y = calc_pixel_position(hdulist, delta_x, delta_y)
+    update_dict['ephem_x'] = int(ephem_x)
+    update_dict['ephem_y'] = int(ephem_y)
     try:
         update_dict['magnitude'] = float(moon_dict['jpl_APmag'])
     except Exception as err:
@@ -563,8 +567,8 @@ def update_record(moon_dict, master_images_id):
     update_dict['master_images_id'] = master_images_id
     update_dict['version'] = __version__
     session.query(MasterFinders).filter(\
-        MasterFinders.master_images_id == master_images_id, 
-        MasterFinders.object_name == moon_dict['object']).update(update_dict)
+            MasterFinders.master_images_id == master_images_id,
+            MasterFinders.object_name == moon_dict['object']).update(update_dict)
     session.commit()
 
 """

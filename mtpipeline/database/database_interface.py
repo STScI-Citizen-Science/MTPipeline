@@ -182,14 +182,19 @@ class MasterImages(Base):
         self.maximum_ra = header['RA_TARG'] + ((self.width - 420.0) / 72000)
         self.maximum_dec = header['DEC_TARG'] + ((self.height - 424.5) / 72000)
         self.pixel_resolution = 0.05 #arcsec / pix
-        self.description = header['FILTNAM1']
+        if '/wfpc2/' in fits_file:
+            self.description = header['FILTNAM1']
+        elif '/acs/' in fits_file:
+            self.description = header['FILTER1']
+        else:
+            self.description = header['FILTER']
         self.file_location = png_path
         linenum = header['LINENUM']
         self.visit = linenum.split('.')[0]
         self.orbit = linenum.split('.')[1]
         self.drz_mode = fits_name.split('_')[-3]
         cr_mode = fits_name.split('_')[1]
-        if cr_mode == 'c0m':
+        if cr_mode == 'c0m' or cr_mode == 'wide':
             cr_mode = 'no_cr'
         assert cr_mode in ['no_cr', 'cr'], 'Unexpected CR mode.'
         self.cr_mode = cr_mode

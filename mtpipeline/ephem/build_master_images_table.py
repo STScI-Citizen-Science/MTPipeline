@@ -69,7 +69,10 @@ def build_master_images_table_main(png_file_list, reproc, reproc_sets):
     # Build the new records     
     for png_file in png_file_list:
         logging.info('Processing {}'.format(png_file))
-        fits_file = png_file.replace('png/','').replace('_linear.png','.fits')
+        if '_linear.png' in png_file:
+            fits_file = png_file.replace('png/','').replace('_linear.png','.fits')
+        elif '_log.png' in png_file:
+            fits_file = png_file.replace('png/','').replace('_log.png','.fits')
         with fits.open(fits_file) as hdulist:
             header = hdulist[0].header
         master_images = MasterImages(header, fits_file, png_file)
