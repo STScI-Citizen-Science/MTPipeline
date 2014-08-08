@@ -53,9 +53,10 @@ def get_metadata(filename):
         
     Returns:
         header_data: dict 
-            Has keys , 'detector','readnoise', and 'gain'
+            Has keys , 'detector','readnoise', and 'gain', 'targname'
+                and , 'filtername'
             Possible 'instrument' values: 'WFPC2', 'WFC3', 'ACS' 
-            Possible 'detectors' values: 
+            Possible 'detector' values: 
                 'WFPC2' for WFPC2 (not technically correct, as WFPC2 FITS
                 images have no detector keyword, but accurate enough).
                 'UVIS', 'IR' for WFC3
@@ -78,7 +79,9 @@ def get_metadata(filename):
 
         gain = None
         readnoise = None
-
+        filtername = "none"
+        targname = "none"
+        
         # For WFPC2, there is no readnoise information in the header.
 	    # There is gain information, but it leads to bad CR rejection.
         # For ACS / SBC, there is no readnoise or gain information.
@@ -92,15 +95,37 @@ def get_metadata(filename):
             readnoise_d = mainHDU.header['readnsed']
             readnoise = max(readnoise_a, readnoise_b,readnoise_c,readnoise_d)
 
+        if detector == 'WFPC2':
+            try:
+                filtername = mainHDU.header['filtnam1']
+            except: print "Failed to find filter keyword."
+        if instrument == 'WFC3':
+            try:
+                fitername = mainHDU.header['filter']
+            except: print "Failed to find filter keyword."
+        if instrument == 'ACS':
+            try:
+                filt1 = mainHDU.header['filter1']
+                filt2 = mainHDU.header['filter2']
+                if filt1[0] == 'F': filtname = filt1 
+                if filt2[0] == 'F': filtname = filt2 
+            except: print "Failed to find filter keyword."
+
+        try:
+            targname == mainHDU.header['targname']
+        except: print "Failed to find targname keyword."
+
     header_data = {'detector' : detector,
                    'readnoise' : readnoise,
-                   'gain' : gain }
+                   'gain' : gain,
+                   'targname' : targname,
+                   'filtername' : filtername}
 
     return header_data
 
 # ----------------------------------------------------------------------------
 
-def make_output_file_dict(filename):
+def make_output_file_dict(filename,header_data):
     '''
         Generate a dictionary with the list of expected inputs for each
         step. This allows steps to be omitted if the output files already
@@ -109,6 +134,9 @@ def make_output_file_dict(filename):
         Parameters:
         input: filename
         a path to where the file is located.
+        header_data: dictionary
+        information extracted from the image header, needed to configure
+        the filename.
         
         Returns:
         output: output_file_dict
@@ -172,13 +200,15 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
     '''
     This is the main controller for all the steps in the pipeline.
     '''
-    # Generate the output drizzle names 
-    filename = os.path.abspath(root_filename) 
-    output_file_dict = make_output_file_dict(root_filename)
-
-    # Get the detector, readnoise, and gain from the header
+    # Get information from the header
     header_data = get_metadata(root_filename)
     detector = header_data['detector']
+
+    # Use string parsing to discern the target.
+
+    # Generate the output filenames 
+    filename = os.path.abspath(root_filename) 
+    output_file_dict = make_output_file_dict(root_filename,header_data)
 
     # Run CR reject
     if cr_reject_switch:
