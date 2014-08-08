@@ -182,7 +182,7 @@ class MasterImages(Base):
         self.maximum_ra = header['RA_TARG'] + ((self.width - 420.0) / 72000)
         self.maximum_dec = header['DEC_TARG'] + ((self.height - 424.5) / 72000)
         self.pixel_resolution = 0.05 #arcsec / pix
-        if '/wfpc2/' in fits_file:
+        if '/wfpc2/' in fits_file:  # added this if statement part to cover all differents filters for wfpc2, wfc3 and acs
             self.description = header['FILTNAM1']
         elif '/acs/' in fits_file:
             self.description = header['FILTER1']

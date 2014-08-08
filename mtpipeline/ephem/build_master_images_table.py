@@ -72,7 +72,7 @@ def build_master_images_table_main(png_file_list, reproc, reproc_sets):
         if '_linear.png' in png_file:
             fits_file = png_file.replace('png/','').replace('_linear.png','.fits')
         elif '_log.png' in png_file:
-            fits_file = png_file.replace('png/','').replace('_log.png','.fits')
+            fits_file = png_file.replace('png/','').replace('_log.png','.fits') # added this to the script go over the log.png files
         with fits.open(fits_file) as hdulist:
             header = hdulist[0].header
         master_images = MasterImages(header, fits_file, png_file)

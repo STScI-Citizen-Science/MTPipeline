@@ -542,7 +542,7 @@ def parse_jpl_cgi(data):
             soe_switch = True
 
 
-def update_record(hdulist, moon_dict, master_images_id):
+def update_record(hdulist, moon_dict, master_images_id): # changed this function. added hdulist as a parameter and added the ephemerides calculations.
     '''
     Update a record in the master_finders table.
     '''
@@ -660,7 +660,7 @@ def ephem_main(filename, reproc=False):
             if master_finders_count == 1 or reproc == True:
                 jpl_dict = get_jpl_data(moon_dict)
                 moon_dict.update(jpl_dict)
-                update_record(moon_dict, master_images_query.id)
+                update_record(hdulist, moon_dict, master_images_query.id)
 
     session.close()
 
@@ -715,7 +715,7 @@ if __name__ == '__main__':
     # Create the filelist.
     if args.filelist != None:
         filelist = glob.glob(args.filelist)
-        filelist = [x for x in filelist if ('c0m_center_single_sci.fits' in x or 'c0m_wide_single_sci.fits' in x)]
+        filelist = [x for x in filelist if 'c0m_wide_single_sci.fits' in x]
         assert isinstance(filelist, list), \
             'Expected list for filelist, got ' + str(type(filelist))
         assert filelist != [], 'No files found.'
