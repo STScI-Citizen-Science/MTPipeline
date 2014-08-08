@@ -183,7 +183,9 @@ class PNGCreator(object):
         '''
         Take the log of self.data.
         '''
-        array_log = N.log(self.data)
+
+        if output:
+            array_log = N.log(self.data)
 
         if output != False:
             before_after(before_array = self.data,
@@ -198,6 +200,7 @@ class PNGCreator(object):
         '''
         Shift all the values in self.data so there are no negative or 0 pixels.
         Needed to prevent taking the log of negative values.
+        This function is not currently used.
         '''
         min_val = N.min(self.data)
         if min_val <= 0:
@@ -214,9 +217,6 @@ class PNGCreator(object):
                 pause = False)
 
         self.data = output_array
-
-        print 'MINIMUM VALUE:'
-        print N.min(self.data)
 
     def saturated_clip(self, weight_array, output=False):
         '''
@@ -308,8 +308,8 @@ def make_subimage_pngs(input_pngc_instance, output_path, filename, suffix):
 
 # -----------------------------------------------------------------------------
 
-def run_trim(filename, weight_file, output_path, log_switch=False,
-        stat_switch=True):
+def run_trim(filename, weight_file, output_path, log_switch=True,
+        stat_switch=False):
     '''
     The main controller for the png creation. Checks for and creates an
     output folder. Opens the data header extention. Uses a pngcreator
@@ -335,7 +335,7 @@ def run_trim(filename, weight_file, output_path, log_switch=False,
         log_stat = make_png_name(output_path, filename, 'log_stat')
         threshold_clip_stat = make_png_name(output_path, filename, 'threshold_clip_stat')
 
-    # Otherwise, setting it to false prevents computing the histograms.
+    # Otherwise, setting it to false prevents writing the histograms.
     else:
         positive_stat = False
         log_stat = False
