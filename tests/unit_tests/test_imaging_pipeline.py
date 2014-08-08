@@ -3,26 +3,38 @@
 from mtpipeline.imaging.imaging_pipeline import make_output_file_dict
 
 expected_output_list = [
-                        {'input_file': 'u2eu0101t_c0m.fits',
-                        'cr_reject_output': ['u2eu0101t_c0m.fits', 'u2eu0101t_cr_c0m.fits'],
-                        'drizzle_output': ['u2eu0101t_c0m_wide_single_sci.fits',
-                                           'u2eu0101t_cr_c0m_wide_single_sci.fits'],
-                        'png_output': ['png/u2eu0101t_c0m_wide_single_sci_linear.png',
-                                       'png/u2eu0101t_cr_c0m_wide_single_sci_linear.png'],
-                        'drizzle_weight': ['u2eu0101t_c0m_wide_single_wht.fits',
-                                           'u2eu0101t_cr_c0m_wide_single_wht.fits']
-                        },
-                        {'input_file': 'u2eu0101t_flt.fits',
-                        'cr_reject_output': ['u2eu0101t_flt.fits', 'u2eu0101t_cr_flt.fits'],
-                        'drizzle_output': ['u2eu0101t_wide_single_sci.fits',
-                                           'u2eu0101t_cr_wide_single_sci.fits'],
-                        'png_output': ['png/u2eu0101t_wide_single_sci_linear.png',
-                                       'png/u2eu0101t_cr_wide_single_sci_linear.png'],
-                        'drizzle_weight': ['u2eu0101t_wide_single_wht.fits',
-                                           'u2eu0101t_cr_wide_single_wht.fits']
-			            }
-                       ]
+                        {'input_file': 'asdfghjkl_c0m.fits',
+                        'cr_reject_output': ['asdfghjkl_c0m.fits', 
+                                             'hlsp_mt_hst_wfpc2_asdfghjkl_ceres_F606W_v1-0_c0m.fits'],
 
+                        'drizzle_output': [ 'hlsp_mt_hst_wfpc2_asdfghjkl_ceres_F606W_v1-0_sci.fits',
+                                            'hlsp_mt_hst_wfpc2_asdfghjkl_ceres_F606W_v1-0_img.fits'],
+
+                        'png_output': ['png/hlsp_mt_hst_wfpc2_asdfghjkl_ceres_F606W_v1-0_img-linear.png',
+                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl_ceres_F606W_v1-0_sci-linear.png',
+                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl_ceres_F606W_v1-0_img-log.png',
+                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl_ceres_F606W_v1-0_sci-log.png'],
+                        
+                        'drizzle_weight': ['hlsp_mt_hst_wfpc2_asdfghjkl_ceres_F606W_v1-0_wht.fits']
+
+                        },
+
+                        {'input_file': 'asdfghjkl_flt.fits',
+                        'cr_reject_output': ['asdfghjkl_flt.fits', 
+                                             'hlsp_mt_hst_wfc3-uvis-0_flt.fits'],
+
+                        'drizzle_output': [ 'hlsp_mt_hst_wfc3-uvis_asdfghjkl_ceres_F606W_v1-0_sci.fits',
+                                            'hlsp_mt_hst_wfc3-uvis_asdfghjkl_ceres_F606W_v1-0_img.fits'],
+
+                        'png_output': ['png/hlsp_mt_hst_wfc3-uvis_asdfghjkl_ceres_F606W_v1-0_img-linear.png',
+                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl_ceres_F606W_v1-0_sci-linear.png',
+                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl_ceres_F606W_v1-0_img-log.png',
+                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl_ceres_F606W_v1-0_sci-log.png'],
+                        
+                        'drizzle_weight': ['hlsp_mt_hst_wfc3-uvis_asdfghjkl_ceres_F606W_v1-0_wht.fits']
+
+                        },
+                       ]
                         
 
 def check_output_entry(output_entry,expected_entry):
