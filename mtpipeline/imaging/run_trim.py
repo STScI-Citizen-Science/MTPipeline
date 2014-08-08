@@ -183,9 +183,7 @@ class PNGCreator(object):
         '''
         Take the log of self.data.
         '''
-
-        if output:
-            array_log = N.log(self.data)
+        array_log = N.log(self.data)
 
         if output != False:
             before_after(before_array = self.data,
