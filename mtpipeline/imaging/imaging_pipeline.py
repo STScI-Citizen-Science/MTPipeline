@@ -147,22 +147,19 @@ def make_output_file_dict(filename):
         fits_type = 'c0m_'
 
     for cr in ['_','_cr_']:
-        for drz in ['wide_single_sci.fits', 'center_single_sci.fits']:
-            filename = os.path.join(path, basename + cr + fits_type + drz)
-            output_file_dict['drizzle_output'].append(filename)
-        for drz in ['wide_single_wht.fits', 'center_single_wht.fits']:
-            filename = os.path.join(path, basename + cr + fits_type + drz)
-            output_file_dict['drizzle_weight'].append(filename)
+        drz = 'wide_single_sci.fits'
+        filename = os.path.join(path, basename + cr + fits_type + drz)
+        output_file_dict['drizzle_output'].append(filename)
+
+        drz = 'wide_single_wht.fits'
+        filename = os.path.join(path, basename + cr + fits_type + drz)
+        output_file_dict['drizzle_weight'].append(filename)
     
     # PNG outputs.
     for cr in ['_','_cr_']:
-        for drz in ['wide_single_sci_linear.png', 'center_single_sci_linear.png']:
-            filename = os.path.join(path, 'png', basename + cr + fits_type + drz)
-            output_file_dict['png_output'].append(filename)
-            if drz == 'wide_single_sci_linear.png':
-                for i_image in range(1,13):
-                    new_file = filename.replace('_linear.png', '_linear_{}.png'.format(i_image))
-                    output_file_dict['png_output'].append(new_file)
+        drz = 'wide_single_sci_linear.png'
+        filename = os.path.join(path, 'png', basename + cr + fits_type + drz)
+        output_file_dict['png_output'].append(filename)
     
     return output_file_dict
 
@@ -233,7 +230,7 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
             logging.info("Running png")
             for filename, weight_file in zip(output_file_dict['drizzle_output'], \
                     output_file_dict['drizzle_weight']):
-                run_trim(filename, weight_file, output_path)
+                run_trim(filename, weight_file, output_path,log_switch=True)
             print 'Done running png'
             logging.info("Done running png")
     else:
