@@ -387,9 +387,8 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
         else:
             print 'Running png'
             logging.info("Running png")
-            for filename, weight_file in zip(output_file_dict['drizzle_output'], \
-                    output_file_dict['drizzle_weight']):
-                run_trim(filename, weight_file, output_path,log_switch=True)
+            for filename in output_file_dict['drizzle_output']:
+                run_trim(filename, output_path,log_switch=True)
             print 'Done running png'
             logging.info("Done running png")
     else:
