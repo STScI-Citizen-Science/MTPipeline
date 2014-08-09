@@ -9,8 +9,11 @@ db_echo: False
 email_switch: False
 contact_email: youremail@domain.com
 
-# File System Settings
+## File System Settings
 logging_path: /path/to/logging
 
-#Number of Cores
+##Number of Cores
 num_cores: 2
+
+##Pipeline version number
+version: '1.0'

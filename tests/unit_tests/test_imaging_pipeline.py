@@ -11,10 +11,10 @@ expected_output_list = [
                         'drizzle_output': [ 'hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_sci.fits',
                                             'hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_img.fits'],
 
-                        'png_output': ['png/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_img-linear.png',
-                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_sci-linear.png',
-                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_img-log.png',
-                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_sci-log.png'],
+                        'png_output': ['png/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_sci-linear.png',
+                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_img-linear.png',
+                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_sci-log.png',
+                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_img-log.png'],
                         
                         'drizzle_weight': ['hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_wht.fits']
 
@@ -22,15 +22,15 @@ expected_output_list = [
 
                         {'input_file': 'asdfghjkl_flt.fits',
                         'cr_reject_output': ['asdfghjkl_flt.fits', 
-                                             'hlsp_mt_hst_wfc3-uvis-0_flt.fits'],
+                                             'hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_flt.fits'],
 
                         'drizzle_output': [ 'hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_sci.fits',
                                             'hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_img.fits'],
 
-                        'png_output': ['png/hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_img-linear.png',
-                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_sci-linear.png',
-                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_img-log.png',
-                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_sci-log.png'],
+                        'png_output': ['png/hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_sci-linear.png',
+                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_img-linear.png',
+                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_sci-log.png',
+                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_img-log.png'],
                         
                         'drizzle_weight': ['hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_wht.fits']
 
@@ -131,7 +131,7 @@ def test_make_output_file_dict():
     for expected_output, metadata in zip(expected_output_list, metadata_list):
     
         output_dict = make_output_file_dict(
-                      expected_output['input_file'],metadata_list)
+                      expected_output['input_file'],metadata)
         expected_keys = expected_output.keys()
         output_keys = output_dict.keys()
 

@@ -23,6 +23,9 @@ from mtpipeline.imaging.run_cosmicx import run_cosmicx
 from mtpipeline.imaging.run_cosmicx import get_cosmicx_params
 from mtpipeline.imaging.run_astrodrizzle import run_astrodrizzle
 from mtpipeline.imaging.run_trim import run_trim
+#from mtpipeline.ephem.build_masters_finder_table import \
+#     get_planet_and_moons_list
+from mtpipeline.get_settings import SETTINGS
 
 # ----------------------------------------------------------------------------
 # Functions (alphabetical)
@@ -125,6 +128,99 @@ def get_metadata(filename):
 
 # ----------------------------------------------------------------------------
 
+def get_planet_and_moons_list():
+    """Return a list of valid JPL HORIZONS targets.
+
+    The JPL HORIZONS interface accepts a strict set of target names. 
+    In order to 
+
+    NOTE: This is only here to support get_mtarg below. Once Wally merges
+    his branch, uncomment the import from build_masters_finder_table above.
+
+    Parameters: 
+        nothing
+
+    Returns: 
+        planet_and_moon_list: list
+            List of terms that match all the planet and moon targets 
+            in the WFPC2 dataset.
+
+    Outputs:
+        nothing
+    """
+    planet_and_moon_list = []
+    with open('mtpipeline/ephem/planets_and_moons.txt', 'r') as f:
+        planets_and_moons_file = f.readlines()
+    for line in planets_and_moons_file:
+        line = line.split(' ')
+        if len(line) > 3:
+            planet_and_moon_list.append(line[1])
+    return planet_and_moon_list
+
+def get_mtarg(targname):
+    """
+    Produce a more regular target name, using the targname keyword and the JPL
+    ephemeris bodies. 
+    Parameters:
+        targname : (string)
+            The targname keyword from the image header
+    
+    Returns:
+        mtarg : (string)
+            A dash-separated list of JPL ephemeris objects found in the
+            targname, accounting for common abbreviations. If no match is
+            found, the targname, truncated to 20 characters, is used instead.
+
+    Outputs: nothing
+    """
+    abbrevs = {'jup' : 'jupiter',
+              'gan' : 'ganymede',
+              'sat' : 'saturn'}
+    
+    name_problems = {'pan' : ['pandora'],
+                    'anthe' : ['euanthe'],
+                    'io' : ['albioriz','bebhionn','iocaste'],
+                    'titan' : ['titania']
+                    }
+
+    jpl_list = get_planet_and_moons_list()
+
+    targname = targname.lower()
+    mtarg_pieces = []
+    
+    # Look for match in the JPL ephemeris objects.
+    for body in jpl_list:
+        if str.find(targname,body) == -1:
+            continue
+        else:
+            mtarg_pieces.append(body)
+             
+    # Look for common abbreviations
+    for abbrev in abbrevs:
+        body = abbrevs[abbrev]
+        if str.find(targname,abbrev) == -1:
+            continue
+        if body not in mtarg_pieces:
+            mtarg_pieces.append(body)
+            
+    # The names of some moons are substrings of others.
+    # Hopefully, Pan and Pandora are never in the same targname,
+    # because if Pandora is in the targname, Pan will be
+    # removed from mtarg_pieces.
+    for subname in name_problems:
+        if subname in mtarg_pieces:
+            for supername in name_problems[subname]:
+                if supername in mtarg_pieces:
+                    mtarg_pieces.remove(subname)
+                
+    if not mtarg_pieces:
+        mtarg_pieces.append(targname[:20])
+        
+    mtarg = '-'.join(mtarg_pieces)
+    return mtarg
+
+# ----------------------------------------------------------------------------
+
 def make_output_file_dict(filename,header_data):
     '''
         Generate a dictionary with the list of expected inputs for each
@@ -150,8 +246,30 @@ def make_output_file_dict(filename,header_data):
     assert (filename[-8:] == 'c0m.fits' or filename[-8:] == 'flt.fits'), error
     
     fits_type = filename[-8:-5]
+
+    front = 'hlsp_mt_hst'
+
+    instrument = header_data['instrument']
+    detector = header_data['detector']
+
+    if instrument == 'WFPC2':
+        hardware = instrument.lower()
+    else:
+        hardware = instrument + '-' + detector
+
+    ipsud = filename.split('_')[0] 
+
+    # Use string parsing to discern the target(s).
+    mtarg = get_mtarg(header_data['targname'])
+
+    filtername = header_data['filtername']
+
+    version = 'v' + str(SETTINGS['version'])
+    version = version.replace('.','-')
+
+    front = '_'.join([front,hardware,ipsud,mtarg,filtername,version])
     
-    # Build the dictionary.
+    # Initialize the dictionary.
     output_file_dict = {}
     output_file_dict['input_file'] = filename
     output_file_dict['cr_reject_output'] = []
@@ -159,36 +277,37 @@ def make_output_file_dict(filename,header_data):
     output_file_dict['png_output'] = []
     output_file_dict['drizzle_weight'] = []
     path, basename = os.path.split(filename)
-    basename = basename.split('_')[0]
     
+
     # CR Rejection outputs.
-    for cr in ['_','_cr_']:
-        filename = os.path.join(path, basename + cr + fits_type + '.fits')
-        output_file_dict['cr_reject_output'].append(filename)
-    
+    # We count the original input file as a cr rejection output.
+    output_file_dict['cr_reject_output'].append(filename) 
+    # The actual output:
+    filename = '_'.join([front,fits_type]) + '.fits'
+    output_file_dict['cr_reject_output'].append(filename) 
+
     # Drizzled outputs.
-    # AstroDrizzle strips _flt from the filename when writing outputs,
-    # but keeps _c0m. 
-    if fits_type == 'flt':
-        fits_type = ''
-    else:
-        fits_type = 'c0m_'
+    # Cr rejected products are sci
+    filename = '_'.join([front,'sci']) + '.fits'
+    output_file_dict['drizzle_output'].append(filename)
+    # Non cr rejected products are img
+    filename = '_'.join([front,'img']) + '.fits'
+    output_file_dict['drizzle_output'].append(filename)
+    # Only a single weight file
+    filename = '_'.join([front,'wht']) + '.fits'
+    output_file_dict['drizzle_weight'].append(filename)
 
-    for cr in ['_','_cr_']:
-        drz = 'wide_single_sci.fits'
-        filename = os.path.join(path, basename + cr + fits_type + drz)
-        output_file_dict['drizzle_output'].append(filename)
-
-        drz = 'wide_single_wht.fits'
-        filename = os.path.join(path, basename + cr + fits_type + drz)
-        output_file_dict['drizzle_weight'].append(filename)
-    
     # PNG outputs.
-    for cr in ['_','_cr_']:
-        drz = 'wide_single_sci_linear.png'
-        filename = os.path.join(path, 'png', basename + cr + fits_type + drz)
-        output_file_dict['png_output'].append(filename)
-    
+    png = 'png/'
+    filename = png + '_'.join([front,'sci']) + '-linear.png'
+    output_file_dict['png_output'].append(filename)
+    filename = png + '_'.join([front,'img']) + '-linear.png'
+    output_file_dict['png_output'].append(filename)
+    filename = png + '_'.join([front,'sci']) + '-log.png'
+    output_file_dict['png_output'].append(filename)
+    filename = png + '_'.join([front,'img']) + '-log.png'
+    output_file_dict['png_output'].append(filename)
+
     return output_file_dict
 
 # ----------------------------------------------------------------------------
@@ -203,8 +322,6 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
     # Get information from the header
     header_data = get_metadata(root_filename)
     detector = header_data['detector']
-
-    # Use string parsing to discern the target.
 
     # Generate the output filenames 
     filename = os.path.abspath(root_filename) 
