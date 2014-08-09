@@ -8,8 +8,8 @@ expected_output_list = [
                         'cr_reject_output': ['asdfghjkl_c0m.fits', 
                                              'hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_c0m.fits'],
 
-                        'drizzle_output': [ 'hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_sci.fits',
-                                            'hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_img.fits'],
+                        'drizzle_output': [ 'hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_img.fits',
+                                            'hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_sci.fits'],
 
                         'png_output': ['png/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_sci-linear.png',
                                        'png/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_img-linear.png',
@@ -24,8 +24,8 @@ expected_output_list = [
                         'cr_reject_output': ['asdfghjkl_flt.fits', 
                                              'hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_flt.fits'],
 
-                        'drizzle_output': [ 'hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_sci.fits',
-                                            'hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_img.fits'],
+                        'drizzle_output': [ 'hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_img.fits',
+                                            'hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_sci.fits'],
 
                         'png_output': ['png/hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_sci-linear.png',
                                        'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_img-linear.png',
@@ -40,8 +40,8 @@ expected_output_list = [
                         'cr_reject_output': ['dir/asdfghjkl_c0m.fits', 
                                              'dir/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_c0m.fits'],
 
-                        'drizzle_output': [ 'dir/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_sci.fits',
-                                            'dir/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_img.fits'],
+                        'drizzle_output': [ 'dir/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_img.fits',
+                                            'dir/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_sci.fits'],
 
                         'png_output': ['dir/png/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_sci-linear.png',
                                        'dir/png/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_img-linear.png',

@@ -104,21 +104,22 @@ def get_metadata(filename):
             except: print "Failed to find filter keyword."
         if instrument == 'WFC3':
             try:
-                fitername = mainHDU.header['filter']
+                filtername = mainHDU.header['filter']
             except: print "Failed to find filter keyword."
         if instrument == 'ACS':
             try:
                 filt1 = mainHDU.header['filter1']
                 filt2 = mainHDU.header['filter2']
-                if filt1[0] == 'F': filtname = filt1 
-                if filt2[0] == 'F': filtname = filt2 
+                if filt1[0] == 'F': filtername = filt1 
+                if filt2[0] == 'F': filtername = filt2 
             except: print "Failed to find filter keyword."
 
         try:
-            targname == mainHDU.header['targname']
+            targname = mainHDU.header['targname']
         except: print "Failed to find targname keyword."
 
-    header_data = {'detector' : detector,
+    header_data = {'instrument' : instrument,
+                   'detector' : detector,
                    'readnoise' : readnoise,
                    'gain' : gain,
                    'targname' : targname,
@@ -251,7 +252,6 @@ def make_output_file_dict(filename,header_data):
 
     instrument = header_data['instrument']
     detector = header_data['detector']
-
     if instrument == 'WFPC2':
         hardware = instrument.lower()
     else:
@@ -289,11 +289,11 @@ def make_output_file_dict(filename,header_data):
 
     # Drizzled outputs.
     # Cr rejected products are sci
-    filename = '_'.join([front,'sci']) + '.fits'
+    filename = '_'.join([front,'img']) + '.fits'
     filename = os.path.join(path,filename)
     output_file_dict['drizzle_output'].append(filename)
     # Non cr rejected products are img
-    filename = '_'.join([front,'img']) + '.fits'
+    filename = '_'.join([front,'sci']) + '.fits'
     filename = os.path.join(path,filename)
     output_file_dict['drizzle_output'].append(filename)
     # Only a single weight file
@@ -349,7 +349,10 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
             logging.info(cosmicx_params)
 
             output_filename = output_file_dict['cr_reject_output'][1]
-            run_cosmicx(root_filename, output_filename,cosmicx_params,detector)
+            run_cosmicx(root_filename, 
+                        output_filename,
+                        cosmicx_params,
+                        detector)
             print 'Done running cr_reject'
             logging.info("Done running cr_reject")
     else:
@@ -365,9 +368,10 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
         else:
             logging.info("Running Astrodrizzle")
             print 'Running Astrodrizzle'
-            for filename in  output_file_dict['cr_reject_output']:
+            for filename, output in zip(output_file_dict['cr_reject_output'],
+                                        output_file_dict['drizzle_output']):
                 updatewcs.updatewcs(filename)
-                run_astrodrizzle(filename, detector)
+                run_astrodrizzle(filename, output, detector)
             print 'Done running astrodrizzle'
             logging.info("Done running astrodrizzle")
     else:

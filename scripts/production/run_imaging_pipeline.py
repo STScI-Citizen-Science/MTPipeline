@@ -121,7 +121,7 @@ def run():
     rootfile_list = glob.glob(args_list.filelist)
     rootfile_list = [filename for filename
                      in rootfile_list
-                     if '_cr_' not in filename
+                     if 'hlsp_' not in filename
                      and ('_flt.fits' in filename or '_c0m.fits' in filename)]
     assert rootfile_list != [], 'empty rootfile_list in mtpipeline.py.'
     logging.info("Processing: {} files".format(len(rootfile_list)))
