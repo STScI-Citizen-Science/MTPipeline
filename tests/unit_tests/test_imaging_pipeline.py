@@ -35,6 +35,22 @@ expected_output_list = [
                         'drizzle_weight': ['hlsp_mt_hst_wfc3-uvis_asdfghjkl_mars_F606W_v1-0_wht.fits']
 
                         },
+
+                        {'input_file': 'dir/asdfghjkl_c0m.fits',
+                        'cr_reject_output': ['dir/asdfghjkl_c0m.fits', 
+                                             'dir/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_c0m.fits'],
+
+                        'drizzle_output': [ 'dir/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_sci.fits',
+                                            'dir/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_img.fits'],
+
+                        'png_output': ['dir/png/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_sci-linear.png',
+                                       'dir/png/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_img-linear.png',
+                                       'dir/png/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_sci-log.png',
+                                       'dir/png/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_img-log.png'],
+                        
+                        'drizzle_weight': ['dir/hlsp_mt_hst_wfpc2_asdfghjkl_mars_F606W_v1-0_wht.fits']
+
+                        },
                        ]
 
 # A list of dictionaries the metadata for each fake test file
@@ -46,8 +62,15 @@ metadata_list = [
                      'targname' : 'mars',
                      'filtername': 'F606W'},
 
-                    {'instrument': 'wfc3',
-                     'detector' : 'uvis',
+                    {'instrument': 'WFC3',
+                     'detector' : 'UVIS',
+                     'readnoise' : None,
+                     'gain' : None,
+                     'targname' : 'mars',
+                     'filtername': 'F606W'},
+
+                    {'instrument': 'WFPC2',
+                     'detector' : 'WFPC2',
                      'readnoise' : None,
                      'gain' : None,
                      'targname' : 'mars',

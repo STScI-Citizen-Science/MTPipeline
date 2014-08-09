@@ -229,7 +229,7 @@ def make_output_file_dict(filename,header_data):
         
         Parameters:
         input: filename
-        a path to where the file is located.
+        a path to the input file.
         header_data: dictionary
         information extracted from the image header, needed to configure
         the filename.
@@ -255,9 +255,10 @@ def make_output_file_dict(filename,header_data):
     if instrument == 'WFPC2':
         hardware = instrument.lower()
     else:
-        hardware = instrument + '-' + detector
+        hardware = instrument.lower() + '-' + detector.lower()
 
-    ipsud = filename.split('_')[0] 
+    path, basename = os.path.split(filename)
+    ipsud = basename.split('_')[0] 
 
     # Use string parsing to discern the target(s).
     mtarg = get_mtarg(header_data['targname'])
@@ -276,7 +277,6 @@ def make_output_file_dict(filename,header_data):
     output_file_dict['drizzle_output'] = []
     output_file_dict['png_output'] = []
     output_file_dict['drizzle_weight'] = []
-    path, basename = os.path.split(filename)
     
 
     # CR Rejection outputs.
@@ -284,28 +284,36 @@ def make_output_file_dict(filename,header_data):
     output_file_dict['cr_reject_output'].append(filename) 
     # The actual output:
     filename = '_'.join([front,fits_type]) + '.fits'
+    filename = os.path.join(path,filename)
     output_file_dict['cr_reject_output'].append(filename) 
 
     # Drizzled outputs.
     # Cr rejected products are sci
     filename = '_'.join([front,'sci']) + '.fits'
+    filename = os.path.join(path,filename)
     output_file_dict['drizzle_output'].append(filename)
     # Non cr rejected products are img
     filename = '_'.join([front,'img']) + '.fits'
+    filename = os.path.join(path,filename)
     output_file_dict['drizzle_output'].append(filename)
     # Only a single weight file
     filename = '_'.join([front,'wht']) + '.fits'
+    filename = os.path.join(path,filename)
     output_file_dict['drizzle_weight'].append(filename)
 
     # PNG outputs.
     png = 'png/'
     filename = png + '_'.join([front,'sci']) + '-linear.png'
+    filename = os.path.join(path,filename)
     output_file_dict['png_output'].append(filename)
     filename = png + '_'.join([front,'img']) + '-linear.png'
+    filename = os.path.join(path,filename)
     output_file_dict['png_output'].append(filename)
     filename = png + '_'.join([front,'sci']) + '-log.png'
+    filename = os.path.join(path,filename)
     output_file_dict['png_output'].append(filename)
     filename = png + '_'.join([front,'img']) + '-log.png'
+    filename = os.path.join(path,filename)
     output_file_dict['png_output'].append(filename)
 
     return output_file_dict
