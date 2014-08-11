@@ -89,14 +89,12 @@ def rename_files(rootfile, output):
     # Loop over the wanted files and rename.
     for filename in sci_list:
         print "Renaming ",filename, " to ",output
-        shutil.copyfile(filename, output)
-        os.remove(filename)
+        os.rename(filename,output)
     for filename in wht_list:
         output = output.replace('_sci','_wht')
         output = output.replace('_img','_wht')
         print "Renaming ",filename, " to ",output
-        shutil.copyfile(filename, output)
-        os.remove(filename)
+        os.rename(filename,output)
 
 # ------------------------------------------------------------------------------
 
