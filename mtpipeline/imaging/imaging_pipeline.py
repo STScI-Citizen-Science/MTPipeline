@@ -258,17 +258,21 @@ def make_output_file_dict(filename,header_data):
         hardware = instrument.lower() + '-' + detector.lower()
 
     path, basename = os.path.split(filename)
+
+    #Get the 9-character alphanumeric identifier for the observation
     ipsud = basename.split('_')[0] 
 
     # Use string parsing to discern the target(s).
     mtarg = get_mtarg(header_data['targname'])
+
+    ipsud_and_mtarg = ipsud + '-' + mtarg
 
     filtername = header_data['filtername']
 
     version = 'v' + str(SETTINGS['version'])
     version = version.replace('.','-')
 
-    front = '_'.join([front,hardware,ipsud,mtarg,filtername,version])
+    front = '_'.join([front,hardware,ipsud_and_mtarg,filtername,version])
     
     # Initialize the dictionary.
     output_file_dict = {}
