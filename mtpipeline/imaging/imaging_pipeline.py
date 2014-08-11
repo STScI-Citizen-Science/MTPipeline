@@ -267,7 +267,7 @@ def make_output_file_dict(filename,header_data):
 
     ipsud_and_mtarg = ipsud + '-' + mtarg
 
-    filtername = header_data['filtername']
+    filtername = header_data['filtername'].lower()
 
     version = 'v' + str(SETTINGS['version'])
     version = version.replace('.','-')
@@ -307,16 +307,16 @@ def make_output_file_dict(filename,header_data):
 
     # PNG outputs.
     png = 'png/'
-    filename = png + '_'.join([front,'sci']) + '-linear.png'
+    filename = png + '_'.join([front,'sci']) + '-linscale.png'
     filename = os.path.join(path,filename)
     output_file_dict['png_output'].append(filename)
-    filename = png + '_'.join([front,'img']) + '-linear.png'
+    filename = png + '_'.join([front,'img']) + '-linscale.png'
     filename = os.path.join(path,filename)
     output_file_dict['png_output'].append(filename)
-    filename = png + '_'.join([front,'sci']) + '-log.png'
+    filename = png + '_'.join([front,'sci']) + '-logscale.png'
     filename = os.path.join(path,filename)
     output_file_dict['png_output'].append(filename)
-    filename = png + '_'.join([front,'img']) + '-log.png'
+    filename = png + '_'.join([front,'img']) + '-logscale.png'
     filename = os.path.join(path,filename)
     output_file_dict['png_output'].append(filename)
 

@@ -6,54 +6,54 @@ from mtpipeline.imaging.imaging_pipeline import make_output_file_dict
 expected_output_list = [
                         {'input_file': 'asdfghjkl_c0m.fits',
                         'cr_reject_output': ['asdfghjkl_c0m.fits', 
-                                             'hlsp_mt_hst_wfpc2_asdfghjkl-mars_F606W_v1-0_c0m.fits'],
+                                             'hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_c0m.fits'],
 
-                        'drizzle_output': [ 'hlsp_mt_hst_wfpc2_asdfghjkl-mars_F606W_v1-0_img.fits',
-                                            'hlsp_mt_hst_wfpc2_asdfghjkl-mars_F606W_v1-0_sci.fits'],
+                        'drizzle_output': [ 'hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img.fits',
+                                            'hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci.fits'],
 
-                        'png_output': ['png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_F606W_v1-0_sci-linear.png',
-                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_F606W_v1-0_img-linear.png',
-                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_F606W_v1-0_sci-log.png',
-                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_F606W_v1-0_img-log.png'],
+                        'png_output': ['png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci-linscale.png',
+                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img-linscale.png',
+                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci-logscale.png',
+                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img-logscale.png'],
                         
-                        'drizzle_weight': ['hlsp_mt_hst_wfpc2_asdfghjkl-mars_F606W_v1-0_wht.fits']
+                        'drizzle_weight': ['hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_wht.fits']
 
                         },
 
                         {'input_file': 'asdfghjkl_flt.fits',
                         'cr_reject_output': ['asdfghjkl_flt.fits', 
-                                             'hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_F606W_v1-0_flt.fits'],
+                                             'hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_flt.fits'],
 
-                        'drizzle_output': [ 'hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_F606W_v1-0_img.fits',
-                                            'hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_F606W_v1-0_sci.fits'],
+                        'drizzle_output': [ 'hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_img.fits',
+                                            'hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_sci.fits'],
 
-                        'png_output': ['png/hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_F606W_v1-0_sci-linear.png',
-                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_F606W_v1-0_img-linear.png',
-                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_F606W_v1-0_sci-log.png',
-                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_F606W_v1-0_img-log.png'],
+                        'png_output': ['png/hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_sci-linscale.png',
+                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_img-linscale.png',
+                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_sci-logscale.png',
+                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_img-logscale.png'],
                         
-                        'drizzle_weight': ['hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_F606W_v1-0_wht.fits']
+                        'drizzle_weight': ['hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_wht.fits']
 
                         },
 
                         {'input_file': 'dir/asdfghjkl_c0m.fits',
                         'cr_reject_output': ['dir/asdfghjkl_c0m.fits', 
-                                             'dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_F606W_v1-0_c0m.fits'],
+                                             'dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_c0m.fits'],
 
-                        'drizzle_output': [ 'dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_F606W_v1-0_img.fits',
-                                            'dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_F606W_v1-0_sci.fits'],
+                        'drizzle_output': [ 'dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img.fits',
+                                            'dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci.fits'],
 
-                        'png_output': ['dir/png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_F606W_v1-0_sci-linear.png',
-                                       'dir/png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_F606W_v1-0_img-linear.png',
-                                       'dir/png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_F606W_v1-0_sci-log.png',
-                                       'dir/png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_F606W_v1-0_img-log.png'],
+                        'png_output': ['dir/png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci-linscale.png',
+                                       'dir/png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img-linscale.png',
+                                       'dir/png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci-logscale.png',
+                                       'dir/png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img-logscale.png'],
                         
-                        'drizzle_weight': ['dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_F606W_v1-0_wht.fits']
+                        'drizzle_weight': ['dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_wht.fits']
 
                         },
                        ]
 
-# A list of dictionaries the metadata for each fake test file
+# A list of dictionaries of metadata for each fake test file
 metadata_list = [
                     {'instrument': 'WFPC2',
                      'detector' : 'WFPC2',
