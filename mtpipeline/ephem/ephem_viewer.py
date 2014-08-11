@@ -77,6 +77,10 @@ class EphemPlot(object):
         ax1.set_xlim(ax1.get_xlim())
         ax1.set_ylim(ax1.get_ylim())
         for moon in self.master_finders_query:
+
+            # The moon may be small enough that drawing a circle of its
+            # JPL-given given diameter will hide it completely. Set the circle
+            # diameter for anything too small to ten pixels.
             if isinstance(moon.diameter, float) and (  moon.diameter/0.05) > 10:
                 diam = moon.diameter/0.05 #conversion form arcsecs to pixels
             else:
@@ -105,6 +109,47 @@ class EphemPlot(object):
         plt.savefig(outputFile)
         plt.draw()
         plt.grid(True)
+
+#----------------------------------------------------------------------------
+
+   def region_file(self):
+        """Creates ds9 .reg files with overlays for FITS images.
+
+        Parameters: nothing
+
+        Returns: nothing
+
+        Outputs: a ds9 region file that, if opened in ds9 with the image
+        "filename", will draw overlays for each object.
+
+        """
+
+        reg_name = os.path.splitext(self.filename)[0]
+        reg_name = reg_name + '.reg'
+
+        f = open(reg_name,'w')
+
+        for moon in self.master_finders_query:
+
+            # The moon may be small enough that drawing a circle of its
+            # JPL-given given diameter will hide it completely. Set the circle
+            # diameter for anything too small to ten pixels.
+            if isinstance(moon.diameter, float) and (moon.diameter/0.05) > 10:
+                diam = moon.diameter/0.05 #conversion form arcsecs to pixels
+            else:
+                diam = 10
+
+            radius = diam/2
+            label = moon.object_name.title()
+            x_cor = moon.ephem_x
+            y_cor = moon.ephem_y
+
+            command = 'image;circle(%f,%f,%d) # color=green text = {%s}' % \
+                      (x_cor, y_cor, radius, label) 
+
+            f.write(command + '\n')
+
+        f.close()
 
 #----------------------------------------------------------------------------
 
