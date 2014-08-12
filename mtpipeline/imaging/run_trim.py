@@ -322,7 +322,7 @@ def run_trim(filename, output_path, log_switch=True,
         pngc_log = PNGCreator(pngc_linear.data)
 
     pngc_linear.compress()
-    pngc_linear.save_png(make_png_name(output_path, filename, 'linear'))
+    pngc_linear.save_png(make_png_name(output_path, filename, 'linscale'))
 
     # Create Log full Image
     if log_switch:
@@ -331,7 +331,7 @@ def run_trim(filename, output_path, log_switch=True,
         #pngc_log.positive(output = positive_stat)
         pngc_log.log(output = log_stat)
         pngc_log.compress()
-        pngc_log.save_png(make_png_name(output_path, filename, 'log'))
+        pngc_log.save_png(make_png_name(output_path, filename, 'logscale'))
 
     else:
         logger.info('Skipping log pngs.')
