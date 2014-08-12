@@ -98,7 +98,7 @@ def get_metadata(filename):
             readnoise_d = mainHDU.header['readnsed']
             readnoise = max(readnoise_a, readnoise_b,readnoise_c,readnoise_d)
 
-        if detector == 'WFPC2':
+        if instrument == 'WFPC2':
             try:
                 filtername = mainHDU.header['filtnam1']
             except: print "Failed to find filter keyword."
