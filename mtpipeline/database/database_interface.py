@@ -11,7 +11,7 @@ Authors:
 """
 
 import os
-import pyfits
+from astropy.io import fits
 
 from mtpipeline.get_settings import SETTINGS
 from sqlalchemy import create_engine
@@ -124,12 +124,10 @@ class MasterImages(Base):
     """ORM for the master_images MySQL table. """
     __tablename__ = 'master_images'
     id  = Column(Integer, primary_key=True)
-    project_id  = Column(Integer)
+    proposalid  = Column(Integer)
     name = Column(String(50), unique=True)
-    fits_file = Column(String(50), unique=True)
-    object_name = Column(String(50))
-    set_id = Column(Integer)
-    set_index = Column(Integer)
+    rootname = Column(String(50), unique=True)
+    jpl_object = Column(String(50))
     width = Column(Integer)
     height = Column(Integer)
     minimum_ra = Column(Float(30))
@@ -137,16 +135,18 @@ class MasterImages(Base):
     maximum_ra = Column(Float(30))
     maximum_dec = Column(Float(30))
     pixel_resolution = Column(Float(10))
-    priority = Column(Integer, default=1)
-    description = Column(String(50))
-    file_location = Column(String(100))
-    visit = Column(String(11))
-    orbit = Column(Integer)
-    drz_mode  = Column(String(6))
-    cr_mode = Column(String(6))
+    version = Column(String(11))
+    flt = Column(String(50), unique=True)
+    cr_flt = Column(String(50), unique=True)
+    single_sci = Column(String(50), unique=True)
+    cr_single_sci = Column(String(50), unique=True)
+    single_sci_linear = Column(String(50), unique=True)
+    cr_single_sci_linear = Column(String(50), unique=True)
+    single_sci_log = Column(String(50), unique=True)
+    cr_single_sci_log = Column(String(50), unique=True)
     mysql_engine = 'InnoDB'
 
-    def __init__(self, header, fits_file, png_file):
+    def __init__(self, header, fits_file):
         """Populates the class attributes of the MasterImages instance.
 
         Note that the `__init__` method does not populate the set 
@@ -170,81 +170,40 @@ class MasterImages(Base):
                 Description of input2.
         """
         fits_path, fits_name = os.path.split(os.path.abspath(fits_file))
-        png_path, png_name = os.path.split(os.path.abspath(png_file))
-        self.project_id = header['proposid']
-        self.name = png_name
-        self.fits_file = fits_name
-        self.object_name = header['targname']
-        self.width = header['NAXIS1']
-        self.height = header['NAXIS2']
+        self.proposalid = header['PROPOSID']
+        self.name = fits_name
+        self.rootname = self.name.split('_')[0]
+        self.jpl_object = header['TARGNAME'].lower()
+        self.pixel_resolution = 0.05 #arcsec / pix
+        self.version = 'v1-0'
+        self.flt = self.name
+        instrument = header['INSTRUME'].lower()
+        if instrument == 'wfpc2':
+            self.cr_flt = 'hlsp_mt_hst_wfpc2_{}-{}_{}_{}_c0m.fits'.format(
+                    self.rootname, header['TARGNAME'].lower().split('-')[0], header['FILTNAM1'].lower(), self.version)
+            self.single_sci = self.cr_flt.replace('_c0m.fits', '_img.fits')
+            self.cr_single_sci = self.cr_flt.replace('_c0m.fits', '_sci.fits')
+        elif instrument == 'wfc3':
+            self.cr_flt = 'hlsp_mt_hst_wfc3-{}_{}-{}_{}_{}_flt.fits'.format(
+                    header['DETECTOR'], self.rootname, header['TARGNAME'].lower().split('-')[0], header['FILTER'].lower(), self.version)
+            self.single_sci = self.cr_flt.replace('_flt.fits', '_img.fits')
+            self.cr_single_sci = self.cr_flt.replace('_flt.fits', '_sci.fits')
+        elif instrument == 'acs':
+            self.cr_flt = 'hlsp_mt_hst_acs-{}_{}-{}_{}_{}_flt.fits'.format(
+                    header['DETECTOR'], self.rootname, header['TARGNAME'].lower().split('-')[0], header['FILTER1'].lower(),self.version)
+            self.single_sci = self.cr_flt.replace('_flt.fits', '_img.fits')
+            self.cr_single_sci = self.cr_flt.replace('_flt.fits', '_sci.fits')
+        self.single_sci_linear = self.single_sci.replace('_img.fits', '_img-linear.png')
+        self.cr_single_sci_linear = self.cr_single_sci.replace('_sci.fits', '_sci-linear.png')
+        self.single_sci_log = self.single_sci.replace('_img.fits', '_img-log.png')
+        self.cr_single_sci_log = self.cr_single_sci.replace('_sci.fits', '_sci-log.png')
+        with fits.open(os.path.join(fits_path, self.single_sci)) as hdulist:
+            self.width = hdulist[0].header['NAXIS1']
+            self.height = hdulist[0].header['NAXIS2']
         self.minimum_ra = header['RA_TARG'] - (420.0 / 72000)
         self.minimum_dec = header['DEC_TARG'] - (424.5 / 72000)
         self.maximum_ra = header['RA_TARG'] + ((self.width - 420.0) / 72000)
         self.maximum_dec = header['DEC_TARG'] + ((self.height - 424.5) / 72000)
-        self.pixel_resolution = 0.05 #arcsec / pix
-        if '/wfpc2/' in fits_file:  # added this if statement part to cover all differents filters for wfpc2, wfc3 and acs
-            self.description = header['FILTNAM1']
-        elif '/acs/' in fits_file:
-            self.description = header['FILTER1']
-        else:
-            self.description = header['FILTER']
-        self.file_location = png_path
-        linenum = header['LINENUM']
-        self.visit = linenum.split('.')[0]
-        self.orbit = linenum.split('.')[1]
-        self.drz_mode = fits_name.split('_')[-3]
-        cr_mode = fits_name.split('_')[1]
-        if cr_mode == 'c0m' or cr_mode == 'wide':
-            cr_mode = 'no_cr'
-        assert cr_mode in ['no_cr', 'cr'], 'Unexpected CR mode.'
-        self.cr_mode = cr_mode
-
-    def set_set_values(self, existing_set_dict, max_set_id):
-        """Set set_id and set_index attributes.
-
-        The `set_id` keyword identifies a unique combination of the 
-        `proposid`, `linenum` (split into orbit and visit in the 
-        database), `drz_mode`, and `cr_mode` keywords. Images that 
-        share a `set_id` value are enumerated in by the `set_index` 
-        variable in the order they are ingested. Observation order
-        is not automatically preserved by the `set_index` keyword. 
-        However, it may end up being preserved due to the alphabetical 
-        naming convention for FITS files which corresponds with 
-        exposure order. 
-
-        The set_id and set_index attributes require information about 
-        the state of the database and any INSERT statements in the 
-        current session. This information comes from the 
-        existing_set_dict and max_set_id variables which this method 
-        takes as an input, sometimes modifies, and then returns.
-
-        Parameters:
-            existing_set_dict : dict
-                A dictionary where the keys are tuples of project_id, 
-                visit, orbit, drz_mode, and cr_mode and each value is 
-                the `set_id` associated with that key. 
-            max_set_id : int
-                The largest set_id value, used to generate new 
-                set_id's records.
-
-        Returns: 
-            existing_set_dict : dict
-                A modified version of the existing_set_dict variable 
-                updated with the information from the method call. 
-            max_set_id : int
-                A modified version of the max_set_id variable updated 
-                with the information from the method call. 
-        """
-        key = (self.project_id, self.visit, self.orbit, self.drz_mode, 
-               self.cr_mode)
-        if key in existing_set_dict:
-            existing_set_dict[key]['set_index'] += 1
-        else:
-            max_set_id += 1
-            existing_set_dict[key] = {'set_id':max_set_id, 'set_index':1}
-        self.set_id = existing_set_dict[key]['set_id']
-        self.set_index = existing_set_dict[key]['set_index'] 
-        return existing_set_dict, max_set_id        
 
 
 class SubImages(Base):

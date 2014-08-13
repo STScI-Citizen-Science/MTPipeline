@@ -37,6 +37,8 @@ Outputs:
     Updates the `master_finders` table.
 """
 
+__version__ = 3
+
 import argparse
 import coords
 import datetime
@@ -312,7 +314,7 @@ def convert_coords(moon_dict):
     return moon_dict
 
 
-def get_planet_and_moons_list():
+def get_planets_and_moons_list():
     """Return a list of valid JPL HORIZONS targets.
 
     The JPL HORIZONS interface accepts a strict set of target names. 
@@ -331,12 +333,12 @@ def get_planet_and_moons_list():
     Outputs:
         nothing
     """
-    planet_and_moon_list = ['jup-', 'gany-', 'sat-', 'copernicus', 'gan-', 
+    planet_and_moon_list = ['jup-', 'gany-', 'sat-', 'gan-',
                             'io-']
     with open('mtpipeline/ephem/planets_and_moons.txt', 'r') as f:
         planets_and_moons_file = f.readlines()
     for line in planets_and_moons_file:
-        line = pm.split(' ')
+        line = line.split(' ')
         if len(line) > 3:
             planet_and_moon_list.append(line[1])
     return planet_and_moon_list
@@ -359,14 +361,22 @@ def get_header_info(hdulist):
     Outputs:
         nothing
     """
+    planets_check = {'sat': 'saturn', 'titan4': 'titan', 'titan1': 'titan', 'titan2': 'titan', 'titan3': 'titan', 'titan5': 'titan', 'jup': 'jupiter', 'cal': 'callisto', 'gan': 'ganymede', 'gany': 'ganymede', 'jupiter+ganymede': 'jupiter', 'jupitertest2': 'jupiter', 'saturn1': 'saturn'}
     output = {}
-    output['targname'] = hdulist[0].header['targname'].lower().split('-')[0]
-    output['date_obs'] = hdulist[0].header['date-obs']
-    output['time_obs'] = hdulist[0].header['time-obs']
+    output['targname'] = hdulist[0].header['targname'].lower()
     for pm in PLANETS_MOONS:
-        if pm in output['targname']:
+        if pm in output['targname'] and 'asteroids' not in hdulist.filename():
+            output['targname'] = hdulist[0].header['targname'].lower().split('-')[0]
+            if output['targname'] in planets_check:
+                output['targname'] = planets_check[output['targname']]
+            filename = hdulist.filename()
+            if '/acs/' in filename or '/wfc3/' in filename:
+                output['date_obs'] = fits.getval('_'.join(filename.split('_')[:-3]) + '_flt.fits', 'date-obs')
+            else:
+                output['date_obs'] = fits.getval('_'.join(filename.split('_')[:-3]) + '.fits', 'date-obs')
+            output['time_obs'] = hdulist[0].header['time-obs']
             return output
-    assert status, 'Header TARGNAME not in planet_list'
+    assert False, 'Header TARGNAME not in planet_list'
 
 
 def get_jpl_data(moon_dict):
@@ -701,7 +711,7 @@ def parse_args():
     
 if __name__ == '__main__':
     
-    PLANETS_MOONS = get_planet_and_moon_list()
+    PLANETS_MOONS = get_planets_and_moons_list()
     
     # Set up the inputs and logging.
     args = parse_args()
