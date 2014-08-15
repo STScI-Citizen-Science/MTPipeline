@@ -64,38 +64,41 @@ def move_files(target, file_list, recopy_switch):
 
 # ------------------------------------------------------------------------------
 
-def rename_files(rootfile, mode, output_path):
+def rename_files(rootfile, output):
     '''
-    Rename all the files that match the root of the filename input 
-    paramater, excluding the input filename itself.
+    Rename all desirable files that match the root of the filename input 
+    paramater, excluding the input filename itself. Remove all other
+    AstroDrizzle outputs.
     '''
-    print 'Renaming Files'
+    print 'Renaming Files:'
     
-    # Build the file list.
     rootfile = os.path.abspath(rootfile)
-    basename = os.path.splitext(rootfile)[0]
-    if '_flt' in basename:
-        basename = basename.replace('_flt','')
-    search = basename + '_sci*'
-    file_list_1 = glob.glob(search)
-    search = basename + '_single*'
-    file_list_2 = glob.glob(search)
-    file_list = file_list_1 + file_list_2
-    
-    # Loop over the files and rename.
-    for filename in file_list:
-        dst = string.split(basename,'/')[-1] + '_' + mode 
-        dst += string.split(filename, basename)[1]
-        if output_path == None:
-            dst = os.path.join(os.path.dirname(rootfile), dst)
-        elif output_path != None:
-            dst = os.path.join(output_path, dst)
-        shutil.copyfile(filename, dst)
+
+    # Remove unwanted AstroDrizzle outputs
+    search = rootfile[:-8] + '*mask*'
+    bad_list = glob.glob(search)
+    for filename in bad_list:
+        print "Removing " ,filename
         os.remove(filename)
+
+    # Find the wanted files
+    search = rootfile[:-8] + '*single_sci.fits'
+    sci_list = glob.glob(search)
+    search = rootfile[:-8] + '*single_wht.fits'
+    wht_list = glob.glob(search)
+    # Loop over the wanted files and rename.
+    for filename in sci_list:
+        print "Renaming ",filename, " to ",output
+        os.rename(filename,output)
+    for filename in wht_list:
+        output = output.replace('_sci','_wht')
+        output = output.replace('_img','_wht')
+        print "Renaming ",filename, " to ",output
+        os.rename(filename,output)
 
 # ------------------------------------------------------------------------------
 
-def run_astrodrizzle(filename, detector, output_path = None):
+def run_astrodrizzle(filename, output, detector):
     '''
     Executes astrodrizzle.AstroDrizzle.
     '''
@@ -107,23 +110,17 @@ def run_astrodrizzle(filename, detector, output_path = None):
         cfg_path = cfg_path.replace('/mtpipeline/imaging/run_astrodrizzle.py',
                                 '/astrodrizzle_cfg/')
 
-    # If other AstroDrizzle outputs are desired, add a cfg file for each
-    # instrument in the lists below, and add the name of the mode to mode_list.
-    mode_list = ['wide']
-    config_sets = {'WFPC2' : ['wfpc2_wideslice.cfg'],
-                   'WFC' : ['acs_wide.cfg'],
-                   'HRC' : ['acs_hrc_wide.cfg'],
-                   'SBC' : ['acs_wide.cfg'],
-                   'UVIS':['wfc3_wide.cfg'],
-                   'IR': ['wfc3_ir_wide.cfg']
+    config_sets = {'WFPC2' : 'wfpc2_wideslice.cfg',
+                   'WFC' : 'acs_wide.cfg',
+                   'HRC' : 'acs_hrc_wide.cfg',
+                   'SBC' : 'acs_wide.cfg',
+                   'UVIS':'wfc3_wide.cfg',
+                   'IR': 'wfc3_ir_wide.cfg'
                   }
 
-    configobj_list = config_sets[detector]
-    for configobj, mode in zip(configobj_list, mode_list):
-        astrodrizzle.AstroDrizzle(
-            input = filename,
-            configobj = os.path.join(cfg_path, configobj))
-        rename_files(filename, mode, output_path)
+    config_file = os.path.join(cfg_path, config_sets[detector])
+    astrodrizzle.AstroDrizzle(input = filename, configobj = config_file)
+    rename_files(filename, output)
             
 # ------------------------------------------------------------------------------
 # The main controller. 

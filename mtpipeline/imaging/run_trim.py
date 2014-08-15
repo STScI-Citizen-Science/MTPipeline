@@ -96,7 +96,7 @@ def make_png_name(path, filename, ext):
     Return the name of the png output_array file.
     '''
     png_name = os.path.basename(filename)
-    png_name = os.path.splitext(png_name)[0] + '_' + ext + '.png'
+    png_name = os.path.splitext(png_name)[0] + '-' + ext + '.png'
     png_name = os.path.join(path, png_name)
     return png_name
 
@@ -216,36 +216,6 @@ class PNGCreator(object):
 
         self.data = output_array
 
-    def saturated_clip(self, weight_array, output=False):
-        '''
-        Replace all the pixels that have a weight value of 0 with the local
-        3x3 median. A copy of the image is created so that the values of
-        the replaced pixels don't affect the medians of other pixels as
-        they are replaced. The subarray function is used to generate the
-        subarrays to prevent error at the array edge.
-
-        The indices are set keeping in mind that a[0:2,0:2] returns a 2x2
-        array while a[0:3,0:3] returns a 3x3 array. Both arrays are
-        centered on (1,1).
-        '''
-
-        assert isinstance(weight_array, N.ndarray), 'array must be numpy array'
-        output_array = copy.copy(self.data)
-        saturated_indices = N.where(weight_array == 0)
-        for index in zip(saturated_indices[0], saturated_indices[1]):
-             output_array[index] = N.median(subarray(self.data, index[0] - 1, \
-                index[0] + 2, index[1] - 1, index[1] + 2))
-
-        if output != False:
-            before_after(before_array = self.data,
-                after_array = output_array,
-                before_array_name = 'Input Data',
-                after_array_name = '0-Weight Corrected',
-                output = output,
-                pause = False)
-
-        self.data = output_array
-
     def save_png(self, png_name):
         '''
         Use the Python image library (PIL) to write self.data as a png file.
@@ -306,7 +276,7 @@ def make_subimage_pngs(input_pngc_instance, output_path, filename, suffix):
 
 # -----------------------------------------------------------------------------
 
-def run_trim(filename, weight_file, output_path, log_switch=True,
+def run_trim(filename, output_path, log_switch=True,
         stat_switch=False):
     '''
     The main controller for the png creation. Checks for and creates an
@@ -341,7 +311,6 @@ def run_trim(filename, weight_file, output_path, log_switch=True,
 
     # Get the data.
     data = get_fits_data(filename)
-    weight_data = get_fits_data(weight_file)
 
     # Create Linear full image
     logger.info('Creating linear PNGs')
@@ -353,7 +322,7 @@ def run_trim(filename, weight_file, output_path, log_switch=True,
         pngc_log = PNGCreator(pngc_linear.data)
 
     pngc_linear.compress()
-    pngc_linear.save_png(make_png_name(output_path, filename, 'linear'))
+    pngc_linear.save_png(make_png_name(output_path, filename, 'linscale'))
 
     # Create Log full Image
     if log_switch:
@@ -362,7 +331,7 @@ def run_trim(filename, weight_file, output_path, log_switch=True,
         #pngc_log.positive(output = positive_stat)
         pngc_log.log(output = log_stat)
         pngc_log.compress()
-        pngc_log.save_png(make_png_name(output_path, filename, 'log'))
+        pngc_log.save_png(make_png_name(output_path, filename, 'logscale'))
 
     else:
         logger.info('Skipping log pngs.')

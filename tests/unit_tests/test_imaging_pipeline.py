@@ -2,27 +2,80 @@
 
 from mtpipeline.imaging.imaging_pipeline import make_output_file_dict
 
+# A list of different input files and the resulting set of expected outputs.
 expected_output_list = [
-                        {'input_file': 'u2eu0101t_c0m.fits',
-                        'cr_reject_output': ['u2eu0101t_c0m.fits', 'u2eu0101t_cr_c0m.fits'],
-                        'drizzle_output': ['u2eu0101t_c0m_wide_single_sci.fits',
-                                           'u2eu0101t_cr_c0m_wide_single_sci.fits'],
-                        'png_output': ['png/u2eu0101t_c0m_wide_single_sci_linear.png',
-                                       'png/u2eu0101t_cr_c0m_wide_single_sci_linear.png'],
-                        'drizzle_weight': ['u2eu0101t_c0m_wide_single_wht.fits',
-                                           'u2eu0101t_cr_c0m_wide_single_wht.fits']
+                        {'input_file': 'asdfghjkl_c0m.fits',
+                        'cr_reject_output': ['asdfghjkl_c0m.fits', 
+                                             'hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_c0m.fits'],
+
+                        'drizzle_output': [ 'hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img.fits',
+                                            'hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci.fits'],
+
+                        'png_output': ['png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci-linscale.png',
+                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img-linscale.png',
+                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci-logscale.png',
+                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img-logscale.png'],
+                        
+                        'drizzle_weight': ['hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_wht.fits']
+
                         },
-                        {'input_file': 'u2eu0101t_flt.fits',
-                        'cr_reject_output': ['u2eu0101t_flt.fits', 'u2eu0101t_cr_flt.fits'],
-                        'drizzle_output': ['u2eu0101t_wide_single_sci.fits',
-                                           'u2eu0101t_cr_wide_single_sci.fits'],
-                        'png_output': ['png/u2eu0101t_wide_single_sci_linear.png',
-                                       'png/u2eu0101t_cr_wide_single_sci_linear.png'],
-                        'drizzle_weight': ['u2eu0101t_wide_single_wht.fits',
-                                           'u2eu0101t_cr_wide_single_wht.fits']
-			            }
+
+                        {'input_file': 'asdfghjkl_flt.fits',
+                        'cr_reject_output': ['asdfghjkl_flt.fits', 
+                                             'hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_flt.fits'],
+
+                        'drizzle_output': [ 'hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_img.fits',
+                                            'hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_sci.fits'],
+
+                        'png_output': ['png/hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_sci-linscale.png',
+                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_img-linscale.png',
+                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_sci-logscale.png',
+                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_img-logscale.png'],
+                        
+                        'drizzle_weight': ['hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_wht.fits']
+
+                        },
+
+                        {'input_file': 'dir/asdfghjkl_c0m.fits',
+                        'cr_reject_output': ['dir/asdfghjkl_c0m.fits', 
+                                             'dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_c0m.fits'],
+
+                        'drizzle_output': [ 'dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img.fits',
+                                            'dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci.fits'],
+
+                        'png_output': ['dir/png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci-linscale.png',
+                                       'dir/png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img-linscale.png',
+                                       'dir/png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci-logscale.png',
+                                       'dir/png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img-logscale.png'],
+                        
+                        'drizzle_weight': ['dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_wht.fits']
+
+                        },
                        ]
 
+# A list of dictionaries of metadata for each fake test file
+metadata_list = [
+                    {'instrument': 'WFPC2',
+                     'detector' : 'WFPC2',
+                     'readnoise' : None,
+                     'gain' : None,
+                     'targname' : 'mars',
+                     'filtername': 'F606W'},
+
+                    {'instrument': 'WFC3',
+                     'detector' : 'UVIS',
+                     'readnoise' : None,
+                     'gain' : None,
+                     'targname' : 'mars',
+                     'filtername': 'F606W'},
+
+                    {'instrument': 'WFPC2',
+                     'detector' : 'WFPC2',
+                     'readnoise' : None,
+                     'gain' : None,
+                     'targname' : 'mars',
+                     'filtername': 'F606W'},
+                   ]
                         
 
 def check_output_entry(output_entry,expected_entry):
@@ -96,12 +149,12 @@ def test_make_output_file_dict():
         nothing
     
     """
-    
+
     # Go through each test case (different input filenames):
-    for expected_output in expected_output_list:
+    for expected_output, metadata in zip(expected_output_list, metadata_list):
     
         output_dict = make_output_file_dict(
-                      expected_output['input_file'])
+                      expected_output['input_file'],metadata)
         expected_keys = expected_output.keys()
         output_keys = output_dict.keys()
 
