@@ -11,10 +11,10 @@ expected_output_list = [
                         'drizzle_output': [ 'hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img.fits',
                                             'hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci.fits'],
 
-                        'png_output': ['png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci-linscale.png',
-                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img-linscale.png',
-                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci-logscale.png',
-                                       'png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img-logscale.png'],
+                        'png_output': ['hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci-linscale.png',
+                                       'hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img-linscale.png',
+                                       'hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci-logscale.png',
+                                       'hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img-logscale.png'],
                         
                         'drizzle_weight': ['hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_wht.fits']
 
@@ -27,10 +27,10 @@ expected_output_list = [
                         'drizzle_output': [ 'hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_img.fits',
                                             'hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_sci.fits'],
 
-                        'png_output': ['png/hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_sci-linscale.png',
-                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_img-linscale.png',
-                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_sci-logscale.png',
-                                       'png/hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_img-logscale.png'],
+                        'png_output': ['hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_sci-linscale.png',
+                                       'hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_img-linscale.png',
+                                       'hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_sci-logscale.png',
+                                       'hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_img-logscale.png'],
                         
                         'drizzle_weight': ['hlsp_mt_hst_wfc3-uvis_asdfghjkl-mars_f606w_v1-0_wht.fits']
 
@@ -43,10 +43,10 @@ expected_output_list = [
                         'drizzle_output': [ 'dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img.fits',
                                             'dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci.fits'],
 
-                        'png_output': ['dir/png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci-linscale.png',
-                                       'dir/png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img-linscale.png',
-                                       'dir/png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci-logscale.png',
-                                       'dir/png/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img-logscale.png'],
+                        'png_output': ['dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci-linscale.png',
+                                       'dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img-linscale.png',
+                                       'dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_sci-logscale.png',
+                                       'dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_img-logscale.png'],
                         
                         'drizzle_weight': ['dir/hlsp_mt_hst_wfpc2_asdfghjkl-mars_f606w_v1-0_wht.fits']
 
