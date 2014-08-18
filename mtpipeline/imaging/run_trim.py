@@ -288,10 +288,9 @@ def run_trim(filename, output_path, log_switch=True,
     astrodrizzle_mode = filename.split('_')[-3]
     logger.info('astrodrizzle mode: {0}'.format(astrodrizzle_mode))
 
-    # Define a default output folder
     # Make the output folder if it doesn't exist.
     if output_path == None:
-        output_path = os.path.join(os.path.dirname(filename), 'png')
+        output_path = os.path.dirname(filename) 
     test = os.access(output_path, os.F_OK)
     if test == False:
         os.mkdir(output_path)

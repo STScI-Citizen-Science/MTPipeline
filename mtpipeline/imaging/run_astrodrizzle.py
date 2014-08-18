@@ -70,7 +70,7 @@ def rename_files(rootfile, output):
     paramater, excluding the input filename itself. Remove all other
     AstroDrizzle outputs.
     '''
-    print 'Renaming Files:'
+    print 'Renaming and removing files:'
     
     rootfile = os.path.abspath(rootfile)
 
