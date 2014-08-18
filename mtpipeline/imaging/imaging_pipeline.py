@@ -56,8 +56,8 @@ def get_metadata(filename):
         
     Returns:
         header_data: dict 
-            Has keys , 'detector','readnoise', and 'gain', 'targname'
-                and , 'filtername'
+            Has keys , 'detector','readnoise', and 'gain', 'targname',
+                'filtername', and 'dateobs'
             Possible 'instrument' values: 'WFPC2', 'WFC3', 'ACS' 
             Possible 'detector' values: 
                 'WFPC2' for WFPC2 (not technically correct, as WFPC2 FITS
@@ -72,6 +72,8 @@ def get_metadata(filename):
     with fits.open(filename, mode='readonly') as HDUlist:
 
         mainHDU = HDUlist[0]
+
+        dateobs = mainHDU.header['date-obs']
         instrument = mainHDU.header['instrume']
         
         # Because WFPC2 has no 'detector' keyword:
@@ -123,7 +125,8 @@ def get_metadata(filename):
                    'readnoise' : readnoise,
                    'gain' : gain,
                    'targname' : targname,
-                   'filtername' : filtername}
+                   'filtername' : filtername,
+                   'dateobs' : dateobs}
 
     return header_data
 
@@ -334,6 +337,7 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
     # Get information from the header
     header_data = get_metadata(root_filename)
     detector = header_data['detector']
+    dateobs = header_data['dateobs']
 
     # Generate the output filenames 
     filename = os.path.abspath(root_filename) 
@@ -375,7 +379,7 @@ def imaging_pipeline(root_filename, output_path = None, cr_reject_switch=True,
             for filename, output in zip(output_file_dict['cr_reject_output'],
                                         output_file_dict['drizzle_output']):
                 updatewcs.updatewcs(filename)
-                run_astrodrizzle(filename, output, detector)
+                run_astrodrizzle(filename, output, detector, dateobs)
             print 'Done running astrodrizzle'
             logging.info("Done running astrodrizzle")
     else:
