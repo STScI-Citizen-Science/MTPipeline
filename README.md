@@ -87,10 +87,9 @@ Installation
 ### At STScI
 
 STScI provides many of the pipeline's external dependencies at various
-locations in its filesystem. However, the accessibility of some of these
-dependencies varies between the filesystem seen by the Institute's Macs and
-that seen by the RedHat science cluster. Two different installation procedures are thus provided. 
-
+locations on its filesystem. However, the accessibility of some of these
+dependencies varies between the filesystems seen by the Institute's Macs and
+ by the RedHat science cluster. Two different installation procedures are thus provided. 
 
 #### On Macs:
 
@@ -130,7 +129,8 @@ This should suffice to install the pipeline in-place on Macs.
 
 #### On the RedHat Science Cluster
 
-The ssbx development version of Ureka is already installed on science3 and science4. Use it by adding the following to your `.setenv`:
+The ssbx development version of Ureka is already installed on science3 and
+science4. Use it by adding the following to your `.setenv`:
 
     # If a local Ureka installation is active (i.e. ur_setup has been executed)
     # do nothing. Otherwise load SSB's build in /usr/stsci
@@ -149,13 +149,14 @@ Also in `.setenv`, define the variables
 
 Make sure to restart your terminal session after making these changes.
 
-As this version of Ureka is read-only, however, it is necessary to create a
-python virtual environment into which the external modules required the
-pipeline can install. Following the instructions
-[here](http://ssb.stsci.edu/customize_python_environment.shtml), set up and
-activate a virtual environment.
+As this version of Ureka is read-only, however, the pipeline's external modules
+will need a separate environment to install into. Following the instructions
+[here](http://ssb.stsci.edu/customize_python_environment.shtml), to set up and
+activate a virtual environment for this purpose.
 
-`setup.py` is currently configured to install on a Mac connected to the institute filesystem. The science cluster sees a slightly different filesyste. Edit `setup.py` to change the paths
+`setup.py` is currently configured to install on a Mac connected to the
+institute filesystem. The science cluster sees a slightly different filesyste.
+Edit `setup.py` to change the paths
 
     cfitslib_path = '/sw/include'
     cfitsinc_path = '/sw/lib' 
@@ -180,7 +181,10 @@ The main hinderance to running the pipeline outside of the the STScI filesystem
 is the AstroDrizzle step. AstroDrizzle requires reference files, the path to
 which is defined by the uref, iref, and jref environment variables. There are
 more than a terabyte of reference files in total, and different referrences
-will be required for different input images.
+will be required for the proper processing of different input images.
+
+The AstroDrizzle step will run, however, so long as the paths described in the installation
+guide are defined. If it is unable to find the appropriate reference files, AstroDrizzle will simply skip
 
 The cosmic ray rejection and png creation should both be functional, however
 (although the latter expects AstroDrizzle outputs). At minimum, the pipeline
