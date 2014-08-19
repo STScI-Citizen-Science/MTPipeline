@@ -65,13 +65,11 @@ def insert_dateobs(output, dateobs):
         The AstroDrizzle output file, edited to include DATE-OBS.
     """
 
-    with fits.open(output, mode='readonly') as HDUlist:
-    
-        header = HDUlist[0].header
-        header.append('date-obs', useblanks = True)
-        header['date-obs'] = dateobs
-
-        HDUlist.writeto(output,clobber='True')
+    # Since we are changing only a single keyword, using the convenience
+    # function is permissible.
+    fits.setval(filename = output,
+                keyword = 'date-obs',
+                value = dateobs)
 
 # ------------------------------------------------------------------------------
     
@@ -153,7 +151,11 @@ def run_astrodrizzle(filename, output, detector, dateobs):
     config_file = os.path.join(cfg_path, config_sets[detector])
     astrodrizzle.AstroDrizzle(input = filename, configobj = config_file)
     rename_files(filename, output)
-    insert_dateobs(output, dateobs)
+    
+    # If the iamge is from ACS or WFC3, we need to add the DATE-OBS keyword
+    # back in.
+    if detector != 'WFPC2':
+        insert_dateobs(output, dateobs)
             
 # ------------------------------------------------------------------------------
 # The main controller. 
