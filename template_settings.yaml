@@ -6,11 +6,16 @@ db_connection: mysql+pymysql://root:user@localhost/mtpipeline
 db_echo: False
 
 ## Email Settings
+# This provide notifications if a call to run_imaging_pipeline succeeds or fails.
 email_switch: False
 contact_email: youremail@domain.com
 
-# File System Settings
+## Logging Path
+# This sets the directory to which logs will be written, in subdirectories specific to the
+# function logged.
 logging_path: /path/to/logging
 
-#Number of Cores
+## Number of Cores
+# Controls the number of cores used by the imaging processing pipeline. Each
+# core will get a subset of the input filelist to process.
 num_cores: 2
