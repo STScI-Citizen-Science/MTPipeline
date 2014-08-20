@@ -151,11 +151,7 @@ def run_astrodrizzle(filename, output, detector, dateobs):
     config_file = os.path.join(cfg_path, config_sets[detector])
     astrodrizzle.AstroDrizzle(input = filename, configobj = config_file)
     rename_files(filename, output)
-    
-    # If the iamge is from ACS or WFC3, we need to add the DATE-OBS keyword
-    # back in.
-    if detector != 'WFPC2':
-        insert_dateobs(output, dateobs)
+    insert_dateobs(output, dateobs)
             
 # ------------------------------------------------------------------------------
 # The main controller. 
