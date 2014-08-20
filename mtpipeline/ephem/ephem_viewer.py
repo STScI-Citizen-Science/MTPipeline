@@ -11,10 +11,10 @@ import matplotlib.cbook as cbook
 import matplotlib.cm as cm
 import matplotlib.patches as mpatches 
 import os
-import pyfits
+from astropy.io import fits
 
 
-from PIL import Image
+from PIL import Image, ImageOps # added this last import
 
 #----------------------------------------------------------------------------
 # Connect the SQLAlchemy ORM declaritive base classes.
@@ -49,8 +49,8 @@ class EphemPlot(object):
         png_path = os.path.split(self.filename)[0]
         png_path = os.path.split(png_path)[0]
         fitsfile = os.path.join(png_path, fitsfile)
-        self.crpix1 = pyfits.getval(fitsfile, 'CRPIX1', 0)
-        self.crpix2 = pyfits.getval(fitsfile, 'CRPIX2', 0)
+        self.crpix1 = fits.getval(fitsfile, 'CRPIX1', 0)
+        self.crpix2 = fits.getval(fitsfile, 'CRPIX2', 0)
 
     def getEphem(self):
         '''
@@ -70,7 +70,7 @@ class EphemPlot(object):
         '''
         Perform the actual plotting
         '''
-        data = Image.open(self.filename)
+        data = ImageOps.mirror(Image.open(self.filename).rotate(180)) # changed this part to rotate the image
         fig = plt.figure()
         ax1 = plt.subplot(111)
         im = ax1.imshow(data, cmap=cm.gray)
@@ -84,11 +84,12 @@ class EphemPlot(object):
             # old way of marking objects using markersize and not mpatches    
             # ax1.plot(moon.ephem_x, moon.ephem_y, 'o', markersize = 10,    
             #     markerfacecolor = 'none', markeredgecolor = 'white')
-            circle = mpatches.Circle((moon.ephem_x, moon.ephem_y),
-                     diam/2, fill=False, ec="r")
+            circle = mpatches.Circle((moon.ephem_x + 25, moon.ephem_y + 15)),
+                    diam/2, fill=False, ec="r") # added +25 and +15 to better place the labels
             ax1.add_patch(circle)
             if args.label == "True":
-                ax1.text(moon.ephem_x + 20, moon.ephem_y + 20, 
+                if moon.ephem_x != None and moon.ephem_y != None:
+                    ax1.text(moon.ephem_x + 20, moon.ephem_y + 20,
                          moon.object_name.title(), color="blue")
           # ax1.text(moon.ephem_x, moon.ephem_y, moon.object_name, 
           #   color = 'white')
