@@ -306,17 +306,16 @@ def make_output_file_dict(filename,header_data):
     output_file_dict['drizzle_weight'].append(filename)
 
     # PNG outputs.
-    png = 'png/'
-    filename = png + '_'.join([front,'sci']) + '-linscale.png'
+    filename = '_'.join([front,'sci']) + '-linscale.png'
     filename = os.path.join(path,filename)
     output_file_dict['png_output'].append(filename)
-    filename = png + '_'.join([front,'img']) + '-linscale.png'
+    filename = '_'.join([front,'img']) + '-linscale.png'
     filename = os.path.join(path,filename)
     output_file_dict['png_output'].append(filename)
-    filename = png + '_'.join([front,'sci']) + '-logscale.png'
+    filename = '_'.join([front,'sci']) + '-logscale.png'
     filename = os.path.join(path,filename)
     output_file_dict['png_output'].append(filename)
-    filename = png + '_'.join([front,'img']) + '-logscale.png'
+    filename = '_'.join([front,'img']) + '-logscale.png'
     filename = os.path.join(path,filename)
     output_file_dict['png_output'].append(filename)
 
