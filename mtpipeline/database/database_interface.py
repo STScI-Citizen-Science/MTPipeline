@@ -14,6 +14,8 @@ import os
 from astropy.io import fits
 
 from mtpipeline.get_settings import SETTINGS
+from mtpipeline.imaging.imaging_pipeline import make_output_file_dict
+from mtpipeline.imaging.imaging_pipeline import get_mtarg
 from sqlalchemy import create_engine
 from sqlalchemy import DateTime
 from sqlalchemy import Column
@@ -127,7 +129,7 @@ class MasterImages(Base):
     proposalid  = Column(Integer)
     name = Column(String(50), unique=True)
     rootname = Column(String(50), unique=True)
-    jpl_object = Column(String(50))
+    planet_or_moon = Column(String(50))
     width = Column(Integer)
     height = Column(Integer)
     minimum_ra = Column(Float(30))
@@ -173,30 +175,25 @@ class MasterImages(Base):
         self.proposalid = header['PROPOSID']
         self.name = fits_name
         self.rootname = self.name.split('_')[0]
-        self.jpl_object = header['TARGNAME'].lower()
+
+        self.planet_or_moon = header['TARGNAME'].lower()
+
+        self.planet_or_moon = get_mtarg
+
         self.pixel_resolution = 0.05 #arcsec / pix
         self.version = 'v1-0'
         self.flt = self.name
         instrument = header['INSTRUME'].lower()
-        if instrument == 'wfpc2':
-            self.cr_flt = 'hlsp_mt_hst_wfpc2_{}-{}_{}_{}_c0m.fits'.format(
-                    self.rootname, header['TARGNAME'].lower().split('-')[0], header['FILTNAM1'].lower(), self.version)
-            self.single_sci = self.cr_flt.replace('_c0m.fits', '_img.fits')
-            self.cr_single_sci = self.cr_flt.replace('_c0m.fits', '_sci.fits')
-        elif instrument == 'wfc3':
-            self.cr_flt = 'hlsp_mt_hst_wfc3-{}_{}-{}_{}_{}_flt.fits'.format(
-                    header['DETECTOR'], self.rootname, header['TARGNAME'].lower().split('-')[0], header['FILTER'].lower(), self.version)
-            self.single_sci = self.cr_flt.replace('_flt.fits', '_img.fits')
-            self.cr_single_sci = self.cr_flt.replace('_flt.fits', '_sci.fits')
-        elif instrument == 'acs':
-            self.cr_flt = 'hlsp_mt_hst_acs-{}_{}-{}_{}_{}_flt.fits'.format(
-                    header['DETECTOR'], self.rootname, header['TARGNAME'].lower().split('-')[0], header['FILTER1'].lower(),self.version)
-            self.single_sci = self.cr_flt.replace('_flt.fits', '_img.fits')
-            self.cr_single_sci = self.cr_flt.replace('_flt.fits', '_sci.fits')
-        self.single_sci_linear = self.single_sci.replace('_img.fits', '_img-linear.png')
-        self.cr_single_sci_linear = self.cr_single_sci.replace('_sci.fits', '_sci-linear.png')
-        self.single_sci_log = self.single_sci.replace('_img.fits', '_img-log.png')
-        self.cr_single_sci_log = self.cr_single_sci.replace('_sci.fits', '_sci-log.png')
+        
+        output_file_dict = make_output_file_dict(fits_file)
+        self.cr_flt = output_file_dict['cr_reject_output'][1]
+        self.single_sci = output_file_dict['drizzle_output'][0]
+        self.cr_single_sci = output_file_dict['drizzle_output'][1]
+        self.single_sci_linear = output_file_dict['png_outputs'][1]
+        self.cr_single_sci_linear = output_file_dict['png_outputs'][0]
+        self.single_sci_log = output_file_dict['png_outputs'][2]
+        self.cr_single_sci_log = output_file_dict['png_outputs'][3]
+
         with fits.open(os.path.join(fits_path, self.single_sci)) as hdulist:
             self.width = hdulist[0].header['NAXIS1']
             self.height = hdulist[0].header['NAXIS2']
