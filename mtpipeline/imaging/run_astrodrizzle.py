@@ -4,6 +4,7 @@ A script to run Astrodrizzle.
 '''
 import argparse
 from drizzlepac import astrodrizzle
+from astropy.io import fits
 import glob
 import inspect
 import os
@@ -44,6 +45,33 @@ def get_file_list(target):
     return file_list
     
 # ------------------------------------------------------------------------------
+
+def insert_dateobs(output, dateobs):
+    """ Put the DATE-OBS keyword back into the AstroDrizzle outputs.
+    AstroDrizzle removes this keyword, and it is needed for the database and
+    ephemeris later. 
+
+    Parameters: 
+        output: string
+                The renamed AstroDrizzle output the DATE-OBS keyword needs to be
+                put back into.
+        dateobs: string
+                 The value of the dateobs keyword from the original _flt or _c0m
+                 file.
+
+    Returns: nothing
+
+    Outputs:
+        The AstroDrizzle output file, edited to include DATE-OBS.
+    """
+
+    # Since we are changing only a single keyword, using the convenience
+    # function is permissible.
+    fits.setval(filename = output,
+                keyword = 'date-obs',
+                value = dateobs)
+
+# ------------------------------------------------------------------------------
     
 def move_files(target, file_list, recopy_switch):
     '''
@@ -77,6 +105,8 @@ def rename_files(rootfile, output):
     # Remove unwanted AstroDrizzle outputs
     search = rootfile[:-8] + '*mask*'
     bad_list = glob.glob(search)
+    search = rootfile[:-8] + '*c0m_d2im*'
+    bad_list = bad_list + glob.glob(search)
     for filename in bad_list:
         print "Removing " ,filename
         os.remove(filename)
@@ -98,7 +128,7 @@ def rename_files(rootfile, output):
 
 # ------------------------------------------------------------------------------
 
-def run_astrodrizzle(filename, output, detector):
+def run_astrodrizzle(filename, output, detector, dateobs):
     '''
     Executes astrodrizzle.AstroDrizzle.
     '''
@@ -121,6 +151,7 @@ def run_astrodrizzle(filename, output, detector):
     config_file = os.path.join(cfg_path, config_sets[detector])
     astrodrizzle.AstroDrizzle(input = filename, configobj = config_file)
     rename_files(filename, output)
+    insert_dateobs(output, dateobs)
             
 # ------------------------------------------------------------------------------
 # The main controller. 
