@@ -108,7 +108,7 @@ class MasterFinders(Base):
     '''
     __tablename__ = 'master_finders'
     id = Column(Integer, primary_key=True)
-    object_name = Column(String(45))
+    planet_or_moon = Column(String(45))
     master_images_id = Column(Integer, 
         ForeignKey('master_images.id'),
         nullable=False)
@@ -131,7 +131,7 @@ class MasterImages(Base):
     proposalid  = Column(Integer)
     name = Column(String(50), unique=True)
     rootname = Column(String(50), unique=True)
-    planet_or_moon = Column(String(50))
+    object_name = Column(String(50))
     width = Column(Integer)
     height = Column(Integer)
     minimum_ra = Column(Float(30))
@@ -184,22 +184,21 @@ class MasterImages(Base):
         # If mtargs is empty, signifying no planets or moons in targname,
         # just use whatever's there.
         if not mtargs:
-            self.planet_or_moon = targname
+            self.object_name = targname
 
-        # If there are planets and/or moons in targname:
-
-        self.planet_or_moon = ''
+        # Otherwise, if there are planets and/or moons in the targname:
+        self.object_name = ''
         planets = ['mars','jupiter','saturn','uranus','neptune','pluto']
 
         # We want to use the most primary body. If a planet is represented
         # in the targname, we'll use it as the entry for the row.
         for mtarg in mtargs:
             if mtarg in planets:
-                self.planet_or_moon = mtarg
+                self.object_name = mtarg
 
         # If no planet was found, use one of the moons.
-        if not self.planet_or_moon:
-            self.planet_or_moon = mtargs[0]
+        if not self.object_name:
+            self.object_name = mtargs[0]
 
         self.pixel_resolution = 0.05 #arcsec / pix
         self.version = 'v1-0'
