@@ -50,6 +50,7 @@ import time
 
 from astropy.io import fits
 from mtpipeline.database.database_tools import counter
+from mtpipeline.tools.file_handling import get_planets_and_moons_list
 from mtpipeline.database.database_tools import check_type
 from mtpipeline.setup_logging import setup_logging
 from urllib2 import urlopen
@@ -312,36 +313,6 @@ def convert_coords(moon_dict):
     jpl_pos = coords.Hmsdms(moon_dict['jpl_ra'] + ' ' + moon_dict['jpl_dec'])
     moon_dict['jpl_ra'], moon_dict['jpl_dec'] = jpl_pos._calcinternal()
     return moon_dict
-
-
-def get_planets_and_moons_list():
-    """Return a list of valid JPL HORIZONS targets.
-
-    The JPL HORIZONS interface accepts a strict set of target names. 
-    In order to 
-
-    XXX
-
-    Parameters: 
-        nothing
-
-    Returns: 
-        planet_and_moon_list: list
-            List of terms that match all the planet and moon targets 
-            in the WFPC2 dataset.
-
-    Outputs:
-        nothing
-    """
-    planet_and_moon_list = ['jup-', 'gany-', 'sat-', 'gan-',
-                            'io-']
-    with open('mtpipeline/ephem/planets_and_moons.txt', 'r') as f:
-        planets_and_moons_file = f.readlines()
-    for line in planets_and_moons_file:
-        line = line.split(' ')
-        if len(line) > 3:
-            planet_and_moon_list.append(line[1])
-    return planet_and_moon_list
 
 
 def get_header_info(hdulist):

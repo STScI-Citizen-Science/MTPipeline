@@ -11,11 +11,13 @@ Authors:
 """
 
 import os
+import yaml
+import inspect
 from astropy.io import fits
 
 from mtpipeline.get_settings import SETTINGS
 from mtpipeline.imaging.imaging_pipeline import make_output_file_dict
-from mtpipeline.imaging.imaging_pipeline import get_mtarg
+from mtpipeline.imaging.imaging_pipeline import get_mtargs
 from sqlalchemy import create_engine
 from sqlalchemy import DateTime
 from sqlalchemy import Column
@@ -176,9 +178,28 @@ class MasterImages(Base):
         self.name = fits_name
         self.rootname = self.name.split('_')[0]
 
-        self.planet_or_moon = header['TARGNAME'].lower()
+        targname = header['TARGNAME']
+        mtargs = get_mtargs(targname)
 
-        self.planet_or_moon = get_mtarg
+        # If mtargs is empty, signifying no planets or moons in targname,
+        # just use whatever's there.
+        if not mtargs:
+            self.planet_or_moon = targname
+
+        # If there are planets and/or moons in targname:
+
+        self.planet_or_moon = ''
+        planets = ['mars','jupiter','saturn','uranus','neptune','pluto']
+
+        # We want to use the most primary body. If a planet is represented
+        # in the targname, we'll use it as the entry for the row.
+        for mtarg in mtargs:
+            if mtarg in planets:
+                self.planet_or_moon = mtarg
+
+        # If no planet was found, use one of the moons.
+        if not self.planet_or_moon:
+            self.planet_or_moon = mtargs[0]
 
         self.pixel_resolution = 0.05 #arcsec / pix
         self.version = 'v1-0'

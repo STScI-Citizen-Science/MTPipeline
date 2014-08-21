@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from mtpipeline.imaging.imaging_pipeline import make_output_file_dict
+from mtpipeline.tools.file_handling import make_output_file_dict
 
 # A list of different input files and the resulting set of expected outputs.
 expected_output_list = [
