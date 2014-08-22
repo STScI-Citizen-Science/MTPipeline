@@ -172,7 +172,7 @@ def cgi_session(command_list):
     return html
 
 
-def calc_delta(hdulist, record):
+def calc_delta(header, record):
     """Calculate JPL coordinate and HST reference pixel deltas.
 
     The calculation is performed in degrees and then converted to 
@@ -182,8 +182,8 @@ def calc_delta(hdulist, record):
     `astrolib.coords` library. 
 
     Parameters: 
-        hdulist : HDUList instance
-            pyfits.io.fits.hdulist object
+        header : header instance
+            astropy.io.fits.header object
         record : dict
             The record dictionary
 
@@ -205,19 +205,36 @@ def calc_delta(hdulist, record):
     assert isinstance(record, dict), \
         'Expected dict got ' + str(type(record))
 
-    crval1 = hdulist[0].header['CRVAL1']
-    crval2 = hdulist[0].header['CRVAL2']
+    crval1 = header['CRVAL1']
+    crval2 = header['CRVAL2']
 
     # Convert the coordinates to coords instances in degrees.
     record = convert_coords(record)
     refpic_coords = coords.Degrees((crval1, crval2))
     crval1, crval2 = refpic_coords.a1, refpic_coords.a2
     
+
+    # Set the pixel scale of the detector, in arcsec/pixel:
+    # WFPC2 has no detector keyword
+    instrument = header['instrume']
+    try:
+        detector = header['detector']
+    except KeyError:
+        detector = instrument
+
+    px_scales = {'WFPC2' : 0.046, #this is only the planetary chip
+                 'WFC' : 0.049,
+                 'HRC' : 0.027,
+                 'SBC' : 0.032,
+                 'UVIS' : 0.04,
+                 'IR' : 0.13}
+    
+    px_scale = px_scales[detector]
+
     # Take the difference and convert to pixels.
     # RA increases to the East (left) so we switch the sign on the delta.
-    # Note these values are for WFPC2 only.
-    delta_x = -1 * (record['jpl_ra'] - crval1) * (3600. / 0.05)
-    delta_y = (record['jpl_dec'] - crval2) * (3600. / 0.05)
+    delta_x = -1 * (record['jpl_ra'] - crval1) * (3600. / px_scale)
+    delta_y = (record['jpl_dec'] - crval2) * (3600. / px_scale)
 
     assert isinstance(delta_x, float), \
         'Expected float got ' + str(type(delta_x))
@@ -226,7 +243,7 @@ def calc_delta(hdulist, record):
     return delta_x, delta_y
 
 
-def calc_pixel_position(hdulist, delta_x, delta_y):
+def calc_pixel_position(header, delta_x, delta_y):
     """Return the x and y position of the ephemeris in pixel space.
 
     This function takes the ephemerides deltas (in pixels) and applies 
@@ -235,8 +252,8 @@ def calc_pixel_position(hdulist, delta_x, delta_y):
     space.
 
     Parameters: 
-        hdulist : HDUList instance
-            pyfits.io.fits.hdulist object
+        header : header instance
+            astropy.io.fits.hdulist.header object
         delta_x : float
             Float of the delta_x shift in pixels.
         delta_y : float
@@ -252,8 +269,8 @@ def calc_pixel_position(hdulist, delta_x, delta_y):
         'Expected float type got ' + str(type(delta_x))
     assert isinstance(delta_y, float), \
         'Expected float type got ' + str(type(delta_y))
-    ephem_x = hdulist[0].header['CRPIX1'] + delta_x
-    ephem_y = hdulist[0].header['CRPIX2'] + delta_y
+    ephem_x = header['CRPIX1'] + delta_x
+    ephem_y = header['CRPIX2'] + delta_y
     assert isinstance(ephem_x, float), \
         'Expected float type got ' + str(type(ephem_x))
     assert isinstance(ephem_y, float), \
@@ -401,7 +418,7 @@ def make_all_moon_dict(targname):
                 return all_moon_dict
 
 
-def insert_record(hdulist, moon_dict,  master_images_id):
+def insert_record(header, moon_dict,  master_images_id):
     """Insert a new record into the `master_finders` table.
 
     If there is no magnitude or diameter information, this raises an 
@@ -412,8 +429,8 @@ def insert_record(hdulist, moon_dict,  master_images_id):
     -999 in `parse_jpl_cgi` so these exceptions should never happen.
 
     Parameters: 
-        hdulist : HDUList instance
-            pyfits.io.fits.hdulist object
+        header : FITS header instance
+            astropy.io.fits.hdulist.header object
         all_moon_dict : dict
             A dict containing the JPL id and object information 
             for each
@@ -436,8 +453,8 @@ def insert_record(hdulist, moon_dict,  master_images_id):
     record.object_name = moon_dict['object']
     record.jpl_ra = moon_dict['jpl_ra']
     record.jpl_dec = moon_dict['jpl_dec']
-    delta_x, delta_y = calc_delta(hdulist, moon_dict)
-    ephem_x, ephem_y = calc_pixel_position(hdulist, delta_x, delta_y)
+    delta_x, delta_y = calc_delta(header, moon_dict)
+    ephem_x, ephem_y = calc_pixel_position(header, delta_x, delta_y)
     record.ephem_x = int(ephem_x)
     record.ephem_y = int(ephem_y)
     try:
@@ -502,7 +519,7 @@ def parse_jpl_cgi(data):
             soe_switch = True
 
 
-def update_record(hdulist, moon_dict, master_images_id): # changed this function. added hdulist as a parameter and added the ephemerides calculations.
+def update_record(header, moon_dict, master_images_id): # changed this function. added header as a parameter and added the ephemerides calculations.
     '''
     Update a record in the master_finders table.
     '''
@@ -510,8 +527,8 @@ def update_record(hdulist, moon_dict, master_images_id): # changed this function
     update_dict['object_name'] = moon_dict['object']
     update_dict['jpl_ra'] = moon_dict['jpl_ra']
     update_dict['jpl_dec'] = moon_dict['jpl_dec']
-    delta_x, delta_y = calc_delta(hdulist, moon_dict)
-    ephem_x, ephem_y = calc_pixel_position(hdulist, delta_x, delta_y)
+    delta_x, delta_y = calc_delta(header, moon_dict)
+    ephem_x, ephem_y = calc_pixel_position(header, delta_x, delta_y)
     update_dict['ephem_x'] = int(ephem_x)
     update_dict['ephem_y'] = int(ephem_y)
     try:
@@ -594,6 +611,7 @@ def ephem_main(filename, reproc=False):
     # Extract needed header information
     file_dict = {}
     with fits.open(filename,mode='readonly') as hdulist:
+        header = hdulist.header
         file_dict['date_obs'] = hdulist[0].header['date-obs']
         file_dict['time_obs'] = hdulist[0].header['time-obs']
         file_dict['targname'] = hdulist[0].header['targname']
@@ -614,7 +632,7 @@ def ephem_main(filename, reproc=False):
         if master_finders_count == 0:
             jpl_dict = get_jpl_data(moon_dict)
             moon_dict.update(jpl_dict)
-            insert_record(hdulist, moon_dict, master_images_query.id)
+            insert_record(header, moon_dict, master_images_query.id)
 
         # When a record exists, check if it has jpl_ra info. If it 
         # doesn't then update.        
@@ -626,7 +644,7 @@ def ephem_main(filename, reproc=False):
             if master_finders_count == 1 or reproc == True:
                 jpl_dict = get_jpl_data(moon_dict)
                 moon_dict.update(jpl_dict)
-                update_record(hdulist, moon_dict, master_images_query.id)
+                update_record(header, moon_dict, master_images_query.id)
 
     session.close()
 
