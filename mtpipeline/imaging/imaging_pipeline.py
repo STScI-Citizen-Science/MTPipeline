@@ -25,7 +25,6 @@ from mtpipeline.imaging.run_cosmicx import run_cosmicx
 from mtpipeline.imaging.run_cosmicx import get_cosmicx_params
 from mtpipeline.imaging.run_astrodrizzle import run_astrodrizzle
 from mtpipeline.imaging.run_trim import run_trim
-from mtpipeline.get_settings import SETTINGS
 
 # ----------------------------------------------------------------------------
 # Functions (alphabetical)

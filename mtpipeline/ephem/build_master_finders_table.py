@@ -29,6 +29,7 @@ in the `mtpipeline.database` module.
 Authors:
     Alex Viana, January 2013
     Wally Barbosa, July 2014
+    Kevin Hale, August 2014
 
 Use:
     XXX
@@ -47,8 +48,10 @@ import logging
 import os
 import sys
 import time
+import yaml
 
 from astropy.io import fits
+from mtpipeline.tools.file_handling import get_mtargs
 from mtpipeline.database.database_tools import counter
 from mtpipeline.tools.file_handling import get_planets_and_moons_list
 from mtpipeline.database.database_tools import check_type
@@ -314,42 +317,6 @@ def convert_coords(moon_dict):
     moon_dict['jpl_ra'], moon_dict['jpl_dec'] = jpl_pos._calcinternal()
     return moon_dict
 
-
-def get_header_info(hdulist):
-    """Gets the header info from the FITS file. 
-
-    Checks to ensure that the target name, after string parsing, 
-    matches a known planet name.
-
-    Parameters: 
-        hdulist : HDUList instance
-
-    Returns: 
-        output : dict
-            A dict containing the header information needed to build 
-            the JPL HORIZONS request. 
-
-    Outputs:
-        nothing
-    """
-    planets_check = {'sat': 'saturn', 'titan4': 'titan', 'titan1': 'titan', 'titan2': 'titan', 'titan3': 'titan', 'titan5': 'titan', 'jup': 'jupiter', 'cal': 'callisto', 'gan': 'ganymede', 'gany': 'ganymede', 'jupiter+ganymede': 'jupiter', 'jupitertest2': 'jupiter', 'saturn1': 'saturn'}
-    output = {}
-    output['targname'] = hdulist[0].header['targname'].lower()
-    for pm in PLANETS_MOONS:
-        if pm in output['targname'] and 'asteroids' not in hdulist.filename():
-            output['targname'] = hdulist[0].header['targname'].lower().split('-')[0]
-            if output['targname'] in planets_check:
-                output['targname'] = planets_check[output['targname']]
-            filename = hdulist.filename()
-            if '/acs/' in filename or '/wfc3/' in filename:
-                output['date_obs'] = fits.getval('_'.join(filename.split('_')[:-3]) + '_flt.fits', 'date-obs')
-            else:
-                output['date_obs'] = fits.getval('_'.join(filename.split('_')[:-3]) + '.fits', 'date-obs')
-            output['time_obs'] = hdulist[0].header['time-obs']
-            return output
-    assert False, 'Header TARGNAME not in planet_list'
-
-
 def get_jpl_data(moon_dict):
     """Get the ephemeris information from JPL HORIZONS.
 
@@ -377,49 +344,61 @@ def get_jpl_data(moon_dict):
     return jpl_dict
 
 
-def make_all_moon_dict(file_dict):
-    """Get the JPL HORIZONS id number for each moon.
+def make_all_moon_dict(targname):
+    """Get the JPL HORIZONS id number for each object represented in targname
 
-    Using the target name retrieve a list of object names and JPL 
-    HORISONS ids associated with that target name. 
+    Figures out what objects are represented in the targname using get_mtargs.
+    Then, it builds a dictionary of all planets and moons associated with that
+    object. That is, every object that might be in the image but isn't mentioned    in the targname.
+
+    If get_mtargs returns an empty list, meaning no planet or moon was found in     the targname, this function returns an empty dictionary.
 
     Parameters: 
-        file_dict : dict
-            A dictionary of FITS file information.
-
+        targname : str
+            the TARGNAME header keyword.
     Returns: 
         all_moon_dict : dict
             A dict containing the JPL id and object information 
-            for each
+            for each object part of a system with objects represented
+            in targname.
 
     Outputs:
         nothing
 
     Notes:
-        This is an inefficient design pattern. It requires that the 
-        table be read in from the disk on every iteration and then 
-        parsed using custom code. This should be reimplemented so that 
-        (1) the data is stored in a standard file format like YAML so 
-        it can be read in more easily and (2) the information should 
-        be read in once and then kept in memory. 
+        This is an inefficient design pattern. It requires that the table be
+        read in from the disk on every iteration. This should be reimplemented
+        so that the information should be read in once and then kept in memory.
     """
-    path_to_code = os.path.dirname(__file__)
-    file_name = os.path.join(path_to_code, 'planets_and_moons.txt')
-    with open(file_name, 'r') as f:
-        full_moon_list = f.readlines()
 
+    #Match strings in the targname with planets and moons
+    mtargs = get_mtargs(targname)
+
+    #If there are no matches in targame for objects we want ephemeris
+    # overlays for:
+    if not mtargs:
+        return {}
+
+    pm_path = os.path.dirname(__file__) # .../mtpipeline/ephem
+    pm_path = os.path.dirname(pm_path) # .../mtpipeline/
+    pm_path = os.path.join(path_to_code, 'tools') # .../mtpipeline/tools
+    pm_path = os.path.join(path_to_code, 'planets_and_moons.yaml') 
+
+    planets_and_moons = yaml.load(open(pm_path))
+    
     all_moon_dict = {}
-    moon_switch = False
-    for line in full_moon_list:
-        line = line.strip().split()
-        if line != [] and line[-1] == file_dict['targname']:
-            moon_switch = True
-        if moon_switch:
-            if line != []:
-                all_moon_dict[line[1]] = {'id': line[0], 'object': line[1]}
-            else:
-                break
-    return all_moon_dict
+    for planet in planets_and_moons.keys():
+        planet_system = planets_and_moons[planet]     
+        for body in planet_system:
+
+            if body in mtargs:
+                # Add the planet and all its moons to the dict
+                for body in planet_system:
+                    all_moon_dict[body] = {'id' : planet_system[body], 
+                                           'object' = body}
+
+                # We assume no image has bodies from multiple planets.
+                return all_moon_dict
 
 
 def insert_record(hdulist, moon_dict,  master_images_id):
@@ -611,12 +590,18 @@ def ephem_main(filename, reproc=False):
         'Expected .fits got ' + filename
     master_images_query = session.query(MasterImages).filter(\
         MasterImages.fits_file == os.path.basename(filename)).one()
-    hdulist = fits.open(filename)
 
-    # Gather some file information and iterate over the moons
-    file_dict = get_header_info(hdulist)
+    # Extract needed header information
+    file_dict = {}
+    with fits.open(filename,mode='readonly') as hdulist:
+        file_dict['date_obs'] = hdulist[0].header['date-obs']
+        file_dict['time_obs'] = hdulist[0].header['time-obs']
+        file_dict['targname'] = hdulist[0].header['targname']
+
     file_dict = convert_datetime(file_dict)
-    all_moon_dict = make_all_moon_dict(file_dict)
+
+    all_moon_dict = make_all_moon_dict(file_dict['targname'])
+
     for moon in all_moon_dict:
         logging.info('Processing {} for {}'.format(moon, filename))
         moon_dict = all_moon_dict[moon]

@@ -1,10 +1,10 @@
 mars : 
-    value :  499
+    mars :  499
     phobos : 401
     deimos : 402
 
 jupiter:
-    value :      599
+    jupiter :      599
     io :         501       
     europa :     502
     ganymede :   503
@@ -74,7 +74,7 @@ jupiter:
     55076 :      55076 
     
 saturn :
-    value :       699
+    saturn :       699
     mimas :       601 
     enceladus :   602 
     tethys :      603 
@@ -138,7 +138,6 @@ saturn :
     65056 :       65056
 
 uranus:
-    value: 799
     uranus    : 799
     ariel     : 701
     umbriel   : 702
@@ -169,7 +168,7 @@ uranus:
     cupid     : 727
               
 neptune:
-    value:      899
+    neptune:      899
     triton :    801
     nereid :    802
     naiad :     803
@@ -185,7 +184,7 @@ neptune:
     neso :      813
 
 pluto :
-    value: 999
+    pluto: 999
     charon : 901
     nix : 902
     hydra : 903
